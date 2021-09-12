@@ -2,9 +2,8 @@ import React from 'react';
 
 import {useNavigation, useRoute} from '@react-navigation/native';
 import {Button, View} from 'react-native';
-import {ScrollView} from 'react-native-gesture-handler';
 
-import Meal from 'components/Meal';
+import JouranlEntryList from 'components/JournalEntryList';
 import Spacer from 'components/Spacer';
 import Stats from 'components/Stats';
 import {ADD_MEAL, DATE_SELECTOR} from 'navigation/Constants';
@@ -48,28 +47,30 @@ const FoodJournalScreen = () => {
   const {todaysEntry} = useJournalContext();
   const navigation = useNavigation<JournalScreenNavigationProp>();
 
+  const AddMealButtonFunction = React.useCallback(
+    () => <AddMealButton date={date} />,
+    [date],
+  );
+
   React.useLayoutEffect(() => {
     navigation.setOptions({
       title: date,
       headerLeft: () => <ChangeDateButton />,
-      headerRight: () => <AddMealButton date={date} />,
+      headerRight: AddMealButtonFunction,
     });
-  }, [navigation, date]);
+  }, [navigation, date, AddMealButtonFunction]);
 
   const macros = user.getCurrentMacros();
 
   return (
-    <ScrollView style={styles.screen}>
+    <View style={styles.screen}>
       <Stats macros={macros} meals={todaysEntry?.meals} />
       <Spacer />
-      {!!todaysEntry &&
-        todaysEntry.meals.map(m => (
-          <View key={`${m.description}${m.order}`}>
-            <Meal journalEntryId={todaysEntry._id} meal={m} />
-            <Spacer />
-          </View>
-        ))}
-    </ScrollView>
+      <JouranlEntryList
+        journalEntry={todaysEntry}
+        EmptyComponent={AddMealButtonFunction}
+      />
+    </View>
   );
 };
 

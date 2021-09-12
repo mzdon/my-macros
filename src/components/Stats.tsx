@@ -4,10 +4,9 @@ import {StyleSheet, Text, View} from 'react-native';
 
 import Meal from 'schemas/Meal';
 import MacroDefinition from 'schemas/MacroDefinition';
-import {defaultPadding} from 'styles';
 
 const _styles = StyleSheet.create({
-  container: {flexDirection: 'row', paddingHorizontal: defaultPadding},
+  container: {flexDirection: 'row'},
   inner: {flex: 1},
 });
 
