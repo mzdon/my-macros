@@ -2,15 +2,15 @@ import React from 'react';
 
 import {createStackNavigator} from '@react-navigation/stack';
 
-import AddFoodItemModal from 'modals/addFoodItemModal/AddFoodItemModal';
-import AddMealModal from 'modals/AddMealModal';
 import {withScreenEnhancers} from 'navigation/Common';
 import * as NavConstants from 'navigation/Constants';
+import FoodCrudStack from 'navigation/FoodCrudStack';
 import {PrivateStackParamList} from 'navigation/RouteTypes';
 import JournalProvider from 'providers/JournalProvider';
 import RealmProvider from 'providers/RealmProvider';
 import UserProvider, {useUserContext} from 'providers/UserProvider';
 import User from 'schemas/User';
+import AddMealScreen from 'screens/AddMealScreen';
 import DateSelectorScreen from 'screens/DateSelectorScreen';
 import FoodJournalScreen from 'screens/FoodJournalScreen';
 import ProfileScreen from 'screens/ProfileScreen';
@@ -55,12 +55,13 @@ const PrivateStack = () => {
         <Stack.Screen
           key="add-meal"
           name={NavConstants.ADD_MEAL}
-          component={withScreenEnhancers(AddMealModal)}
+          component={withScreenEnhancers(AddMealScreen)}
         />
         <Stack.Screen
-          key="add-food-item"
-          name={NavConstants.ADD_FOOD_ITEM}
-          component={withScreenEnhancers(AddFoodItemModal)}
+          key="food-crud"
+          name={NavConstants.FOOD_CRUD}
+          component={FoodCrudStack}
+          options={{headerShown: false}}
         />
       </Stack.Group>
     </Stack.Navigator>

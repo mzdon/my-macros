@@ -1,24 +1,22 @@
 import React from 'react';
 
+import {useNavigation} from '@react-navigation/core';
 import {Button, StyleSheet, Text, View} from 'react-native';
 
 import BaseNumberInput from 'components/BaseNumberInput';
 import BaseTextInput from 'components/BaseTextInput';
 import RadioButtons from 'components/RadioButtons';
 import Spacer from 'components/Spacer';
-import FoodItem, {FoodItemData} from 'schemas/FoodItem';
-import {useSimpleStateUpdater} from 'utils/State';
+import {FOOD_ITEM_MACROS} from 'navigation/Constants';
+import {FoodItemDescriptionNavigationProp} from 'navigation/RouteTypes';
 import {UnitOfMeasurement} from 'types/UnitOfMeasurement';
+import {useSimpleStateUpdater} from 'utils/State';
+import {useFoodContext} from 'providers/FoodProvider';
+import styles from 'styles';
 
 const _styles = StyleSheet.create({
   buttonContainer: {flexDirection: 'row', justifyContent: 'space-between'},
 });
-
-interface Props {
-  foodItem: FoodItem | FoodItemData;
-  onGoBack: () => void;
-  onUpdateFoodItem: (foodItem: FoodItemData) => void;
-}
 
 const SERVING_UMO_VALUES = [
   UnitOfMeasurement.Grams,
@@ -27,30 +25,24 @@ const SERVING_UMO_VALUES = [
   UnitOfMeasurement.Liters,
 ];
 
-const EditFoodItemStep1 = ({foodItem, onGoBack, onUpdateFoodItem}: Props) => {
+const FoodItemDescriptionScreen = () => {
+  const navigation = useNavigation<FoodItemDescriptionNavigationProp>();
+
+  const {foodItemData, updateFoodItemData} = useFoodContext();
+
   const [state, updater] = useSimpleStateUpdater({
-    description: foodItem.description,
-    servingSize: foodItem.servingSize,
-    servingUnitOfMeasurement: foodItem.servingUnitOfMeasurement,
-    servingSizeNote: foodItem.servingSizeNote,
-    calories: foodItem.calories,
+    description: foodItemData?.description || '',
+    servingSize: foodItemData?.servingSize || 0,
+    servingUnitOfMeasurement:
+      foodItemData?.servingUnitOfMeasurement || UnitOfMeasurement.Grams,
+    servingSizeNote: foodItemData?.servingSizeNote || '',
+    calories: foodItemData?.calories || 0,
   });
 
   const onNext = React.useCallback(() => {
-    const {
-      description,
-      servingSize,
-      servingSizeNote,
-      servingUnitOfMeasurement,
-      calories,
-    } = state;
-    foodItem.description = description;
-    foodItem.servingSize = servingSize;
-    foodItem.servingUnitOfMeasurement = servingUnitOfMeasurement;
-    foodItem.servingSizeNote = servingSizeNote;
-    foodItem.calories = calories;
-    onUpdateFoodItem(foodItem);
-  }, [foodItem, state, onUpdateFoodItem]);
+    updateFoodItemData(state);
+    navigation.navigate(FOOD_ITEM_MACROS);
+  }, [updateFoodItemData, state, navigation]);
 
   // TODO: Warn if a food item exists with the same description
   const updateDescription = updater('description');
@@ -65,7 +57,7 @@ const EditFoodItemStep1 = ({foodItem, onGoBack, onUpdateFoodItem}: Props) => {
   const updateCalories = updater<number>('calories');
 
   return (
-    <>
+    <View style={styles.screen}>
       <Text>New Item</Text>
       <Spacer />
       <BaseTextInput
@@ -103,11 +95,11 @@ const EditFoodItemStep1 = ({foodItem, onGoBack, onUpdateFoodItem}: Props) => {
       />
       <Spacer />
       <View style={_styles.buttonContainer}>
-        <Button title="Back" onPress={onGoBack} />
+        <Button title="Back" onPress={navigation.goBack} />
         <Button title="Next" onPress={onNext} />
       </View>
-    </>
+    </View>
   );
 };
 
-export default EditFoodItemStep1;
+export default FoodItemDescriptionScreen;

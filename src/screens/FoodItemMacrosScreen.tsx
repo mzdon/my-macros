@@ -1,40 +1,37 @@
 import React from 'react';
 
+import {useNavigation} from '@react-navigation/core';
 import {Button, StyleSheet, Text, View} from 'react-native';
 
 import BaseNumberInput from 'components/BaseNumberInput';
 import Spacer from 'components/Spacer';
-import FoodItem, {FoodItemData} from 'schemas/FoodItem';
+import {ITEM_CONSUMED} from 'navigation/Constants';
+import {FoodItemMacrosNavigationProp} from 'navigation/RouteTypes';
+import {useFoodContext} from 'providers/FoodProvider';
 import {useSimpleStateUpdater} from 'utils/State';
+import styles from 'styles';
 
 const _styles = StyleSheet.create({
   buttonContainer: {flexDirection: 'row', justifyContent: 'space-between'},
 });
 
-interface Props {
-  foodItem: FoodItem | FoodItemData;
-  onGoBack: () => void;
-  onUpdateFoodItem: (foodItem: FoodItemData) => void;
-}
+const FoodItemMacrosScreen = (): React.ReactElement => {
+  const navigation = useNavigation<FoodItemMacrosNavigationProp>();
 
-const EditFoodItemStep2 = ({foodItem, onGoBack, onUpdateFoodItem}: Props) => {
+  const {foodItemData, saveFoodItem} = useFoodContext();
+
   const [state, updater] = useSimpleStateUpdater({
-    carbs: foodItem.carbs,
-    protein: foodItem.protein,
-    fat: foodItem.fat,
-    sugar: foodItem.sugar,
-    fiber: foodItem.fiber,
+    carbs: foodItemData?.carbs || 0,
+    protein: foodItemData?.protein || 0,
+    fat: foodItemData?.fat || 0,
+    sugar: foodItemData?.sugar || 0,
+    fiber: foodItemData?.fiber || 0,
   });
 
   const onNext = React.useCallback(() => {
-    const {carbs, protein, fat, sugar, fiber} = state;
-    foodItem.carbs = carbs;
-    foodItem.protein = protein;
-    foodItem.fat = fat;
-    foodItem.sugar = sugar;
-    foodItem.fiber = fiber;
-    onUpdateFoodItem(foodItem);
-  }, [foodItem, state, onUpdateFoodItem]);
+    saveFoodItem(state);
+    navigation.navigate(ITEM_CONSUMED);
+  }, [saveFoodItem, state, navigation]);
 
   const updateCarbs = updater<number>('carbs');
   const updateProtein = updater<number>('protein');
@@ -43,8 +40,8 @@ const EditFoodItemStep2 = ({foodItem, onGoBack, onUpdateFoodItem}: Props) => {
   const updateFiber = updater<number>('fiber');
 
   return (
-    <>
-      <Text>{`New ${foodItem.description}`}</Text>
+    <View style={styles.screen}>
+      <Text>{`New ${foodItemData?.description}`}</Text>
       <Spacer />
       <BaseNumberInput
         label="Carbs"
@@ -82,11 +79,11 @@ const EditFoodItemStep2 = ({foodItem, onGoBack, onUpdateFoodItem}: Props) => {
       />
       <Spacer />
       <View style={_styles.buttonContainer}>
-        <Button title="Back" onPress={onGoBack} />
+        <Button title="Back" onPress={navigation.goBack} />
         <Button title="Next" onPress={onNext} />
       </View>
-    </>
+    </View>
   );
 };
 
-export default EditFoodItemStep2;
+export default FoodItemMacrosScreen;

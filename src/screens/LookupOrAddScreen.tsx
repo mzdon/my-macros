@@ -1,29 +1,23 @@
 import React from 'react';
 
+import {useNavigation} from '@react-navigation/core';
 import {Button, StyleSheet, View} from 'react-native';
 import {RealmQuery} from 'react-realm-context';
 
 import BaseTextInput from 'components/BaseTextInput';
+import SearchResults from 'components/SearchResults';
 import Spacer from 'components/Spacer';
-import SearchResults from 'modals/addFoodItemModal/SearchResults';
-import FoodItem, {FoodItemData} from 'schemas/FoodItem';
+import {FOOD_ITEM_DESCRIPTION, ITEM_CONSUMED} from 'navigation/Constants';
+import {LookupOrAddNavigationProp} from 'navigation/RouteTypes';
 import styles from 'styles';
 
 const _styles = StyleSheet.create({
   buttonContainer: {flexDirection: 'row', justifyContent: 'space-between'},
 });
 
-interface Props {
-  addFoodItem: (item: FoodItemData) => void;
-  setFoodItem: (item: FoodItem) => void;
-  // addFoodItemGroup: (group: FoodItemGroupData) => void;
-  // setFoodItemGroup: (group: FoodItemGroup) => void;
-}
+const LookupOrAddScreen = (): React.ReactElement => {
+  const navigation = useNavigation<LookupOrAddNavigationProp>();
 
-const LookupOrAdd = ({
-  addFoodItem,
-  setFoodItem,
-}: Props): React.ReactElement<Props> => {
   const [state, setState] = React.useState({
     foodSearch: '',
     groupSearch: '',
@@ -48,9 +42,12 @@ const LookupOrAdd = ({
   // );
 
   const addNewFoodItem = React.useCallback(
-    () => addFoodItem(FoodItem.generate()),
-    [addFoodItem],
+    () => navigation.navigate(FOOD_ITEM_DESCRIPTION),
+    [navigation],
   );
+  const selectFoodItem = React.useCallback(() => {
+    navigation.navigate(ITEM_CONSUMED);
+  }, [navigation]);
   // const addNewFoodItemGroup = React.useCallback(
   //   () => addFoodItemGroup(new FoodItemGroup({})),
   //   [addFoodItemGroup],
@@ -74,7 +71,7 @@ const LookupOrAdd = ({
       {!!state.foodSearch && (
         <RealmQuery type="FoodItem" filter={foodFilter} sort="description">
           {({results}) => (
-            <SearchResults items={results} onPress={setFoodItem} />
+            <SearchResults items={results} onPress={selectFoodItem} />
           )}
         </RealmQuery>
       )}
@@ -103,4 +100,4 @@ const LookupOrAdd = ({
   );
 };
 
-export default LookupOrAdd;
+export default LookupOrAddScreen;

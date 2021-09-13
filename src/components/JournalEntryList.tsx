@@ -6,7 +6,7 @@ import {Button, SectionList, Text} from 'react-native';
 
 import ConsumedFoodItem from 'components/ConsumedFoodItem';
 import Spacer from 'components/Spacer';
-import {ADD_FOOD_ITEM} from 'navigation/Constants';
+import {FOOD_CRUD} from 'navigation/Constants';
 import {JournalScreenNavigationProp} from 'navigation/RouteTypes';
 import ConsumedFoodItemSchema from 'schemas/ConsumedFoodItem';
 import JournalEntry from 'schemas/JournalEntry';
@@ -59,9 +59,9 @@ const JouranlEntryList = ({
         <Button
           title="Add Item"
           onPress={() =>
-            navigation.navigate(ADD_FOOD_ITEM, {
+            navigation.navigate(FOOD_CRUD, {
               journalEntryId: journalEntryId.toHexString(),
-              mealIndex: order,
+              mealOrderIndex: order,
             })
           }
         />

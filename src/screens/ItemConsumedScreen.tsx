@@ -1,14 +1,17 @@
 import React from 'react';
 
+import {useNavigation} from '@react-navigation/core';
 import {Button, StyleSheet, Text, View} from 'react-native';
 
 import BaseNumberInput from 'components/BaseNumberInput';
 import Spacer from 'components/Spacer';
-import {ConsumedFoodItemData} from 'schemas/ConsumedFoodItem';
 import RadioButtons from 'components/RadioButtons';
+import {ItemConsumedNavigationProp} from 'navigation/RouteTypes';
+import {useFoodContext} from 'providers/FoodProvider';
 import {Servings, UnitOfMeasurement} from 'types/UnitOfMeasurement';
 import {useSimpleStateUpdater} from 'utils/State';
 import {FoodItemType, isFoodOrDrink} from 'utils/FoodItem';
+import styles from 'styles';
 
 const _styles = StyleSheet.create({
   buttonContainer: {flexDirection: 'row', justifyContent: 'space-between'},
@@ -27,28 +30,26 @@ const UOM_VALUES = {
   ],
 };
 
-interface Props {
-  consumedFoodItem: ConsumedFoodItemData;
-  onGoBack: () => void;
-  onAddItemConsumed: (foodItem: ConsumedFoodItemData) => void;
-}
+const ItemConsumed = (): React.ReactElement => {
+  const navigation = useNavigation<ItemConsumedNavigationProp>();
 
-const ItemConsumed = ({
-  consumedFoodItem,
-  onGoBack,
-  onAddItemConsumed,
-}: Props) => {
+  const {foodItemData, saveConsumedFoodItem} = useFoodContext();
+
   const [state, updater] = useSimpleStateUpdater({
-    quantity: consumedFoodItem.quantity,
-    unitOfMeasurement: consumedFoodItem.unitOfMeasurement,
+    quantity: foodItemData?.servingSize || 0,
+    unitOfMeasurement:
+      foodItemData?.servingUnitOfMeasurement || UnitOfMeasurement.Grams,
   });
 
   const onNext = React.useCallback(() => {
-    const {quantity, unitOfMeasurement} = state;
-    consumedFoodItem.quantity = quantity;
-    consumedFoodItem.unitOfMeasurement = unitOfMeasurement;
-    onAddItemConsumed(consumedFoodItem);
-  }, [consumedFoodItem, state, onAddItemConsumed]);
+    saveConsumedFoodItem(state);
+    const parentNavigator = navigation.getParent();
+    if (parentNavigator) {
+      parentNavigator.goBack();
+    } else {
+      navigation.popToTop();
+    }
+  }, [navigation, saveConsumedFoodItem, state]);
 
   const updateQuantity = updater<number>('quantity');
   const onUpdateUnitOfMeasurement =
@@ -58,17 +59,21 @@ const ItemConsumed = ({
   };
 
   const uomValues =
-    UOM_VALUES[isFoodOrDrink(consumedFoodItem.item.servingUnitOfMeasurement)];
+    UOM_VALUES[
+      isFoodOrDrink(
+        foodItemData?.servingUnitOfMeasurement || UnitOfMeasurement.Grams,
+      )
+    ];
 
-  const {item} = consumedFoodItem;
+  const item = foodItemData || {};
   const {servingSize, servingUnitOfMeasurement, servingSizeNote} = item;
   const quantityLabel = `Quantity (1 serving = ${servingSize}${servingUnitOfMeasurement}${
     servingSizeNote ? ` or ${servingSizeNote}` : ''
   })`;
 
   return (
-    <>
-      <Text>{`How much ${consumedFoodItem.item.description} did you eat?`}</Text>
+    <View style={styles.screen}>
+      <Text>{`How much ${item.description} did you eat?`}</Text>
       <Spacer />
       <BaseNumberInput
         label={quantityLabel}
@@ -84,10 +89,10 @@ const ItemConsumed = ({
       />
       <Spacer />
       <View style={_styles.buttonContainer}>
-        <Button title="Back" onPress={onGoBack} />
+        <Button title="Back" onPress={navigation.goBack} />
         <Button title="Next" onPress={onNext} />
       </View>
-    </>
+    </View>
   );
 };
 

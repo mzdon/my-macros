@@ -6,12 +6,24 @@ export type PublicStackParamList = {
 };
 
 export type PrivateStackParamList = {
-  AddFoodItem: {journalEntryId: string; mealIndex: number};
   AddMeal: {date: string};
   DateSelector: undefined;
+  FoodCrud: {
+    journalEntryId?: string;
+    mealOrderIndex?: number;
+    foodItemId?: string;
+    foodGroupId?: string;
+  };
   Journal: {date: string};
-  UserInfo: undefined;
   Profile: undefined;
+  UserInfo: undefined;
+};
+
+export type FoodCrudStackParamList = {
+  LookupOrAdd: undefined;
+  FoodItemDescription: undefined;
+  FoodItemMacros: undefined;
+  ItemConsumed: undefined;
 };
 
 // These route names are defined in navigation/Constants
@@ -52,12 +64,52 @@ export type AddMealModalNavigationProp = StackNavigationProp<
 
 export type AddMealModalRouteProp = RouteProp<PrivateStackParamList, 'AddMeal'>;
 
-export type AddFoodItemModalNavigationProp = StackNavigationProp<
+export type FoodCrudModalNavigationProp = StackNavigationProp<
   PrivateStackParamList,
-  'AddFoodItem'
+  'FoodCrud'
 >;
 
-export type AddFoodItemModalRouteProp = RouteProp<
+export type FoodCrudModalRouteProp = RouteProp<
   PrivateStackParamList,
-  'AddFoodItem'
+  'FoodCrud'
+>;
+
+export type LookupOrAddNavigationProp = StackNavigationProp<
+  FoodCrudStackParamList,
+  'LookupOrAdd'
+>;
+
+export type LookupOrAddRouteProp = RouteProp<
+  FoodCrudStackParamList,
+  'LookupOrAdd'
+>;
+
+export type FoodItemDescriptionNavigationProp = StackNavigationProp<
+  FoodCrudStackParamList,
+  'FoodItemDescription'
+>;
+
+export type FoodItemDescriptionRouteProp = RouteProp<
+  FoodCrudStackParamList,
+  'FoodItemDescription'
+>;
+
+export type FoodItemMacrosNavigationProp = StackNavigationProp<
+  FoodCrudStackParamList,
+  'FoodItemMacros'
+>;
+
+export type FoodItemMacrosRouteProp = RouteProp<
+  FoodCrudStackParamList,
+  'FoodItemMacros'
+>;
+
+export type ItemConsumedNavigationProp = StackNavigationProp<
+  FoodCrudStackParamList,
+  'ItemConsumed'
+>;
+
+export type ItemConsumedRouteProp = RouteProp<
+  FoodCrudStackParamList,
+  'ItemConsumed'
 >;

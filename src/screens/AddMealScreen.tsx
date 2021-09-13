@@ -10,7 +10,7 @@ import {
 } from 'navigation/RouteTypes';
 import {useJournalContext} from 'providers/JournalProvider';
 
-const AddMealModal = () => {
+const AddMealScreen = () => {
   const {createMeal} = useJournalContext();
   const navigation = useNavigation<AddMealModalNavigationProp>();
   const route = useRoute<AddMealModalRouteProp>();
@@ -56,4 +56,4 @@ const AddMealModal = () => {
   );
 };
 
-export default AddMealModal;
+export default AddMealScreen;
