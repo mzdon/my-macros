@@ -3,16 +3,11 @@ import React from 'react';
 import {RealmConsumer} from 'react-realm-context';
 
 import {useAuthContext} from 'providers/AuthProvider';
-import FoodItem, {FoodItemData} from 'schemas/FoodItem';
 import User, {UserData} from 'schemas/User';
-import {RecoverableError} from 'utils/Errors';
-import {UpdateMode} from 'realm';
 
 interface UserContextValue {
   user: User;
   updateUser: (updatedUser: UserData) => User;
-  createFoodItem: (foodItem: FoodItemData) => FoodItem;
-  updateFoodItem: (foodItem: FoodItem, foodItemData: FoodItemData) => FoodItem;
 }
 
 const UserContext = React.createContext<UserContextValue | null>(null);
@@ -50,48 +45,9 @@ const UserProvider = ({children}: Props): React.ReactElement<Props> => {
           return getUser();
         };
 
-        const createFoodItem = (foodItemData: FoodItemData) => {
-          const user = getUser();
-          const foodItem = FoodItem.generate(foodItemData);
-          realm.write(() => {
-            realm.create('FoodItem', foodItem);
-            user.addFoodItem(foodItem._id);
-          });
-          const createdFoodItem = realm
-            .objects<FoodItem>('FoodItem')
-            .find((f: FoodItem) => f._id.equals(foodItem._id));
-          if (!createdFoodItem) {
-            throw new RecoverableError(
-              `Did not find newly created FoodItem<${foodItem._id.toHexString()}>`,
-            );
-          }
-          return createdFoodItem;
-        };
-
-        const updateFoodItem = (
-          foodItem: FoodItem,
-          foodItemData: FoodItemData,
-        ) => {
-          let result: FoodItem;
-          realm.write(() => {
-            result = realm.create(
-              FoodItem,
-              FoodItem.generate({
-                ...foodItem,
-                ...foodItemData,
-              }),
-              UpdateMode.Modified,
-            );
-          });
-          // @ts-ignore
-          return result;
-        };
-
         const userContextValue = {
           user: getUser(),
           updateUser,
-          createFoodItem,
-          updateFoodItem,
         };
         return (
           <UserContext.Provider value={userContextValue}>
