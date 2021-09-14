@@ -1,10 +1,12 @@
 import React from 'react';
 
+import {UUID} from 'bson';
 import {RealmConsumer} from 'react-realm-context';
 import {UpdateMode} from 'realm';
 
 import ConsumedFoodItem, {ConsumedFoodItemData} from 'schemas/ConsumedFoodItem';
 import FoodItem, {FoodItemData} from 'schemas/FoodItem';
+import JournalEntry from 'schemas/JournalEntry';
 import {RecoverableError} from 'utils/Errors';
 
 type FoodItemDataState = FoodItem | Partial<FoodItemData> | null;
@@ -28,22 +30,25 @@ const FoodContext = React.createContext<FoodContextValue | null>(null);
 
 type Props = React.PropsWithChildren<{
   journalEntryId: string | undefined;
-  mealOrderIndex: number | undefined;
+  mealIndex: number | undefined;
+  itemIndex: number | undefined;
   foodItemId: string | undefined;
   foodGroupId: string | undefined;
-  createConsumedFoodItem: (
+  saveConsumedFoodItem: (
     journalEntryId: string,
     mealOrderIndex: number,
     data: ConsumedFoodItemData,
-  ) => ConsumedFoodItem;
+    itemIndex?: number,
+  ) => void;
 }>;
 
 const FoodProvider = ({
   journalEntryId,
-  mealOrderIndex,
+  mealIndex,
+  itemIndex,
   foodItemId,
   // foodGroupId,
-  createConsumedFoodItem,
+  saveConsumedFoodItem,
   children,
 }: Props): React.ReactElement<Props> => {
   const [foodItemData, setFoodItemData] =
@@ -59,28 +64,56 @@ const FoodProvider = ({
     [foodItemData],
   );
 
-  const onCreateConsumedFoodItem = React.useCallback(
+  const onSaveConsumedFoodItem = React.useCallback(
     (data: ConsumedFoodItemData) => {
-      if (journalEntryId === undefined || mealOrderIndex === undefined) {
+      if (journalEntryId === undefined || mealIndex === undefined) {
         throw new RecoverableError(
           'No journal entry id or meal id to create a consumed item for',
         );
       }
-      createConsumedFoodItem(journalEntryId, mealOrderIndex, data);
+      saveConsumedFoodItem(journalEntryId, mealIndex, data, itemIndex);
     },
-    [createConsumedFoodItem, journalEntryId, mealOrderIndex],
+    [journalEntryId, mealIndex, saveConsumedFoodItem, itemIndex],
   );
 
   return (
     <RealmConsumer updateOnChange={true}>
       {({realm}) => {
-        const getExistingFoodItem = () => {
-          if (!foodItemId) {
-            return null;
+        const getExistingFoodItem = (passedFoodItemId?: string) => {
+          let id = passedFoodItemId;
+          if (!id) {
+            if (!foodItemId) {
+              return null;
+            } else {
+              id = foodItemId;
+            }
           }
           return (
-            realm.objectForPrimaryKey<FoodItem>('FoodItem', foodItemId) || null
+            realm.objectForPrimaryKey<FoodItem>('FoodItem', new UUID(id)) ||
+            null
           );
+        };
+
+        const getExistingFoodItemFromConsumedFoodItem = () => {
+          if (
+            !journalEntryId ||
+            mealIndex === undefined ||
+            itemIndex === undefined
+          ) {
+            return null;
+          }
+          const entry = realm.objectForPrimaryKey<JournalEntry>(
+            'JournalEntry',
+            new UUID(journalEntryId),
+          );
+          if (!entry) {
+            return null;
+          }
+          const consumedItem = entry.meals[mealIndex]?.items[itemIndex];
+          if (!consumedItem) {
+            return null;
+          }
+          return getExistingFoodItem(consumedItem.itemId.toHexString());
         };
 
         const writeFoodItemToRealm = (
@@ -114,9 +147,12 @@ const FoodProvider = ({
           }
         };
 
-        const saveConsumedFoodItem = (data: ConsumedFoodItemDataProvided) => {
+        const internalSaveConsumedFoodItem = (
+          data: ConsumedFoodItemDataProvided,
+        ) => {
           let payload: ConsumedFoodItemData;
-          const existingFoodItem = getExistingFoodItem();
+          const existingFoodItem =
+            getExistingFoodItem() || getExistingFoodItemFromConsumedFoodItem();
           if (existingFoodItem) {
             payload = {
               ...data,
@@ -133,18 +169,23 @@ const FoodProvider = ({
               'No food item data save to consumed food item',
             );
           }
-          onCreateConsumedFoodItem(payload);
+          onSaveConsumedFoodItem(payload);
         };
+
+        const getFoodItemData = () =>
+          foodItemData ||
+          getExistingFoodItem() ||
+          getExistingFoodItemFromConsumedFoodItem();
 
         return (
           <FoodContext.Provider
             value={{
               items: {},
               groups: {},
-              foodItemData: foodItemData || getExistingFoodItem(),
+              foodItemData: getFoodItemData(),
               saveFoodItem,
               updateFoodItemData,
-              saveConsumedFoodItem,
+              saveConsumedFoodItem: internalSaveConsumedFoodItem,
             }}>
             {children}
           </FoodContext.Provider>

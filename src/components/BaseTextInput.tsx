@@ -1,7 +1,7 @@
 import React from 'react';
-import {Falsy} from 'react-native';
 
 import {
+  Falsy,
   StyleProp,
   Text,
   TextInput,
@@ -17,20 +17,21 @@ export interface BaseTextInputProps extends TextInputProps {
   style?: StyleProp<ViewStyle>;
 }
 
-const BaseTextInput = (
-  props: BaseTextInputProps,
-): React.ReactElement<BaseTextInputProps> => {
-  const {label, error, style, ...rest} = props;
-  return (
-    <>
-      {label && <Text style={styles.inputLabel}>{label}</Text>}
-      <TextInput
-        style={[styles.input, !!error && styles.inputError, style]}
-        {...rest}
-      />
-      {error && <Text style={styles.inputErrorMessage}>{error}</Text>}
-    </>
-  );
-};
+const BaseTextInput = React.forwardRef<TextInput, BaseTextInputProps>(
+  (props: BaseTextInputProps, ref): React.ReactElement<BaseTextInputProps> => {
+    const {label, error, style, ...rest} = props;
+    return (
+      <>
+        {label && <Text style={styles.inputLabel}>{label}</Text>}
+        <TextInput
+          ref={ref}
+          style={[styles.input, !!error && styles.inputError, style]}
+          {...rest}
+        />
+        {error && <Text style={styles.inputErrorMessage}>{error}</Text>}
+      </>
+    );
+  },
+);
 
 export default BaseTextInput;

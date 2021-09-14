@@ -1,11 +1,13 @@
 import React from 'react';
 
-import {StyleSheet, Text, View} from 'react-native';
+import {StyleSheet, Text, TextInput, View} from 'react-native';
 
-import BaseTextInput, {BaseTextInputProps} from 'components/BaseTextInput';
+import BaseNumberInput, {
+  BaseNumberInputProps,
+} from 'components/BaseNumberInput';
+import DisabledOverlay from 'components/DisabledOverlay';
 import Spacer from 'components/Spacer';
 import {MeasurementSystem} from 'types/MeasurementSystem';
-import {checkValidNumberFirst} from 'utils/Validators';
 import styles from 'styles';
 
 const _styles = StyleSheet.create({
@@ -23,37 +25,52 @@ const toFeetInches = (v: number): {feet: number; inches: number} => {
   return {feet, inches};
 };
 
-interface InnerProps
-  extends Omit<BaseTextInputProps, 'value' | 'onChangeText'> {
-  value: number;
-  onChangeText: (v: number) => void;
+interface InnerProps extends BaseNumberInputProps {
+  hasMeasurementSystem: boolean;
 }
 
 const ImperialWeightInput = (
   props: InnerProps,
 ): React.ReactElement<InnerProps> => {
-  const {value, onChangeText, ...rest} = props;
+  const {value, hasMeasurementSystem, onChangeText, ...rest} = props;
   const {feet, inches} = toFeetInches(value);
-  const onChangeFeet = checkValidNumberFirst((val: string) => {
-    const nextHeight = Math.max(0, Number(val)) * 12 + inches;
-    onChangeText(nextHeight);
-  });
-  const onChangeInches = checkValidNumberFirst((val: string) => {
-    const nextHeight = 12 * feet + Number(val);
-    onChangeText(nextHeight);
-  });
+  const onChangeFeet = React.useCallback(
+    (val: number) => {
+      const nextHeight = Math.max(0, val) * 12 + inches;
+      onChangeText(nextHeight);
+    },
+    [inches, onChangeText],
+  );
+  const onChangeInches = React.useCallback(
+    (val: number) => {
+      const nextHeight = 12 * feet + val;
+      onChangeText(nextHeight);
+    },
+    [feet, onChangeText],
+  );
+
+  const ftRef = React.useRef<TextInput | null>(null);
+  const inRef = React.useRef<TextInput | null>(null);
+  React.useEffect(() => {
+    if (!hasMeasurementSystem) {
+      ftRef.current?.blur();
+      inRef.current?.blur();
+    }
+  }, [hasMeasurementSystem]);
 
   return (
     <>
-      <BaseTextInput
-        value={String(feet)}
+      <BaseNumberInput
+        ref={ftRef}
+        value={feet}
         onChangeText={onChangeFeet}
         {...rest}
         style={_styles.stretchInput}
       />
       <Text style={_styles.stretchLabel}>{'ft'}</Text>
-      <BaseTextInput
-        value={String(inches)}
+      <BaseNumberInput
+        ref={inRef}
+        value={inches}
         onChangeText={onChangeInches}
         {...rest}
         style={_styles.stretchInput}
@@ -66,47 +83,45 @@ const ImperialWeightInput = (
 const MetricWeightInput = (
   props: InnerProps,
 ): React.ReactElement<InnerProps> => {
-  const {value, onChangeText, ...rest} = props;
-  const onChangeHeight = (val: string) => {
-    onChangeText(Number(val));
-  };
+  const {hasMeasurementSystem, ...rest} = props;
+  const cmRef = React.useRef<TextInput | null>(null);
+  React.useEffect(() => {
+    if (!hasMeasurementSystem) {
+      cmRef.current?.blur();
+    }
+  }, [hasMeasurementSystem]);
+
   return (
     <>
-      <BaseTextInput
-        {...rest}
-        value={String(value)}
-        style={_styles.stretchInput}
-        onChangeText={checkValidNumberFirst(onChangeHeight)}
-      />
+      <BaseNumberInput ref={cmRef} {...rest} style={_styles.stretchInput} />
       <Text style={_styles.stretchLabel}>{'cm'}</Text>
     </>
   );
 };
 
-type Props = {
+interface Props extends BaseNumberInputProps {
   measurementSystem: MeasurementSystem | null;
-  value: number;
-  onChangeText: (v: number) => void;
-} & Omit<BaseTextInputProps, 'value' | 'onChangeText'>;
+}
 
 const HeightInput = (props: Props): React.ReactElement<Props> | null => {
-  const {value, measurementSystem, ...rest} = props;
-  if (!measurementSystem) {
-    return null;
-  }
+  const {measurementSystem, ...rest} = props;
+  const nestedProps = {...rest, hasMeasurementSystem: !!measurementSystem};
 
-  const Component = {
-    [MeasurementSystem.Imperial]: ImperialWeightInput,
-    [MeasurementSystem.Metric]: MetricWeightInput,
-  }[measurementSystem];
   return (
-    <>
+    <View>
       <Text style={styles.inputLabel}>{'Height (optional)'}</Text>
       <View style={_styles.innerContainer}>
-        <Component {...rest} value={value} />
+        {(!measurementSystem ||
+          measurementSystem === MeasurementSystem.Imperial) && (
+          <ImperialWeightInput {...nestedProps} />
+        )}
+        {measurementSystem === MeasurementSystem.Metric && (
+          <MetricWeightInput {...nestedProps} />
+        )}
       </View>
       <Spacer />
-    </>
+      {!measurementSystem && <DisabledOverlay />}
+    </View>
   );
 };
 

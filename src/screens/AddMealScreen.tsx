@@ -11,10 +11,10 @@ import {
 import {useJournalContext} from 'providers/JournalProvider';
 
 const AddMealScreen = () => {
-  const {createMeal} = useJournalContext();
+  const {saveMeal} = useJournalContext();
   const navigation = useNavigation<AddMealModalNavigationProp>();
   const route = useRoute<AddMealModalRouteProp>();
-  const {date} = route.params;
+  const {date, mealIndex} = route.params;
 
   const called = React.useRef(false);
   const onAddMeal = React.useCallback(
@@ -23,10 +23,10 @@ const AddMealScreen = () => {
         return;
       }
       called.current = true;
-      createMeal(date, desc);
+      saveMeal(date, desc, mealIndex);
       navigation.goBack();
     },
-    [createMeal, date, navigation],
+    [saveMeal, date, mealIndex, navigation],
   );
 
   const onAddBreakfast = React.useCallback(

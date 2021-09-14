@@ -14,17 +14,30 @@ import {UpdateMode} from 'realm';
 interface JournalContext {
   todaysEntry: JournalEntry | null;
   getEntries: (startDate: Date, endDate: Date) => JournalEntry[];
-  createMeal: (date: string, description: string) => Meal;
-  createConsumedFoodItem: (
+  saveMeal: (date: string, description: string, order?: number) => void;
+  deleteMeal: (meal: Meal) => void;
+  saveConsumedFoodItem: (
     entryId: string,
     mealIndex: number,
     consumedFoodItem: ConsumedFoodItemData,
-  ) => ConsumedFoodItem;
+    itemIndex?: number,
+  ) => void;
+  deleteConsumedFoodItem: (item: ConsumedFoodItem) => void;
 }
 
 const JournalContext = React.createContext<JournalContext | null>(null);
 
 type Props = React.PropsWithChildren<{}>;
+
+function getMealFromEntry(entry: JournalEntry, mealIndex: number) {
+  const meal = entry.meals[mealIndex];
+  if (!meal) {
+    throw new RecoverableError(
+      `No meal at index: ${mealIndex} for JournalEntry<${entry._id.toHexString()}>`,
+    );
+  }
+  return meal;
+}
 
 const JournalProvider = ({children}: Props): React.ReactElement<Props> => {
   const {user} = useUserContext();
@@ -40,10 +53,16 @@ const JournalProvider = ({children}: Props): React.ReactElement<Props> => {
     <RealmConsumer updateOnChange={true}>
       {({realm}) => {
         const getEntryById = (uuid: UUID) => {
-          return realm
+          const journalEntry = realm
             .objects<JournalEntry>('JournalEntry')
             .filtered('userId == $0', userId)
             .find(entry => entry._id.equals(uuid));
+          if (!journalEntry) {
+            throw new RecoverableError(
+              `No JouranlEntry found with id: ${uuid.toHexString()}`,
+            );
+          }
+          return journalEntry;
         };
 
         const getEntryForDate = (date: Date) => {
@@ -59,106 +78,92 @@ const JournalProvider = ({children}: Props): React.ReactElement<Props> => {
 
         const getEntries = () => [];
 
-        const createMeal = (date: string, description: string) => {
+        const saveMeal = (
+          date: string,
+          description: string,
+          mealIndex?: number,
+        ) => {
           const d = new Date(date);
           const entry = getEntryForDate(d);
-          let order = 0;
-          if (entry) {
-            entry.meals.forEach(m => {
-              if (m.order > order) {
-                order = m.order;
+          let meals = entry ? [...entry.meals] : [];
+          if (mealIndex === undefined) {
+            const newMeal = {description};
+            // @ts-ignore
+            meals.push(newMeal);
+          } else {
+            // @ts-ignore
+            meals = meals.map((meal, idx) => {
+              if (idx === mealIndex) {
+                return {items: meal.items, description};
               }
+              return meal;
             });
-            order += 1;
           }
-          const newMeal = {description, order};
-          const meals = entry ? [...entry.meals, newMeal] : [newMeal];
-          const entryData = {userId, date: d, meals, id: entry?._id};
 
-          let result: JournalEntry;
+          const entryData = {userId, date: d, meals, id: entry?._id};
           realm.write(() => {
-            result = realm.create<JournalEntry>(
+            realm.create<JournalEntry>(
               JournalEntry,
               // @ts-ignore
               JournalEntry.generate(entryData),
               UpdateMode.Modified,
             );
           });
-
-          // @ts-ignore
-          if (!result) {
-            throw new RecoverableError(
-              "No JournalEntry returned from 'realm.create'",
-            );
-          }
-          const meal = result.meals.find(m => m.order === order);
-          if (!meal) {
-            throw new RecoverableError(`Could not find Meal<order: ${order}>`);
-          }
-          return meal;
         };
 
-        const createConsumedFoodItem = (
+        const deleteMeal = (meal: Meal) => {
+          realm.write(() => {
+            realm.delete(meal);
+          });
+        };
+
+        const saveConsumedFoodItem = (
           journalEntryId: string,
           mealIndex: number,
           consumedFoodItemData: ConsumedFoodItemData,
+          itemIndex?: number,
         ) => {
           const entry = getEntryById(new UUID(journalEntryId));
-          if (!entry) {
-            throw new RecoverableError(
-              `Could not find JournalEntry<${journalEntryId}>`,
-            );
+          const existingMeal = getMealFromEntry(entry, mealIndex);
+          let newItems;
+          if (itemIndex === undefined) {
+            newItems = [...existingMeal.items, consumedFoodItemData];
+          } else {
+            newItems = [
+              ...existingMeal.items.slice(0, itemIndex),
+              consumedFoodItemData,
+              ...existingMeal.items.slice(itemIndex + 1),
+            ];
           }
-          const idx = entry.meals.findIndex(m => m.order === mealIndex);
-          if (idx === -1) {
-            throw new RecoverableError(
-              `Meal ${idx} not found on journal entry!`,
-            );
-          }
-
-          const existingMeal = entry.meals[idx];
-          const newMeal = {
-            description: existingMeal.description,
-            order: existingMeal.order,
-            items: [...existingMeal.items, consumedFoodItemData],
-          };
-
-          const meals = [
-            ...entry.meals.slice(0, idx),
-            newMeal,
-            ...entry.meals.slice(idx + 1),
+          const newMeals = [
+            ...entry.meals.slice(0, mealIndex),
+            {
+              description: existingMeal.description,
+              items: newItems,
+            },
+            ...entry.meals.slice(mealIndex + 1),
           ];
-
           const entryData = {
             id: entry._id,
             userId: entry.userId,
             date: entry.date,
-            meals,
+            meals: newMeals,
           };
 
-          let result: JournalEntry;
           realm.write(() => {
-            result = realm.create(
+            realm.create(
               JournalEntry,
               // @ts-ignore
               JournalEntry.generate(entryData),
               UpdateMode.Modified,
             );
           });
+        };
 
-          // @ts-ignore
-          if (!result) {
-            throw new RecoverableError(
-              "No JournalEntry returned from 'realm.create'",
-            );
-          }
-          const meal = result.meals.find(m => m.order === mealIndex);
-          if (!meal) {
-            throw new RecoverableError(
-              `Could not find Meal<order: ${mealIndex}>`,
-            );
-          }
-          return meal.items[meal.items.length - 1];
+        const deleteConsumedFoodItem = (item: ConsumedFoodItem) => {
+          realm.write(() => {
+            realm.delete(item);
+          });
         };
 
         return (
@@ -166,8 +171,10 @@ const JournalProvider = ({children}: Props): React.ReactElement<Props> => {
             value={{
               todaysEntry,
               getEntries,
-              createMeal,
-              createConsumedFoodItem,
+              saveMeal,
+              deleteMeal,
+              saveConsumedFoodItem,
+              deleteConsumedFoodItem,
             }}>
             {children}
           </JournalContext.Provider>

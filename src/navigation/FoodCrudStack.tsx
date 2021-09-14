@@ -20,17 +20,18 @@ const Stack = createStackNavigator<FoodCrudStackParamList>();
 
 const FoodCrudStack = () => {
   const route = useRoute<FoodCrudModalRouteProp>();
-  const {journalEntryId, mealOrderIndex, foodItemId, foodGroupId} =
+  const {journalEntryId, mealIndex, itemIndex, foodItemId, foodGroupId} =
     route.params;
 
-  const {createConsumedFoodItem} = useJournalContext();
+  const {saveConsumedFoodItem} = useJournalContext();
   return (
     <FoodProvider
       journalEntryId={journalEntryId}
-      mealOrderIndex={mealOrderIndex}
+      mealIndex={mealIndex}
+      itemIndex={itemIndex}
       foodItemId={foodItemId}
       foodGroupId={foodGroupId}
-      createConsumedFoodItem={createConsumedFoodItem}>
+      saveConsumedFoodItem={saveConsumedFoodItem}>
       <Stack.Navigator>
         <Stack.Screen
           key="lookup-or-add"

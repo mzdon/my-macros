@@ -1,4 +1,4 @@
-import {RouteProp} from '@react-navigation/native';
+import {NavigatorScreenParams, RouteProp} from '@react-navigation/native';
 import {StackNavigationProp} from '@react-navigation/stack';
 
 export type PublicStackParamList = {
@@ -6,11 +6,12 @@ export type PublicStackParamList = {
 };
 
 export type PrivateStackParamList = {
-  AddMeal: {date: string};
+  AddMeal: {date: string; mealIndex?: number};
   DateSelector: undefined;
-  FoodCrud: {
+  FoodCrud: NavigatorScreenParams<FoodCrudStackParamList> & {
     journalEntryId?: string;
-    mealOrderIndex?: number;
+    mealIndex?: number;
+    itemIndex?: number;
     foodItemId?: string;
     foodGroupId?: string;
   };

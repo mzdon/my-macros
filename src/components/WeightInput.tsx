@@ -1,11 +1,13 @@
 import React from 'react';
 
-import {StyleSheet, Text, View} from 'react-native';
+import {StyleSheet, Text, TextInput, View} from 'react-native';
 
-import BaseTextInput, {BaseTextInputProps} from 'components/BaseTextInput';
+import BaseNumberInput, {
+  BaseNumberInputProps,
+} from 'components/BaseNumberInput';
+import DisabledOverlay from 'components/DisabledOverlay';
 import Spacer from 'components/Spacer';
 import {MeasurementSystem} from 'types/MeasurementSystem';
-import {checkValidNumberFirst} from 'utils/Validators';
 import styles from 'styles';
 
 const _styles = StyleSheet.create({
@@ -14,40 +16,38 @@ const _styles = StyleSheet.create({
   stretchLabel: {width: 40, paddingLeft: 8},
 });
 
-type Props = {
+interface Props extends BaseNumberInputProps {
   measurementSystem: MeasurementSystem | null;
-  value: number;
-  onChangeText: (v: number) => void;
-} & Omit<BaseTextInputProps, 'value' | 'onChangeText'>;
+}
 
 const WeightInput = (props: Props): React.ReactElement<Props> | null => {
-  const {value, measurementSystem, onChangeText, ...rest} = props;
-  if (!measurementSystem) {
-    return null;
-  }
+  const {measurementSystem, ...rest} = props;
 
-  const onChangeInputText = checkValidNumberFirst((v: string) => {
-    onChangeText(v ? Number(v) : 0);
+  const inputRef = React.useRef<TextInput | null>(null);
+  React.useEffect(() => {
+    if (!measurementSystem) {
+      inputRef.current?.blur();
+    }
   });
 
   const uomText = {
     [MeasurementSystem.Imperial]: 'lbs',
     [MeasurementSystem.Metric]: 'kgs',
-  }[measurementSystem];
+  }[measurementSystem || MeasurementSystem.Imperial];
   return (
-    <>
+    <View>
       <Text style={styles.inputLabel}>{'Weight (optional)'}</Text>
       <View style={_styles.innerContainer}>
-        <BaseTextInput
+        <BaseNumberInput
+          ref={inputRef}
           {...rest}
-          value={String(value)}
           style={_styles.stretchInput}
-          onChangeText={onChangeInputText}
         />
         <Text style={_styles.stretchLabel}>{uomText}</Text>
       </View>
       <Spacer />
-    </>
+      {!measurementSystem && <DisabledOverlay />}
+    </View>
   );
 };
 
