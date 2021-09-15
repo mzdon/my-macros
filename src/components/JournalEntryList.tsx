@@ -1,24 +1,13 @@
 import React from 'react';
 
-import {useNavigation} from '@react-navigation/core';
-import {UUID} from 'bson';
 import {Button, SectionList, StyleSheet, Text, View} from 'react-native';
 
 import ConsumedFoodItem from 'components/ConsumedFoodItem';
 import Spacer from 'components/Spacer';
 import SwipeableRow from 'components/SwipeableRow';
-import {
-  ADD_MEAL,
-  FOOD_CRUD,
-  ITEM_CONSUMED,
-  LOOKUP_OR_ADD,
-} from 'navigation/Constants';
-import {JournalScreenNavigationProp} from 'navigation/RouteTypes';
 import ConsumedFoodItemSchema from 'schemas/ConsumedFoodItem';
 import JournalEntry from 'schemas/JournalEntry';
 import Meal from 'schemas/Meal';
-import {useJournalContext} from 'providers/JournalProvider';
-import {RecoverableError} from 'utils/Errors';
 
 const _styles = StyleSheet.create({
   titleContainer: {
@@ -32,8 +21,19 @@ const _styles = StyleSheet.create({
   },
 });
 
+type JournalEntryId = JournalEntry['_id'];
+
 interface Props {
   journalEntry: JournalEntry | null;
+  onAddItem: (journalEntryId: JournalEntryId, mealIndex: number) => void;
+  onEditMeal: (journalEntryDate: Date, mealIndex: number) => void;
+  onDeleteMeal: (meal: Meal) => void;
+  onEditConsumedFoodItem: (
+    journalEntryId: JournalEntryId,
+    mealIndex: number,
+    consumedFoodItemIndex: number,
+  ) => void;
+  onDeleteConsumedFoodItem: (consumedFoodItem: ConsumedFoodItemSchema) => void;
   EmptyComponent: () => React.ReactElement;
 }
 
@@ -41,7 +41,7 @@ type Section = {
   title: string;
   meal: Meal;
   mealIndex: number;
-  journalEntryId: UUID;
+  journalEntry: JournalEntry;
   data: ConsumedFoodItemSchema[];
 };
 
@@ -57,19 +57,21 @@ function formatSections(journalEntry: JournalEntry | null): Section[] {
       meal,
       mealIndex: idx,
       data: meal.items,
-      journalEntryId: journalEntry._id,
+      journalEntry,
     });
     return nextResult;
   }, sections);
 }
 
-const JouranlEntryList = ({
-  journalEntry,
-  EmptyComponent,
-}: Props): React.ReactElement<Props> => {
-  const navigation = useNavigation<JournalScreenNavigationProp>();
-
-  const {deleteConsumedFoodItem, deleteMeal} = useJournalContext();
+const JouranlEntryList = (props: Props): React.ReactElement<Props> => {
+  const {
+    onAddItem,
+    onEditMeal,
+    onDeleteMeal,
+    onEditConsumedFoodItem,
+    onDeleteConsumedFoodItem,
+    EmptyComponent,
+  } = props;
 
   const renderItem = React.useCallback(
     ({
@@ -81,7 +83,7 @@ const JouranlEntryList = ({
       item: ConsumedFoodItemSchema;
       index: number;
     }) => {
-      const {journalEntryId, mealIndex} = section;
+      const {journalEntry, mealIndex} = section;
       return (
         <SwipeableRow
           rightActions={[
@@ -89,17 +91,12 @@ const JouranlEntryList = ({
               color: 'purple',
               label: 'Edit',
               onPress: () =>
-                navigation.navigate(FOOD_CRUD, {
-                  screen: ITEM_CONSUMED,
-                  journalEntryId: journalEntryId.toHexString(),
-                  mealIndex,
-                  itemIndex: index,
-                }),
+                onEditConsumedFoodItem(journalEntry._id, mealIndex, index),
             },
             {
               color: 'red',
               label: 'Delete',
-              onPress: () => deleteConsumedFoodItem(item),
+              onPress: () => onDeleteConsumedFoodItem(item),
             },
           ]}>
           <View style={_styles.titleContainer}>
@@ -108,32 +105,22 @@ const JouranlEntryList = ({
         </SwipeableRow>
       );
     },
-    [deleteConsumedFoodItem, navigation],
+    [onDeleteConsumedFoodItem, onEditConsumedFoodItem],
   );
 
   const renderSectionHeader = React.useCallback(
-    ({section: {title, meal, mealIndex}}: {section: Section}) => (
+    ({section: {title, meal, journalEntry, mealIndex}}: {section: Section}) => (
       <SwipeableRow
         rightActions={[
           {
             color: 'purple',
             label: 'Edit',
-            onPress: () => {
-              if (!journalEntry) {
-                throw new RecoverableError(
-                  'No journal entry found in JournalEntryList',
-                );
-              }
-              navigation.navigate(ADD_MEAL, {
-                date: journalEntry.date.toDateString(),
-                mealIndex,
-              });
-            },
+            onPress: () => onEditMeal(journalEntry.date, mealIndex),
           },
           {
             color: 'red',
             label: 'Delete',
-            onPress: () => deleteMeal(meal),
+            onPress: () => onDeleteMeal(meal),
           },
         ]}>
         <View style={_styles.titleContainer}>
@@ -141,31 +128,25 @@ const JouranlEntryList = ({
         </View>
       </SwipeableRow>
     ),
-    [deleteMeal, journalEntry, navigation],
+    [onDeleteMeal, onEditMeal],
   );
 
   const renderSectionFooter = React.useCallback(
     ({section}: {section: Section}) => {
-      const {journalEntryId, mealIndex} = section;
+      const {journalEntry, mealIndex} = section;
       return (
         <Button
           title="Add Item"
-          onPress={() =>
-            navigation.navigate(FOOD_CRUD, {
-              screen: LOOKUP_OR_ADD,
-              journalEntryId: journalEntryId.toHexString(),
-              mealIndex,
-            })
-          }
+          onPress={() => onAddItem(journalEntry._id, mealIndex)}
         />
       );
     },
-    [navigation],
+    [onAddItem],
   );
 
   return (
     <SectionList
-      sections={formatSections(journalEntry)}
+      sections={formatSections(props.journalEntry)}
       renderItem={renderItem}
       renderSectionHeader={renderSectionHeader}
       renderSectionFooter={renderSectionFooter}

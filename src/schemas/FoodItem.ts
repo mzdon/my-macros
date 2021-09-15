@@ -30,7 +30,7 @@ class FoodItem extends Realm.Object implements FoodItemData {
   servingUnitOfMeasurement!: UnitOfMeasurement;
   servingSizeNote!: string;
 
-  static generate(obj: Partial<FoodItemData> = {}) {
+  static generate(obj: Partial<FoodItemData> = {}): FoodItemData {
     const {
       _id = new UUID(),
       description = '',
@@ -59,7 +59,7 @@ class FoodItem extends Realm.Object implements FoodItemData {
     };
   }
 
-  getData() {
+  getData(): FoodItemData {
     return {
       _id: this._id,
       description: this.description,

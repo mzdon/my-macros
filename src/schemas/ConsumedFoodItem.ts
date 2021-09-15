@@ -8,7 +8,7 @@ import {convert} from 'utils/UnitOfMeasurement';
 type UomOrServings = UnitOfMeasurement | typeof Servings;
 
 export interface ConsumedFoodItemData {
-  item: FoodItemData;
+  item: Partial<FoodItemData>;
   quantity: number;
   unitOfMeasurement: UomOrServings;
 }

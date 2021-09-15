@@ -41,7 +41,7 @@ const ItemConsumed = (): React.ReactElement => {
       foodItemData?.servingUnitOfMeasurement || UnitOfMeasurement.Grams,
   });
 
-  const onNext = React.useCallback(() => {
+  const onSave = React.useCallback(() => {
     saveConsumedFoodItem(state);
     const parentNavigator = navigation.getParent();
     if (parentNavigator) {
@@ -90,7 +90,7 @@ const ItemConsumed = (): React.ReactElement => {
       <Spacer />
       <View style={_styles.buttonContainer}>
         <Button title="Back" onPress={navigation.goBack} />
-        <Button title="Next" onPress={onNext} />
+        <Button title="Save" onPress={onSave} />
       </View>
     </View>
   );

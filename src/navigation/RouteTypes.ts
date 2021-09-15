@@ -6,16 +6,21 @@ export type PublicStackParamList = {
 };
 
 export type PrivateStackParamList = {
-  AddMeal: {date: string; mealIndex?: number};
+  AddMeal: {
+    date: string;
+    mealIndex?: number;
+  };
   DateSelector: undefined;
   FoodCrud: NavigatorScreenParams<FoodCrudStackParamList> & {
     journalEntryId?: string;
     mealIndex?: number;
-    itemIndex?: number;
+    consumedItemIndex?: number;
     foodItemId?: string;
     foodGroupId?: string;
   };
-  Journal: {date: string};
+  Journal: {
+    date: string;
+  };
   Profile: undefined;
   UserInfo: undefined;
 };

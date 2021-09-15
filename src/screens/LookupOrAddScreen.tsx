@@ -1,14 +1,20 @@
 import React from 'react';
 
-import {useNavigation} from '@react-navigation/core';
+import {CommonActions, useNavigation} from '@react-navigation/native';
 import {Button, StyleSheet, View} from 'react-native';
 import {RealmQuery} from 'react-realm-context';
 
 import BaseTextInput from 'components/BaseTextInput';
 import SearchResults from 'components/SearchResults';
 import Spacer from 'components/Spacer';
-import {FOOD_ITEM_DESCRIPTION, ITEM_CONSUMED} from 'navigation/Constants';
+import {
+  FOOD_CRUD,
+  FOOD_ITEM_DESCRIPTION,
+  ITEM_CONSUMED,
+  LOOKUP_OR_ADD,
+} from 'navigation/Constants';
 import {LookupOrAddNavigationProp} from 'navigation/RouteTypes';
+import FoodItem from 'schemas/FoodItem';
 import styles from 'styles';
 
 const _styles = StyleSheet.create({
@@ -45,14 +51,53 @@ const LookupOrAddScreen = (): React.ReactElement => {
     () => navigation.navigate(FOOD_ITEM_DESCRIPTION),
     [navigation],
   );
-  const selectFoodItem = React.useCallback(() => {
-    navigation.navigate(ITEM_CONSUMED);
-  }, [navigation]);
-  // const addNewFoodItemGroup = React.useCallback(
-  //   () => addFoodItemGroup(new FoodItemGroup({})),
-  //   [addFoodItemGroup],
-  // );
+  const selectFoodItem = React.useCallback(
+    (foodItem: FoodItem) => {
+      const parentNavigation = navigation.getParent();
+      if (parentNavigation) {
+        parentNavigation.dispatch(navState => {
+          const foodCrudRouteIndex = navState.routes.findIndex(
+            route => route.name === FOOD_CRUD,
+          );
+          if (foodCrudRouteIndex === -1) {
+            console.log('No food crud route');
+            return {type: 'noop'};
+          }
 
+          const foodCrudRoute = navState.routes[foodCrudRouteIndex];
+          const newFoodCrudRoute = {
+            ...foodCrudRoute,
+            params: {
+              ...foodCrudRoute.params,
+              screen: ITEM_CONSUMED,
+              foodItemId: foodItem._id.toHexString(),
+            },
+            state: {
+              ...foodCrudRoute.state,
+              index: 1,
+              routes: [{name: LOOKUP_OR_ADD}, {name: ITEM_CONSUMED}],
+            },
+          };
+
+          const newState = {
+            ...navState,
+            routes: [
+              ...navState.routes.slice(0, foodCrudRouteIndex),
+              newFoodCrudRoute,
+              ...navState.routes.slice(foodCrudRouteIndex + 1),
+            ],
+          };
+
+          return CommonActions.reset(newState);
+        });
+      }
+    },
+    [navigation],
+  );
+  // const addNewFoodItemGroup = React.useCallback(
+  //   () => navigation.navigate(FOOD_ITEM_GROUP_DESCRIPTION),
+  //   [navigation],
+  // );
   // const setExistingFoodItemGroup = React.useCallback(
   //   (foodItemGroup: FoodItemGroup) => addFoodItemGroup(foodItemGroup),
   //   [addFoodItemGroup],
