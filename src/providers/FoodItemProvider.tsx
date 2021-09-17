@@ -4,25 +4,12 @@ import {UUID} from 'bson';
 import {withRealm} from 'react-realm-context';
 import {UpdateMode} from 'realm';
 
+import {useUserContext} from 'providers/UserProvider';
 import {InitConsumedFoodItemData} from 'schemas/ConsumedFoodItem';
 import FoodItem, {InitFoodItemData} from 'schemas/FoodItem';
 import JournalEntry from 'schemas/JournalEntry';
 import {RecoverableError} from 'utils/Errors';
-import {useUserContext} from './UserProvider';
-
-export const useGetFoodItemById = (realm: Realm) => {
-  return React.useCallback(
-    (id: UUID | string): FoodItem => {
-      const itemId = id instanceof UUID ? id : new UUID(id);
-      const foodItem = realm.objectForPrimaryKey<FoodItem>('FoodItem', itemId);
-      if (!foodItem) {
-        throw new RecoverableError(`No Food Item found with id: ${id}`);
-      }
-      return foodItem;
-    },
-    [realm],
-  );
-};
+import {useGetFoodItemById} from 'utils/Queries';
 
 type ConsumedFoodItemDataProvided = Pick<
   InitConsumedFoodItemData,
@@ -156,63 +143,78 @@ const FoodItemProvider = ({
     realm,
   ]);
 
-  const writeFoodItemToRealm = (data: InitFoodItemData): FoodItem => {
-    let result;
-    realm.write(() => {
-      result = realm.create<FoodItem>(
-        FoodItem,
-        FoodItem.generate(data),
-        UpdateMode.Modified,
-      );
-      user.addFoodItem(result);
-    });
-    // @ts-ignore
-    return result;
-  };
+  const writeFoodItemToRealm = React.useCallback(
+    (data: InitFoodItemData): FoodItem => {
+      let result;
+      realm.write(() => {
+        result = realm.create<FoodItem>(
+          FoodItem,
+          FoodItem.generate(data),
+          UpdateMode.Modified,
+        );
+        user.addFoodItem(result);
+      });
+      // @ts-ignore
+      return result;
+    },
+    [realm, user],
+  );
 
-  const saveFoodItem = (data: Partial<InitFoodItemData>) => {
-    if (!foodItemData) {
-      throw new RecoverableError('No food item data save');
-    }
-    if (journalEntryId) {
-      // if we are adding a new food item, just update state
-      updateFoodItemData(data);
-    } else if (foodItemId) {
+  const saveFoodItem = React.useCallback(
+    (data: Partial<InitFoodItemData>) => {
+      if (!foodItemData) {
+        throw new RecoverableError('No food item data save');
+      }
+      if (journalEntryId) {
+        // if we are adding a new food item, just update state
+        updateFoodItemData(data);
+      } else if (foodItemId) {
+        const validItem = FoodItem.verifyInitFoodItemData(foodItemData);
+        if (!validItem) {
+          throw new RecoverableError(
+            'Some food item data appears to be missing in order to create a consumed food item',
+          );
+        }
+        // if we are editing an existing food item, save it to realm
+        writeFoodItemToRealm({
+          ...validItem,
+          ...data,
+        });
+      }
+    },
+    [
+      foodItemData,
+      foodItemId,
+      journalEntryId,
+      updateFoodItemData,
+      writeFoodItemToRealm,
+    ],
+  );
+
+  const internalSaveConsumedFoodItem = React.useCallback(
+    (data: ConsumedFoodItemDataProvided) => {
+      if (!foodItemData) {
+        throw new RecoverableError(
+          'No food item data save to consumed food item',
+        );
+      }
       const validItem = FoodItem.verifyInitFoodItemData(foodItemData);
       if (!validItem) {
         throw new RecoverableError(
           'Some food item data appears to be missing in order to create a consumed food item',
         );
       }
-      // if we are editing an existing food item, save it to realm
-      writeFoodItemToRealm({
-        ...validItem,
+      let payload = {
+        item: validItem,
         ...data,
-      });
-    }
-  };
-
-  const internalSaveConsumedFoodItem = (data: ConsumedFoodItemDataProvided) => {
-    if (!foodItemData) {
-      throw new RecoverableError(
-        'No food item data save to consumed food item',
-      );
-    }
-    const validItem = FoodItem.verifyInitFoodItemData(foodItemData);
-    if (!validItem) {
-      throw new RecoverableError(
-        'Some food item data appears to be missing in order to create a consumed food item',
-      );
-    }
-    let payload = {
-      item: validItem,
-      ...data,
-    };
-    if (!payload.item._id) {
-      payload.item = writeFoodItemToRealm(payload.item);
-    }
-    onSaveConsumedFoodItem(payload);
-  };
+      };
+      if (!payload.item._id) {
+        payload.item = writeFoodItemToRealm(payload.item);
+      }
+      onSaveConsumedFoodItem(payload);
+    },
+    [foodItemData, onSaveConsumedFoodItem, writeFoodItemToRealm],
+  );
 
   return (
     <FoodItemContext.Provider

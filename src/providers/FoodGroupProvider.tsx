@@ -4,11 +4,11 @@ import {UUID} from 'bson';
 import {withRealm} from 'react-realm-context';
 import {UpdateMode} from 'realm';
 
-import {useGetFoodItemById} from 'providers/FoodItemProvider';
 import {useUserContext} from 'providers/UserProvider';
 import {InitConsumedFoodItemData} from 'schemas/ConsumedFoodItem';
 import FoodItemGroup from 'schemas/FoodItemGroup';
 import {RecoverableError} from 'utils/Errors';
+import {useGetFoodItemById, useGetFoodItemGroupById} from 'utils/Queries';
 
 type FoodGroupStateData = {
   _id?: UUID;
@@ -73,26 +73,16 @@ const FoodGroupProvider = ({
 }: Props) => {
   const {user} = useUserContext();
   const getFoodItemById = useGetFoodItemById(realm);
+  const getFoodItemGroupById = useGetFoodItemGroupById(realm);
 
   const [foodGroupData, setFoodGroupData] =
     React.useState<FoodGroupStateData>(null);
 
   React.useEffect(() => {
     if (!foodGroupData) {
-      const getFoodGroupById = (id: string) => {
-        const result = realm.objectForPrimaryKey<FoodItemGroup>(
-          'FoodItemGroup',
-          new UUID(id),
-        );
-        if (!result) {
-          throw new RecoverableError(`No FoodItemGroup found for id: ${id}`);
-        }
-        return result;
-      };
-
       let data: FoodGroupStateData = null;
       if (foodGroupId) {
-        const dehydratedData = getFoodGroupById(foodGroupId).getData();
+        const dehydratedData = getFoodItemGroupById(foodGroupId).getData();
         data = {
           _id: dehydratedData._id,
           description: dehydratedData.description,
@@ -109,67 +99,86 @@ const FoodGroupProvider = ({
       }
       setFoodGroupData(data);
     }
-  }, [foodGroupData, foodGroupId, getFoodItemById, newFoodGroup, realm]);
+  }, [
+    foodGroupData,
+    foodGroupId,
+    getFoodItemById,
+    getFoodItemGroupById,
+    newFoodGroup,
+    realm,
+  ]);
 
-  const saveFoodGroup = (description: string) => {
-    if (!foodGroupData) {
-      throw new RecoverableError('No food group data to save');
-    }
-    let result;
-    realm.write(() => {
-      result = realm.create<FoodItemGroup>(
-        FoodItemGroup,
-        // @ts-ignore TODO
-        FoodItemGroup.generate({
-          foodItems: foodGroupData.foodItems,
-          description,
-        }),
-        UpdateMode.Modified,
-      );
-      user.addFoodItemGroup(result);
-    });
-    if (!foodGroupId) {
-      // @ts-ignore
-      internalApplyFoodItemGroup(result);
-    }
-  };
+  const internalApplyFoodItemGroup = React.useCallback(
+    (group: FoodItemGroup) => {
+      if (!journalEntryId || mealIndex === undefined) {
+        throw new RecoverableError(
+          'No journal entry or meal specified to apply food item group to',
+        );
+      }
+      applyFoodItemGroup(journalEntryId, mealIndex, group);
+    },
+    [applyFoodItemGroup, journalEntryId, mealIndex],
+  );
 
-  const saveConsumedFoodItemToGroup = (
-    _entryId: string,
-    _mealIdx: number,
-    foodItem: InitConsumedFoodItemData,
-    _itemIndex?: number,
-  ) => {
-    if (!foodGroupData) {
-      throw new RecoverableError('No food group data to add a food item to');
-    }
-    setFoodGroupData({
-      ...foodGroupData,
-      foodItems: [...foodGroupData.foodItems, foodItem],
-    });
-  };
+  const saveFoodGroup = React.useCallback(
+    (description: string) => {
+      if (!foodGroupData) {
+        throw new RecoverableError('No food group data to save');
+      }
+      let result;
+      realm.write(() => {
+        result = realm.create<FoodItemGroup>(
+          FoodItemGroup,
+          // @ts-ignore TODO
+          FoodItemGroup.generate({
+            foodItems: foodGroupData.foodItems,
+            description,
+          }),
+          UpdateMode.Modified,
+        );
+        user.addFoodItemGroup(result);
+      });
+      if (!foodGroupId) {
+        // @ts-ignore
+        internalApplyFoodItemGroup(result);
+      }
+    },
+    [foodGroupData, foodGroupId, internalApplyFoodItemGroup, realm, user],
+  );
 
-  const removeFoodItemFromGroup = (itemIndex: number) => {
-    if (!foodGroupData) {
-      throw new RecoverableError('No food group data to add a food item to');
-    }
-    setFoodGroupData({
-      ...foodGroupData,
-      foodItems: [
-        ...foodGroupData.foodItems.slice(0, itemIndex),
-        ...foodGroupData.foodItems.slice(itemIndex + 1),
-      ],
-    });
-  };
+  const saveConsumedFoodItemToGroup = React.useCallback(
+    (
+      _entryId: string,
+      _mealIdx: number,
+      foodItem: InitConsumedFoodItemData,
+      _itemIndex?: number,
+    ) => {
+      if (!foodGroupData) {
+        throw new RecoverableError('No food group data to add a food item to');
+      }
+      setFoodGroupData({
+        ...foodGroupData,
+        foodItems: [...foodGroupData.foodItems, foodItem],
+      });
+    },
+    [foodGroupData],
+  );
 
-  const internalApplyFoodItemGroup = (group: FoodItemGroup) => {
-    if (!journalEntryId || mealIndex === undefined) {
-      throw new RecoverableError(
-        'No journal entry or meal specified to apply food item group to',
-      );
-    }
-    applyFoodItemGroup(journalEntryId, mealIndex, group);
-  };
+  const removeFoodItemFromGroup = React.useCallback(
+    (itemIndex: number) => {
+      if (!foodGroupData) {
+        throw new RecoverableError('No food group data to add a food item to');
+      }
+      setFoodGroupData({
+        ...foodGroupData,
+        foodItems: [
+          ...foodGroupData.foodItems.slice(0, itemIndex),
+          ...foodGroupData.foodItems.slice(itemIndex + 1),
+        ],
+      });
+    },
+    [foodGroupData],
+  );
 
   return (
     <FoodGroupContext.Provider
