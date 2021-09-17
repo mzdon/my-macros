@@ -1,146 +1,65 @@
 import React from 'react';
 
-import {CommonActions, useNavigation} from '@react-navigation/native';
-import {Button, StyleSheet, View} from 'react-native';
-import {RealmQuery} from 'react-realm-context';
+import {useNavigation} from '@react-navigation/native';
+import {View} from 'react-native';
 
-import BaseTextInput from 'components/BaseTextInput';
-import SearchResults from 'components/SearchResults';
+import LookupFoodItem from 'components/LookupFoodItem';
+import LookupFoodItemGroup from 'components/LookupFoodItemGroup';
 import Spacer from 'components/Spacer';
 import {
-  FOOD_CRUD,
   FOOD_ITEM_DESCRIPTION,
+  FOOD_ITEM_GROUP,
   ITEM_CONSUMED,
-  LOOKUP_OR_ADD,
 } from 'navigation/Constants';
 import {LookupOrAddNavigationProp} from 'navigation/RouteTypes';
+import {useFoodGroupContext} from 'providers/FoodGroupProvider';
 import FoodItem from 'schemas/FoodItem';
+import FoodItemGroup from 'schemas/FoodItemGroup';
 import styles from 'styles';
-
-const _styles = StyleSheet.create({
-  buttonContainer: {flexDirection: 'row', justifyContent: 'space-between'},
-});
+import {useUpdateFoodCrudRoute} from 'utils/Navigation';
 
 const LookupOrAddScreen = (): React.ReactElement => {
   const navigation = useNavigation<LookupOrAddNavigationProp>();
-
-  const [state, setState] = React.useState({
-    foodSearch: '',
-    groupSearch: '',
-  });
-  const updateFoodSearch = React.useCallback(
-    (val: string) => {
-      setState({
-        ...state,
-        foodSearch: val,
-      });
-    },
-    [state, setState],
-  );
-  // const updateGroupSearch = React.useCallback(
-  //   (val: string) => {
-  //     setState({
-  //       ...state,
-  //       groupSearch: val,
-  //     });
-  //   },
-  //   [state, setState],
-  // );
+  const updateFoodCrudRoute = useUpdateFoodCrudRoute(navigation);
+  const {applyFoodItemGroup} = useFoodGroupContext();
 
   const addNewFoodItem = React.useCallback(
-    () => navigation.navigate(FOOD_ITEM_DESCRIPTION),
-    [navigation],
+    () => updateFoodCrudRoute(FOOD_ITEM_DESCRIPTION),
+    [updateFoodCrudRoute],
   );
   const selectFoodItem = React.useCallback(
     (foodItem: FoodItem) => {
-      const parentNavigation = navigation.getParent();
-      if (parentNavigation) {
-        parentNavigation.dispatch(navState => {
-          const foodCrudRouteIndex = navState.routes.findIndex(
-            route => route.name === FOOD_CRUD,
-          );
-          if (foodCrudRouteIndex === -1) {
-            console.log('No food crud route');
-            return {type: 'noop'};
-          }
-
-          const foodCrudRoute = navState.routes[foodCrudRouteIndex];
-          const newFoodCrudRoute = {
-            ...foodCrudRoute,
-            params: {
-              ...foodCrudRoute.params,
-              screen: ITEM_CONSUMED,
-              foodItemId: foodItem._id.toHexString(),
-            },
-            state: {
-              ...foodCrudRoute.state,
-              index: 1,
-              routes: [{name: LOOKUP_OR_ADD}, {name: ITEM_CONSUMED}],
-            },
-          };
-
-          const newState = {
-            ...navState,
-            routes: [
-              ...navState.routes.slice(0, foodCrudRouteIndex),
-              newFoodCrudRoute,
-              ...navState.routes.slice(foodCrudRouteIndex + 1),
-            ],
-          };
-
-          return CommonActions.reset(newState);
-        });
-      }
+      updateFoodCrudRoute(ITEM_CONSUMED, {
+        foodItemId: foodItem._id.toHexString(),
+      });
     },
-    [navigation],
+    [updateFoodCrudRoute],
   );
-  // const addNewFoodItemGroup = React.useCallback(
-  //   () => navigation.navigate(FOOD_ITEM_GROUP_DESCRIPTION),
-  //   [navigation],
-  // );
-  // const setExistingFoodItemGroup = React.useCallback(
-  //   (foodItemGroup: FoodItemGroup) => addFoodItemGroup(foodItemGroup),
-  //   [addFoodItemGroup],
-  // );
-
-  const foodFilter = `description CONTAINS[c] "${state.foodSearch}"`;
-  // const groupFilter = `description CONTAINS[c] "${state.groupSearch}"`;
+  const addNewFoodItemGroup = React.useCallback(() => {
+    updateFoodCrudRoute(FOOD_ITEM_GROUP, {
+      newFoodGroup: true,
+    });
+  }, [updateFoodCrudRoute]);
+  const selectFoodItemGroup = React.useCallback(
+    (foodItemGroup: FoodItemGroup) => {
+      applyFoodItemGroup(foodItemGroup);
+      navigation.goBack();
+    },
+    [applyFoodItemGroup, navigation],
+  );
 
   return (
     <View style={styles.screen}>
-      <BaseTextInput
-        placeholder="Lookup Food Item..."
-        value={state.foodSearch}
-        onChangeText={updateFoodSearch}
+      <LookupFoodItem
+        addNewFoodItem={addNewFoodItem}
+        selectFoodItem={selectFoodItem}
       />
-      {!!state.foodSearch && (
-        <RealmQuery type="FoodItem" filter={foodFilter} sort="description">
-          {({results}) => (
-            <SearchResults items={results} onPress={selectFoodItem} />
-          )}
-        </RealmQuery>
-      )}
       <Spacer />
-      {/* <BaseTextInput
-        placeholder="Lookup Food Item Group..."
-        value={state.groupSearch}
-        onChangeText={updateGroupSearch}
+      <LookupFoodItemGroup
+        addNewFoodItemGroup={addNewFoodItemGroup}
+        selectFoodItemGroup={selectFoodItemGroup}
       />
-      {!!state.groupSearch && (
-        <RealmQuery
-          type="FoodItemGroup"
-          filter={groupFilter}
-          sort="description">
-          {({results}) => (
-            <SearchResults items={results} onPress={setExistingFoodItemGroup} />
-          )}
-        </RealmQuery>
-      )}
-      <Spacer /> */}
-      <View style={_styles.buttonContainer}>
-        <Button title="New Food Item" onPress={addNewFoodItem} />
-        {/* <Button title="New Food Item Group" onPress={addNewFoodItemGroup} /> */}
-      </View>
+      <Spacer />
     </View>
   );
 };

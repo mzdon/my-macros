@@ -1,17 +1,19 @@
 import Realm from 'realm';
 
-import ConsumedFoodItem, {ConsumedFoodItemData} from 'schemas/ConsumedFoodItem';
+import ConsumedFoodItem, {
+  InitConsumedFoodItemData,
+} from 'schemas/ConsumedFoodItem';
 
-export interface ConstructorObject {
+export interface InitMealData {
   description: string;
-  items?: Array<ConsumedFoodItem | ConsumedFoodItemData>;
+  items?: Array<ConsumedFoodItem | InitConsumedFoodItemData>;
 }
 
 class Meal extends Realm.Object {
   description!: string;
   items!: ConsumedFoodItem[];
 
-  static generate(obj: ConstructorObject) {
+  static generate(obj: InitMealData) {
     const {description, items = []} = obj;
     const mappedItems = items.map(item => {
       if (item instanceof ConsumedFoodItem) {

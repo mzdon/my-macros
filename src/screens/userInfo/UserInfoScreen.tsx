@@ -60,7 +60,7 @@ const UserInfoScreen = () => {
     if (step < 2) {
       updateStep(step + 1);
     } else {
-      await onSaveUser();
+      onSaveUser();
       if (navigation.canGoBack()) {
         navigation.goBack();
       } else {

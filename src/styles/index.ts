@@ -17,4 +17,8 @@ export default StyleSheet.create({
     borderColor: 'red',
     color: 'red',
   },
+  horizontalContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
 });

@@ -1,26 +1,29 @@
 import {UUID} from 'bson';
 import Realm from 'realm';
 
-import {FoodItemData} from 'schemas/FoodItem';
+import {InitFoodItemData} from 'schemas/FoodItem';
 import {Servings, UnitOfMeasurement} from 'types/UnitOfMeasurement';
 import {convert} from 'utils/UnitOfMeasurement';
 
 type UomOrServings = UnitOfMeasurement | typeof Servings;
 
-export interface ConsumedFoodItemData {
-  item: Partial<FoodItemData>;
+export interface InitConsumedFoodItemData {
+  item: InitFoodItemData;
   quantity: number;
   unitOfMeasurement: UomOrServings;
 }
 
-interface ConstructorObject {
-  item: FoodItemData;
-  quantity?: number;
-  unitOfMeasurement?: UomOrServings;
+export interface ReturnedConsumedFoodItemData {
+  item: {
+    _id: UUID;
+    name: string;
+  };
+  quantity: number;
+  unitOfMeasurement: UnitOfMeasurement;
 }
 
 function determineServingsConsumedAndUom(
-  item: FoodItemData,
+  item: InitFoodItemData,
   quantity: number,
   unitOfMeasurement: UomOrServings,
 ): {servings: number; realQuantity: number; uom: UnitOfMeasurement} {
@@ -53,7 +56,7 @@ function determineServingsConsumedAndUom(
   };
 }
 
-function determineItemMacros(item: FoodItemData, servings: number) {
+function determineItemMacros(item: InitFoodItemData, servings: number) {
   return {
     calories: item.calories * servings,
     carbs: item.carbs * servings,
@@ -76,8 +79,8 @@ class ConsumedFoodItem extends Realm.Object {
   quantity!: number;
   unitOfMeasurement!: UnitOfMeasurement;
 
-  static generate(obj: ConstructorObject) {
-    const {item, quantity = 0, unitOfMeasurement} = obj;
+  static generate(obj: InitConsumedFoodItemData) {
+    const {item, quantity, unitOfMeasurement} = obj;
     const {servings, realQuantity, uom} = determineServingsConsumedAndUom(
       item,
       quantity,
@@ -89,6 +92,17 @@ class ConsumedFoodItem extends Realm.Object {
       quantity: realQuantity,
       unitOfMeasurement: uom,
       ...determineItemMacros(item, servings),
+    };
+  }
+
+  getData(): ReturnedConsumedFoodItemData {
+    return {
+      quantity: this.quantity,
+      unitOfMeasurement: this.unitOfMeasurement,
+      item: {
+        _id: this.itemId,
+        name: this.itemName,
+      },
     };
   }
 

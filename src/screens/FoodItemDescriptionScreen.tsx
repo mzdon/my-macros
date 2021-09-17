@@ -1,7 +1,7 @@
 import React from 'react';
 
 import {useNavigation} from '@react-navigation/core';
-import {Button, StyleSheet, Text, View} from 'react-native';
+import {Button, Text, View} from 'react-native';
 
 import BaseNumberInput from 'components/BaseNumberInput';
 import BaseTextInput from 'components/BaseTextInput';
@@ -11,12 +11,9 @@ import {FOOD_ITEM_MACROS} from 'navigation/Constants';
 import {FoodItemDescriptionNavigationProp} from 'navigation/RouteTypes';
 import {UnitOfMeasurement} from 'types/UnitOfMeasurement';
 import {useSimpleStateUpdater} from 'utils/State';
-import {useFoodContext} from 'providers/FoodProvider';
+import {useFoodItemContext} from 'providers/FoodItemProvider';
 import styles from 'styles';
-
-const _styles = StyleSheet.create({
-  buttonContainer: {flexDirection: 'row', justifyContent: 'space-between'},
-});
+import {useUpdateFoodCrudRoute} from 'utils/Navigation';
 
 const SERVING_UMO_VALUES = [
   UnitOfMeasurement.Grams,
@@ -27,8 +24,9 @@ const SERVING_UMO_VALUES = [
 
 const FoodItemDescriptionScreen = () => {
   const navigation = useNavigation<FoodItemDescriptionNavigationProp>();
+  const updateFoodCrudRoute = useUpdateFoodCrudRoute(navigation);
 
-  const {foodItemData, updateFoodItemData} = useFoodContext();
+  const {foodItemData, updateFoodItemData} = useFoodItemContext();
 
   const [state, updater] = useSimpleStateUpdater({
     description: foodItemData?.description || '',
@@ -41,8 +39,8 @@ const FoodItemDescriptionScreen = () => {
 
   const onNext = React.useCallback(() => {
     updateFoodItemData(state);
-    navigation.navigate(FOOD_ITEM_MACROS);
-  }, [updateFoodItemData, state, navigation]);
+    updateFoodCrudRoute(FOOD_ITEM_MACROS);
+  }, [updateFoodItemData, state, updateFoodCrudRoute]);
 
   // TODO: Warn if a food item exists with the same description
   const updateDescription = updater('description');
@@ -58,7 +56,7 @@ const FoodItemDescriptionScreen = () => {
 
   return (
     <View style={styles.screen}>
-      <Text>New Item</Text>
+      <Text>{`${foodItemData?._id ? 'Edit' : 'New'} Item`}</Text>
       <Spacer />
       <BaseTextInput
         label="Description"
@@ -94,7 +92,7 @@ const FoodItemDescriptionScreen = () => {
         onChangeText={updateCalories}
       />
       <Spacer />
-      <View style={_styles.buttonContainer}>
+      <View style={styles.horizontalContainer}>
         <Button title="Back" onPress={navigation.goBack} />
         <Button title="Next" onPress={onNext} />
       </View>

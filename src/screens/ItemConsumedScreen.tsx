@@ -1,17 +1,19 @@
 import React from 'react';
 
-import {useNavigation} from '@react-navigation/core';
+import {CommonActions, useNavigation} from '@react-navigation/native';
 import {Button, StyleSheet, Text, View} from 'react-native';
 
 import BaseNumberInput from 'components/BaseNumberInput';
 import Spacer from 'components/Spacer';
 import RadioButtons from 'components/RadioButtons';
+import {FOOD_ITEM_GROUP} from 'navigation/Constants';
 import {ItemConsumedNavigationProp} from 'navigation/RouteTypes';
-import {useFoodContext} from 'providers/FoodProvider';
+import {useFoodItemContext} from 'providers/FoodItemProvider';
 import {Servings, UnitOfMeasurement} from 'types/UnitOfMeasurement';
 import {useSimpleStateUpdater} from 'utils/State';
 import {FoodItemType, isFoodOrDrink} from 'utils/FoodItem';
 import styles from 'styles';
+import {useFoodGroupContext} from 'providers/FoodGroupProvider';
 
 const _styles = StyleSheet.create({
   buttonContainer: {flexDirection: 'row', justifyContent: 'space-between'},
@@ -33,7 +35,8 @@ const UOM_VALUES = {
 const ItemConsumed = (): React.ReactElement => {
   const navigation = useNavigation<ItemConsumedNavigationProp>();
 
-  const {foodItemData, saveConsumedFoodItem} = useFoodContext();
+  const {foodGroupData} = useFoodGroupContext();
+  const {foodItemData, saveConsumedFoodItem} = useFoodItemContext();
 
   const [state, updater] = useSimpleStateUpdater({
     quantity: foodItemData?.servingSize || 0,
@@ -44,12 +47,17 @@ const ItemConsumed = (): React.ReactElement => {
   const onSave = React.useCallback(() => {
     saveConsumedFoodItem(state);
     const parentNavigator = navigation.getParent();
-    if (parentNavigator) {
+    if (parentNavigator && !foodGroupData) {
+      console.log('parentNavigator.goBack');
       parentNavigator.goBack();
     } else {
-      navigation.popToTop();
+      const navState = navigation.getState();
+      const key =
+        navState.routes.find(route => route.name === FOOD_ITEM_GROUP)?.key ||
+        '';
+      navigation.dispatch(CommonActions.navigate({name: FOOD_ITEM_GROUP, key}));
     }
-  }, [navigation, saveConsumedFoodItem, state]);
+  }, [foodGroupData, navigation, saveConsumedFoodItem, state]);
 
   const updateQuantity = updater<number>('quantity');
   const onUpdateUnitOfMeasurement =

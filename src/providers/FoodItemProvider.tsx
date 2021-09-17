@@ -4,27 +4,42 @@ import {UUID} from 'bson';
 import {withRealm} from 'react-realm-context';
 import {UpdateMode} from 'realm';
 
-import {ConsumedFoodItemData} from 'schemas/ConsumedFoodItem';
-import FoodItem, {FoodItemData} from 'schemas/FoodItem';
+import {InitConsumedFoodItemData} from 'schemas/ConsumedFoodItem';
+import FoodItem, {InitFoodItemData} from 'schemas/FoodItem';
 import JournalEntry from 'schemas/JournalEntry';
 import {RecoverableError} from 'utils/Errors';
+import {useUserContext} from './UserProvider';
+
+export const useGetFoodItemById = (realm: Realm) => {
+  return React.useCallback(
+    (id: UUID | string): FoodItem => {
+      const itemId = id instanceof UUID ? id : new UUID(id);
+      const foodItem = realm.objectForPrimaryKey<FoodItem>('FoodItem', itemId);
+      if (!foodItem) {
+        throw new RecoverableError(`No Food Item found with id: ${id}`);
+      }
+      return foodItem;
+    },
+    [realm],
+  );
+};
 
 type ConsumedFoodItemDataProvided = Pick<
-  ConsumedFoodItemData,
+  InitConsumedFoodItemData,
   'quantity' | 'unitOfMeasurement'
 >;
 
-export interface FoodContextValue {
-  foodItemData: Partial<FoodItemData> | null;
-  saveFoodItem: (data: Partial<FoodItemData>) => void;
-  updateFoodItemData: (data: Partial<FoodItemData>) => void;
+export interface FoodItemContextValue {
+  foodItemData: Partial<InitFoodItemData> | null;
+  saveFoodItem: (data: Partial<InitFoodItemData>) => void;
+  updateFoodItemData: (data: Partial<InitFoodItemData>) => void;
   saveConsumedFoodItem: (
     consumedFoodItemData: ConsumedFoodItemDataProvided,
     foodItemId?: string,
   ) => void;
 }
 
-const FoodContext = React.createContext<FoodContextValue | null>(null);
+const FoodItemContext = React.createContext<FoodItemContextValue | null>(null);
 
 type Props = React.PropsWithChildren<{
   realm: Realm;
@@ -36,13 +51,13 @@ type Props = React.PropsWithChildren<{
   saveConsumedFoodItem: (
     journalEntryId: string,
     mealIndex: number,
-    data: ConsumedFoodItemData,
+    data: InitConsumedFoodItemData,
     itemIndex?: number,
   ) => void;
 }>;
 
 /**
- * The FoodProvider serves the following cases:
+ * The FoodItemProvider serves the following cases:
  * [1] Add a consumed food item to a journal entry meal
  *    - journalEntryId, mealIndex, foodItemId
  * [2] Update a consumed food item on a journal entry meal
@@ -51,29 +66,24 @@ type Props = React.PropsWithChildren<{
  *    - journalEntryId, mealIndex
  * [4] Edit an existing food item and prompt the user on whether or not this impacts all previous consumed food items
  *    - foodItemId
- * // FOLLOWING ITEMS PENDING... NOT SURE HOW I'LL DO THESE... MAYBE NEED THEIR OWN STACK AND PROVIDER ??
- * [5] Add a consumed food item group to a journal entry meal
- *    - jouranlEntryId, mealIndex, foodGroupId
- * [6] Add a new food item group and then [3] ??
- *    - journalEntryId, mealIndex ??
- * [7] Edit an exist food item group ??
- *    - foodGroupId ??
  */
-const FoodProvider = ({
+const FoodItemProvider = ({
   realm,
   journalEntryId,
   mealIndex,
   consumedItemIndex,
   foodItemId,
-  // foodGroupId,
   saveConsumedFoodItem,
   children,
 }: Props): React.ReactElement<Props> => {
+  const {user} = useUserContext();
+  const getFoodItemById = useGetFoodItemById(realm);
+
   const [foodItemData, setFoodItemData] =
-    React.useState<Partial<FoodItemData> | null>(null);
+    React.useState<Partial<InitFoodItemData> | null>(null);
 
   const updateFoodItemData = React.useCallback(
-    (data: Partial<FoodItemData>) => {
+    (data: Partial<InitFoodItemData>) => {
       setFoodItemData({
         ...(foodItemData || {}),
         ...data,
@@ -83,7 +93,7 @@ const FoodProvider = ({
   );
 
   const onSaveConsumedFoodItem = React.useCallback(
-    (data: ConsumedFoodItemData) => {
+    (data: InitConsumedFoodItemData) => {
       if (journalEntryId === undefined || mealIndex === undefined) {
         throw new RecoverableError(
           'No journal entry id or meal id to create a consumed item for',
@@ -95,17 +105,6 @@ const FoodProvider = ({
   );
 
   React.useEffect(() => {
-    const getFoodItemById = (id: string): FoodItem => {
-      const foodItem = realm.objectForPrimaryKey<FoodItem>(
-        'FoodItem',
-        new UUID(id),
-      );
-      if (!foodItem) {
-        throw new RecoverableError(`No Food Item found with id: ${id}`);
-      }
-      return foodItem;
-    };
-
     const getExistingFoodItemFromConsumedFoodItem = (
       jeId: string,
       mIdx: number,
@@ -122,12 +121,12 @@ const FoodProvider = ({
       if (!consumedItem) {
         return null;
       }
-      return getFoodItemById(consumedItem.itemId.toHexString());
+      return getFoodItemById(consumedItem.itemId);
     };
 
-    let data: Partial<FoodItemData>;
+    let data: Partial<InitFoodItemData>;
     if (foodItemId) {
-      // case [1], [5]
+      // case [1], [4]
       data = getFoodItemById(foodItemId).getData();
     } else if (journalEntryId && mealIndex !== undefined && consumedItemIndex) {
       // case [2]
@@ -143,28 +142,35 @@ const FoodProvider = ({
       }
       data = foodItem.getData();
     } else {
-      // case [4]
+      // case [3]
       data = {};
     }
 
-    console.log('setFoodItemData in useEffect');
     setFoodItemData(data);
-  }, [consumedItemIndex, foodItemId, journalEntryId, mealIndex, realm]);
+  }, [
+    consumedItemIndex,
+    foodItemId,
+    getFoodItemById,
+    journalEntryId,
+    mealIndex,
+    realm,
+  ]);
 
-  const writeFoodItemToRealm = (data: Partial<FoodItemData>): FoodItem => {
+  const writeFoodItemToRealm = (data: InitFoodItemData): FoodItem => {
     let result;
     realm.write(() => {
-      result = realm.create(
+      result = realm.create<FoodItem>(
         FoodItem,
         FoodItem.generate(data),
         UpdateMode.Modified,
       );
+      user.addFoodItem(result);
     });
     // @ts-ignore
     return result;
   };
 
-  const saveFoodItem = (data: Partial<FoodItemData>) => {
+  const saveFoodItem = (data: Partial<InitFoodItemData>) => {
     if (!foodItemData) {
       throw new RecoverableError('No food item data save');
     }
@@ -172,9 +178,15 @@ const FoodProvider = ({
       // if we are adding a new food item, just update state
       updateFoodItemData(data);
     } else if (foodItemId) {
+      const validItem = FoodItem.verifyInitFoodItemData(foodItemData);
+      if (!validItem) {
+        throw new RecoverableError(
+          'Some food item data appears to be missing in order to create a consumed food item',
+        );
+      }
       // if we are editing an existing food item, save it to realm
       writeFoodItemToRealm({
-        ...foodItemData,
+        ...validItem,
         ...data,
       });
     }
@@ -186,18 +198,24 @@ const FoodProvider = ({
         'No food item data save to consumed food item',
       );
     }
+    const validItem = FoodItem.verifyInitFoodItemData(foodItemData);
+    if (!validItem) {
+      throw new RecoverableError(
+        'Some food item data appears to be missing in order to create a consumed food item',
+      );
+    }
     let payload = {
-      item: foodItemData,
+      item: validItem,
       ...data,
     };
-    if (!foodItemData._id) {
-      payload.item = writeFoodItemToRealm(foodItemData);
+    if (!payload.item._id) {
+      payload.item = writeFoodItemToRealm(payload.item);
     }
     onSaveConsumedFoodItem(payload);
   };
 
   return (
-    <FoodContext.Provider
+    <FoodItemContext.Provider
       value={{
         foodItemData,
         saveFoodItem,
@@ -205,18 +223,18 @@ const FoodProvider = ({
         saveConsumedFoodItem: internalSaveConsumedFoodItem,
       }}>
       {children}
-    </FoodContext.Provider>
+    </FoodItemContext.Provider>
   );
 };
 
-export default withRealm(FoodProvider);
+export default withRealm(FoodItemProvider);
 
-export const useFoodContext = () => {
-  const foodContext = React.useContext(FoodContext);
-  if (foodContext === null) {
+export const useFoodItemContext = () => {
+  const foodItemContext = React.useContext(FoodItemContext);
+  if (foodItemContext === null) {
     throw new Error(
-      'No FoodContext value found. Was useFoodContext() called outside of a FoodProvider?',
+      'No FoodItemContext value found. Was useFoodItemContext() called outside of a FoodItemProvider?',
     );
   }
-  return foodContext;
+  return foodItemContext;
 };

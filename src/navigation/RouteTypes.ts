@@ -17,6 +17,7 @@ export type PrivateStackParamList = {
     consumedItemIndex?: number;
     foodItemId?: string;
     foodGroupId?: string;
+    newFoodGroup?: boolean;
   };
   Journal: {
     date: string;
@@ -29,6 +30,7 @@ export type FoodCrudStackParamList = {
   LookupOrAdd: undefined;
   FoodItemDescription: undefined;
   FoodItemMacros: undefined;
+  FoodItemGroup: undefined;
   ItemConsumed: undefined;
 };
 
@@ -108,6 +110,16 @@ export type FoodItemMacrosNavigationProp = StackNavigationProp<
 export type FoodItemMacrosRouteProp = RouteProp<
   FoodCrudStackParamList,
   'FoodItemMacros'
+>;
+
+export type FoodItemGroupNavigationProp = StackNavigationProp<
+  FoodCrudStackParamList,
+  'FoodItemGroup'
+>;
+
+export type FoodItemGroupRouteProp = RouteProp<
+  FoodCrudStackParamList,
+  'FoodItemGroup'
 >;
 
 export type ItemConsumedNavigationProp = StackNavigationProp<

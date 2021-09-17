@@ -3,8 +3,8 @@ import Realm from 'realm';
 
 import {UnitOfMeasurement} from 'types/UnitOfMeasurement';
 
-export interface FoodItemData {
-  _id: UUID;
+export interface InitFoodItemData {
+  _id?: UUID;
   description: string;
   calories: number;
   carbs: number;
@@ -17,7 +17,23 @@ export interface FoodItemData {
   servingSizeNote: string;
 }
 
-class FoodItem extends Realm.Object implements FoodItemData {
+const REQUIRED_INIT_KEYS: Array<keyof InitFoodItemData> = [
+  'description',
+  'calories',
+  'carbs',
+  'protein',
+  'fat',
+  'sugar',
+  'fiber',
+  'sugar',
+  'servingSize',
+  'servingUnitOfMeasurement',
+  'servingSizeNote',
+];
+
+export type ReturnedFoodItemData = Omit<InitFoodItemData, '_id'> & {_id: UUID};
+
+class FoodItem extends Realm.Object {
   _id!: UUID;
   description!: string;
   calories!: number;
@@ -30,19 +46,19 @@ class FoodItem extends Realm.Object implements FoodItemData {
   servingUnitOfMeasurement!: UnitOfMeasurement;
   servingSizeNote!: string;
 
-  static generate(obj: Partial<FoodItemData> = {}): FoodItemData {
+  static generate(obj: InitFoodItemData): ReturnedFoodItemData {
     const {
       _id = new UUID(),
-      description = '',
-      calories = 0,
-      carbs = 0,
-      protein = 0,
-      fat = 0,
-      sugar = 0,
-      fiber = 0,
-      servingSize = 0,
-      servingUnitOfMeasurement = UnitOfMeasurement.Grams,
-      servingSizeNote = '',
+      description,
+      calories,
+      carbs,
+      protein,
+      fat,
+      sugar,
+      fiber,
+      servingSize,
+      servingUnitOfMeasurement,
+      servingSizeNote,
     } = obj;
     return {
       _id,
@@ -59,7 +75,22 @@ class FoodItem extends Realm.Object implements FoodItemData {
     };
   }
 
-  getData(): FoodItemData {
+  static verifyInitFoodItemData(
+    obj: Partial<InitFoodItemData>,
+  ): InitFoodItemData | null {
+    let valid = true;
+    REQUIRED_INIT_KEYS.forEach(key => {
+      if (obj[key] === undefined) {
+        valid = false;
+      }
+    });
+    if (!valid) {
+      return null;
+    }
+    return obj as InitFoodItemData;
+  }
+
+  getData(): ReturnedFoodItemData {
     return {
       _id: this._id,
       description: this.description,

@@ -1,34 +1,43 @@
 import {UUID} from 'bson';
+import Realm from 'realm';
 
-import ConsumedFoodItem from 'schemas/ConsumedFoodItem';
-import {FoodItemData} from 'schemas/FoodItem';
+import ConsumedFoodItem, {
+  InitConsumedFoodItemData,
+  ReturnedConsumedFoodItemData,
+} from 'schemas/ConsumedFoodItem';
 
-interface ConstructorObject {}
-
-export interface FoodItemGroupData {
-  id: UUID | null;
+export interface InitFoodItemGroupData {
+  _id?: UUID;
   description: string;
-  foodItems: FoodItemData[];
+  foodItems: InitConsumedFoodItemData[];
 }
 
-class FoodItemGroup {
-  // @ts-ignore
+export interface ReturnedFoodItemGroupData {
   _id: UUID;
-  // @ts-ignore
   description: string;
-  // @ts-ignore
-  foodItems: ConsumedFoodItem[];
+  foodItems: ReturnedConsumedFoodItemData[];
+}
 
-  constructor(obj?: ConstructorObject) {
-    if (obj) {
-      this._id = new UUID();
-      this.description = '';
-      this.foodItems = [];
-    }
+class FoodItemGroup extends Realm.Object {
+  _id!: UUID;
+  description!: string;
+  foodItems!: ConsumedFoodItem[];
+
+  static generate(obj: InitFoodItemGroupData) {
+    const {_id = new UUID(), description = '', foodItems = []} = obj;
+    return {
+      _id,
+      description,
+      foodItems: foodItems.map(item => ConsumedFoodItem.generate(item)),
+    };
   }
 
-  addFoodItem(foodItem: ConsumedFoodItem) {
-    this.foodItems.push(foodItem);
+  getData(): ReturnedFoodItemGroupData {
+    return {
+      _id: this._id,
+      description: this.description,
+      foodItems: this.foodItems.map(item => item.getData()),
+    };
   }
 
   static schema = {

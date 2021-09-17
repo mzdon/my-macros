@@ -8,5 +8,6 @@ export const LOOKUP_OR_ADD = 'LookupOrAdd';
 export const PROFILE = 'Profile';
 export const FOOD_ITEM_DESCRIPTION = 'FoodItemDescription';
 export const FOOD_ITEM_MACROS = 'FoodItemMacros';
+export const FOOD_ITEM_GROUP = 'FoodItemGroup';
 export const USER_INFO = 'UserInfo';
 export const WELCOME = 'Welcome';

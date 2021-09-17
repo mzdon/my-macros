@@ -35,15 +35,9 @@ const RlmProvider = ({children}: Props): React.ReactElement<Props> => {
     return <ActivityIndicator />;
   }
 
-  // const partitionValue = `user=${realmUser?.id}`;
-
   return (
-    <RealmProvider
-      /* @ts-ignore */
-      schema={Schema}
-      deleteRealmIfMigrationNeeded
-      // sync={{user: realmUser, partitionValue}}
-    >
+    // @ts-ignore not sure why schema is not defined as a prop on RealmProvider
+    <RealmProvider schema={Schema} deleteRealmIfMigrationNeeded>
       <RealmInitializer>
         {({realm}) => {
           if (realmUser) {

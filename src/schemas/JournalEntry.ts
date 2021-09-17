@@ -1,13 +1,13 @@
 import {UUID} from 'bson';
 import Realm from 'realm';
 
-import Meal, {ConstructorObject as MealConstructorObject} from 'schemas/Meal';
+import Meal, {InitMealData} from 'schemas/Meal';
 
-interface ConstructorObject {
+interface InitJournalEntryData {
   id?: UUID;
   userId: UUID;
   date?: Date;
-  meals?: Array<MealConstructorObject>;
+  meals?: InitMealData[];
 }
 
 class JournalEntry extends Realm.Object {
@@ -16,7 +16,7 @@ class JournalEntry extends Realm.Object {
   date!: Date;
   meals!: Meal[];
 
-  static generate(obj: ConstructorObject) {
+  static generate(obj: InitJournalEntryData) {
     const {
       id = new UUID(),
       userId,

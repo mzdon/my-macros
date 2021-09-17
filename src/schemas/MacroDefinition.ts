@@ -26,20 +26,13 @@ function determineOptionalString(value: string | number | null): string {
 }
 
 class MacroDefinition {
-  /* @ts-ignore */
-  startDate: Date | null;
-  /* @ts-ignore */
-  calories: number;
-  /* @ts-ignore */
-  carbs: number;
-  /* @ts-ignore */
-  protein: number;
-  /* @ts-ignore */
-  fat: number;
-  /* @ts-ignore */
-  sugar: number | null;
-  /* @ts-ignore */
-  fiber: number | null;
+  startDate!: Date | null;
+  calories!: number;
+  carbs!: number;
+  protein!: number;
+  fat!: number;
+  sugar!: number | null;
+  fiber!: number | null;
 
   constructor(obj?: ConstructorObject) {
     if (obj) {

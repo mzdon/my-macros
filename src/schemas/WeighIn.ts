@@ -19,12 +19,9 @@ interface MS extends Base {
 type ConstructorObject = UOM | MS;
 
 class WeighIn {
-  // @ts-ignore
-  date: Date;
-  // @ts-ignore
-  weight: number;
-  // @ts-ignore
-  unitOfMeasurement: UnitOfMeasurement;
+  date!: Date;
+  weight!: number;
+  unitOfMeasurement!: UnitOfMeasurement;
 
   constructor(obj?: ConstructorObject) {
     if (obj) {

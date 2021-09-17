@@ -19,10 +19,8 @@ interface MS extends Base {
 type ConstructorObject = UOM | MS;
 
 class Height {
-  // @ts-ignore
-  height: number;
-  // @ts-ignore
-  unitOfMeasurement: UnitOfMeasurement;
+  height!: number;
+  unitOfMeasurement!: UnitOfMeasurement;
 
   constructor(obj?: ConstructorObject) {
     if (obj) {

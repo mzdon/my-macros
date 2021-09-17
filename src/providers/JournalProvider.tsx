@@ -4,8 +4,13 @@ import {UUID} from 'bson';
 import {RealmConsumer} from 'react-realm-context';
 
 import {useUserContext} from 'providers/UserProvider';
-import ConsumedFoodItem, {ConsumedFoodItemData} from 'schemas/ConsumedFoodItem';
+import ConsumedFoodItem, {
+  InitConsumedFoodItemData,
+  ReturnedConsumedFoodItemData,
+} from 'schemas/ConsumedFoodItem';
 import JournalEntry from 'schemas/JournalEntry';
+import FoodItem from 'schemas/FoodItem';
+import FoodItemGroup from 'schemas/FoodItemGroup';
 import Meal from 'schemas/Meal';
 import {CatastrophicError, RecoverableError} from 'utils/Errors';
 import {isSameDay} from 'utils/Date';
@@ -19,10 +24,15 @@ interface JournalContext {
   saveConsumedFoodItem: (
     entryId: string,
     mealIndex: number,
-    consumedFoodItem: ConsumedFoodItemData,
+    consumedFoodItem: InitConsumedFoodItemData | ReturnedConsumedFoodItemData,
     itemIndex?: number,
   ) => void;
   deleteConsumedFoodItem: (item: ConsumedFoodItem) => void;
+  applyFoodItemGroup: (
+    entryId: string,
+    mealIndex: number,
+    group: FoodItemGroup,
+  ) => void;
 }
 
 const JournalContext = React.createContext<JournalContext | null>(null);
@@ -120,7 +130,9 @@ const JournalProvider = ({children}: Props): React.ReactElement<Props> => {
         const saveConsumedFoodItem = (
           journalEntryId: string,
           mealIndex: number,
-          consumedFoodItemData: ConsumedFoodItemData,
+          consumedFoodItemData:
+            | InitConsumedFoodItemData
+            | ReturnedConsumedFoodItemData,
           itemIndex?: number,
         ) => {
           const entry = getEntryById(new UUID(journalEntryId));
@@ -166,6 +178,37 @@ const JournalProvider = ({children}: Props): React.ReactElement<Props> => {
           });
         };
 
+        const hydrateConsumedFoodItem = (
+          data: ReturnedConsumedFoodItemData,
+        ): InitConsumedFoodItemData => {
+          const foodItem = realm.objectForPrimaryKey<FoodItem>(
+            'FoodItem',
+            data.item._id,
+          );
+          if (!foodItem) {
+            throw new RecoverableError(
+              `Could not find Food Item id: ${data.item._id.toHexString()}`,
+            );
+          }
+          return {
+            ...data,
+            item: foodItem.getData(),
+          };
+        };
+
+        const applyFoodItemGroup = (
+          entryId: string,
+          mealIdx: number,
+          group: FoodItemGroup,
+        ) => {
+          group.foodItems.forEach(foodItem => {
+            const consumedFoodItem = hydrateConsumedFoodItem(
+              foodItem.getData(),
+            );
+            saveConsumedFoodItem(entryId, mealIdx, consumedFoodItem);
+          });
+        };
+
         return (
           <JournalContext.Provider
             value={{
@@ -175,6 +218,7 @@ const JournalProvider = ({children}: Props): React.ReactElement<Props> => {
               deleteMeal,
               saveConsumedFoodItem,
               deleteConsumedFoodItem,
+              applyFoodItemGroup,
             }}>
             {children}
           </JournalContext.Provider>

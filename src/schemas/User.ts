@@ -1,6 +1,8 @@
 import {UUID} from 'bson';
 import Realm from 'realm';
 
+import FoodItem from 'schemas/FoodItem';
+import FoodItemGroup from 'schemas/FoodItemGroup';
 import Height from 'schemas/Height';
 import MacroDefinition from 'schemas/MacroDefinition';
 import WeighIn from 'schemas/WeighIn';
@@ -208,8 +210,16 @@ class User extends Realm.Object {
     }
   }
 
-  addFoodItem(foodItemId: UUID) {
-    this.foodItems.push(foodItemId);
+  addFoodItem(foodItem: FoodItem) {
+    if (!this.foodItems.find(uuid => foodItem._id.equals(uuid))) {
+      this.foodItems.push(foodItem._id);
+    }
+  }
+
+  addFoodItemGroup(foodItemGroup: FoodItemGroup) {
+    if (!this.foodItemGroups.find(uuid => foodItemGroup._id.equals(uuid))) {
+      this.foodItemGroups.push(foodItemGroup._id);
+    }
   }
 
   static isValidBirthdayString(bday: string): boolean {

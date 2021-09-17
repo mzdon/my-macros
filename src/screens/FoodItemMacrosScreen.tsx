@@ -7,9 +7,10 @@ import BaseNumberInput from 'components/BaseNumberInput';
 import Spacer from 'components/Spacer';
 import {ITEM_CONSUMED} from 'navigation/Constants';
 import {FoodItemMacrosNavigationProp} from 'navigation/RouteTypes';
-import {useFoodContext} from 'providers/FoodProvider';
+import {useFoodItemContext} from 'providers/FoodItemProvider';
 import {useSimpleStateUpdater} from 'utils/State';
 import styles from 'styles';
+import {useUpdateFoodCrudRoute} from 'utils/Navigation';
 
 const _styles = StyleSheet.create({
   buttonContainer: {flexDirection: 'row', justifyContent: 'space-between'},
@@ -17,8 +18,9 @@ const _styles = StyleSheet.create({
 
 const FoodItemMacrosScreen = (): React.ReactElement => {
   const navigation = useNavigation<FoodItemMacrosNavigationProp>();
+  const updateFoodCrudRoute = useUpdateFoodCrudRoute(navigation);
 
-  const {foodItemData, saveFoodItem} = useFoodContext();
+  const {foodItemData, saveFoodItem} = useFoodItemContext();
 
   const [state, updater] = useSimpleStateUpdater({
     carbs: foodItemData?.carbs || 0,
@@ -30,8 +32,8 @@ const FoodItemMacrosScreen = (): React.ReactElement => {
 
   const onNext = React.useCallback(() => {
     saveFoodItem(state);
-    navigation.navigate(ITEM_CONSUMED);
-  }, [saveFoodItem, state, navigation]);
+    updateFoodCrudRoute(ITEM_CONSUMED);
+  }, [saveFoodItem, state, updateFoodCrudRoute]);
 
   const updateCarbs = updater<number>('carbs');
   const updateProtein = updater<number>('protein');
