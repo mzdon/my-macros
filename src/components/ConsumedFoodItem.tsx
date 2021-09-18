@@ -22,9 +22,14 @@ const ConsumedFoodItemComponent = ({
   const itemName = item?.itemName || initItem?.item.description;
   const quantity = item?.quantity || initItem?.quantity;
   const uom = item?.unitOfMeasurement || initItem?.unitOfMeasurement;
+  const calories = item?.calories || initItem?.item.calories;
+  const carb = item?.carbs || initItem?.item.carbs;
+  const protein = item?.protein || initItem?.item.protein;
+  const fat = item?.fat || initItem?.item.fat;
   return (
     <>
       <Text>{`${itemName} - ${quantity}${uom}`}</Text>
+      <Text>{`${calories}cal ${carb}c ${protein}p ${fat}f`}</Text>
     </>
   );
 };

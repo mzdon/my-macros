@@ -17,7 +17,6 @@ export const useUpdateFoodCrudRoute = (
       params: Partial<PrivateStackParamList['FoodCrud']> = {},
     ) => {
       const state = navigation.getState();
-      console.log(state.routes);
       const parentNavigation = navigation.getParent();
       if (parentNavigation) {
         parentNavigation.dispatch(navState => {
@@ -45,8 +44,6 @@ export const useUpdateFoodCrudRoute = (
             },
           };
 
-          console.log(newFoodCrudRoute.state);
-
           const newState = {
             ...navState,
             routes: [
@@ -55,8 +52,6 @@ export const useUpdateFoodCrudRoute = (
               ...navState.routes.slice(foodCrudRouteIndex + 1),
             ],
           };
-
-          console.log(newState);
 
           return CommonActions.reset(newState);
         });

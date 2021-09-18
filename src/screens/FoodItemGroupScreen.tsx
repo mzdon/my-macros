@@ -44,6 +44,12 @@ const FoodItemGroupScreen = () => {
     saveFoodGroup(description);
   }, [description, saveFoodGroup]);
 
+  React.useLayoutEffect(() => {
+    navigation.setOptions({
+      headerRight: () => <Button title="Save" onPress={onSave} />,
+    });
+  }, [navigation, onSave]);
+
   return (
     <View style={styles.screen}>
       <Text>{`${foodGroupData?._id ? 'Edit' : 'New'} Item Group`}</Text>
@@ -62,10 +68,6 @@ const FoodItemGroupScreen = () => {
       {foodGroupData?.foodItems.map((item, idx) => (
         <ConsumedFoodItem key={`consumedItem-${idx}`} initItem={item} />
       ))}
-      <View style={styles.horizontalContainer}>
-        <Button title="Back" onPress={navigation.goBack} />
-        <Button title="Save" onPress={onSave} />
-      </View>
     </View>
   );
 };

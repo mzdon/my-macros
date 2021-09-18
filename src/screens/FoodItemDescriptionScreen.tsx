@@ -42,6 +42,12 @@ const FoodItemDescriptionScreen = () => {
     updateFoodCrudRoute(FOOD_ITEM_MACROS);
   }, [updateFoodItemData, state, updateFoodCrudRoute]);
 
+  React.useLayoutEffect(() => {
+    navigation.setOptions({
+      headerRight: () => <Button title="Next" onPress={onNext} />,
+    });
+  }, [navigation, onNext]);
+
   // TODO: Warn if a food item exists with the same description
   const updateDescription = updater('description');
   const updateServingSize = updater<number>('servingSize');
@@ -92,10 +98,6 @@ const FoodItemDescriptionScreen = () => {
         onChangeText={updateCalories}
       />
       <Spacer />
-      <View style={styles.horizontalContainer}>
-        <Button title="Back" onPress={navigation.goBack} />
-        <Button title="Next" onPress={onNext} />
-      </View>
     </View>
   );
 };

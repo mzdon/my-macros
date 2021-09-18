@@ -1,7 +1,7 @@
 import React from 'react';
 
 import {useNavigation, useRoute} from '@react-navigation/native';
-import {Button, Text} from 'react-native';
+import {Button, Text, View} from 'react-native';
 
 import BaseTextInput from 'components/BaseTextInput';
 import {
@@ -9,12 +9,14 @@ import {
   AddMealModalRouteProp,
 } from 'navigation/RouteTypes';
 import {useJournalContext} from 'providers/JournalProvider';
+import styles from 'styles';
 
 const AddMealScreen = () => {
-  const {saveMeal} = useJournalContext();
   const navigation = useNavigation<AddMealModalNavigationProp>();
   const route = useRoute<AddMealModalRouteProp>();
   const {date, mealIndex} = route.params;
+
+  const {saveMeal} = useJournalContext();
 
   const called = React.useRef(false);
   const onAddMeal = React.useCallback(
@@ -43,16 +45,22 @@ const AddMealScreen = () => {
     [onAddMeal, description],
   );
 
+  React.useLayoutEffect(() => {
+    navigation.setOptions({
+      headerBackTitle: '',
+      headerRight: () => <Button title="Save" onPress={onAddCustom} />,
+    });
+  }, [navigation, onAddCustom]);
+
   return (
-    <>
+    <View style={styles.screen}>
       <Text>{`Add Meal on ${date}`}</Text>
       <Button title="Breakfast" onPress={onAddBreakfast} />
       <Button title="Lunch" onPress={onAddLunch} />
       <Button title="Dinner" onPress={onAddDinner} />
       <Button title="Snack" onPress={onAddSnack} />
       <BaseTextInput value={description} onChangeText={setDescription} />
-      <Button title="Save" onPress={onAddCustom} />
-    </>
+    </View>
   );
 };
 

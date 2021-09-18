@@ -1,7 +1,7 @@
 import React from 'react';
 
 import {CommonActions, useNavigation} from '@react-navigation/native';
-import {Button, StyleSheet, Text, View} from 'react-native';
+import {Button, Text, View} from 'react-native';
 
 import BaseNumberInput from 'components/BaseNumberInput';
 import Spacer from 'components/Spacer';
@@ -14,10 +14,6 @@ import {useSimpleStateUpdater} from 'utils/State';
 import {FoodItemType, isFoodOrDrink} from 'utils/FoodItem';
 import styles from 'styles';
 import {useFoodGroupContext} from 'providers/FoodGroupProvider';
-
-const _styles = StyleSheet.create({
-  buttonContainer: {flexDirection: 'row', justifyContent: 'space-between'},
-});
 
 const UOM_VALUES = {
   [FoodItemType.Food]: [
@@ -48,7 +44,6 @@ const ItemConsumed = (): React.ReactElement => {
     saveConsumedFoodItem(state);
     const parentNavigator = navigation.getParent();
     if (parentNavigator && !foodGroupData) {
-      console.log('parentNavigator.goBack');
       parentNavigator.goBack();
     } else {
       const navState = navigation.getState();
@@ -58,6 +53,12 @@ const ItemConsumed = (): React.ReactElement => {
       navigation.dispatch(CommonActions.navigate({name: FOOD_ITEM_GROUP, key}));
     }
   }, [foodGroupData, navigation, saveConsumedFoodItem, state]);
+
+  React.useLayoutEffect(() => {
+    navigation.setOptions({
+      headerRight: () => <Button title="Save" onPress={onSave} />,
+    });
+  }, [navigation, onSave]);
 
   const updateQuantity = updater<number>('quantity');
   const onUpdateUnitOfMeasurement =
@@ -96,10 +97,6 @@ const ItemConsumed = (): React.ReactElement => {
         onChange={updateUnitOfMeasurement}
       />
       <Spacer />
-      <View style={_styles.buttonContainer}>
-        <Button title="Back" onPress={navigation.goBack} />
-        <Button title="Save" onPress={onSave} />
-      </View>
     </View>
   );
 };

@@ -1,7 +1,7 @@
 import React from 'react';
 
 import {useNavigation} from '@react-navigation/core';
-import {Button, StyleSheet, Text, View} from 'react-native';
+import {Button, Text, View} from 'react-native';
 
 import BaseNumberInput from 'components/BaseNumberInput';
 import Spacer from 'components/Spacer';
@@ -11,10 +11,6 @@ import {useFoodItemContext} from 'providers/FoodItemProvider';
 import {useSimpleStateUpdater} from 'utils/State';
 import styles from 'styles';
 import {useUpdateFoodCrudRoute} from 'utils/Navigation';
-
-const _styles = StyleSheet.create({
-  buttonContainer: {flexDirection: 'row', justifyContent: 'space-between'},
-});
 
 const FoodItemMacrosScreen = (): React.ReactElement => {
   const navigation = useNavigation<FoodItemMacrosNavigationProp>();
@@ -34,6 +30,12 @@ const FoodItemMacrosScreen = (): React.ReactElement => {
     saveFoodItem(state);
     updateFoodCrudRoute(ITEM_CONSUMED);
   }, [saveFoodItem, state, updateFoodCrudRoute]);
+
+  React.useLayoutEffect(() => {
+    navigation.setOptions({
+      headerRight: () => <Button title="Next" onPress={onNext} />,
+    });
+  }, [navigation, onNext]);
 
   const updateCarbs = updater<number>('carbs');
   const updateProtein = updater<number>('protein');
@@ -80,10 +82,6 @@ const FoodItemMacrosScreen = (): React.ReactElement => {
         onChangeText={updateFiber}
       />
       <Spacer />
-      <View style={_styles.buttonContainer}>
-        <Button title="Back" onPress={navigation.goBack} />
-        <Button title="Next" onPress={onNext} />
-      </View>
     </View>
   );
 };
