@@ -13,7 +13,6 @@ import {UnitOfMeasurement} from 'types/UnitOfMeasurement';
 import {useSimpleStateUpdater} from 'utils/State';
 import {useFoodItemContext} from 'providers/FoodItemProvider';
 import styles from 'styles';
-import {useUpdateFoodCrudRoute} from 'utils/Navigation';
 
 const SERVING_UMO_VALUES = [
   UnitOfMeasurement.Grams,
@@ -24,8 +23,6 @@ const SERVING_UMO_VALUES = [
 
 const FoodItemDescriptionScreen = () => {
   const navigation = useNavigation<FoodItemDescriptionNavigationProp>();
-  const updateFoodCrudRoute = useUpdateFoodCrudRoute(navigation);
-
   const {foodItemData, updateFoodItemData} = useFoodItemContext();
 
   const [state, updater] = useSimpleStateUpdater({
@@ -39,8 +36,8 @@ const FoodItemDescriptionScreen = () => {
 
   const onNext = React.useCallback(() => {
     updateFoodItemData(state);
-    updateFoodCrudRoute(FOOD_ITEM_MACROS);
-  }, [updateFoodItemData, state, updateFoodCrudRoute]);
+    navigation.navigate(FOOD_ITEM_MACROS);
+  }, [updateFoodItemData, state, navigation]);
 
   React.useLayoutEffect(() => {
     navigation.setOptions({

@@ -1,17 +1,16 @@
 import React from 'react';
 
 import {Button, Text, View} from 'react-native';
-import {useNavigation} from '@react-navigation/native';
 
 import CurrentMacros from 'components/CurrentMacros';
 import {USER_INFO} from 'navigation/Constants';
-import {ProfileScreenNavigationProp} from 'navigation/RouteTypes';
 import {useAuthContext} from 'providers/AuthProvider';
 import {useUserContext} from 'providers/UserProvider';
 import styles from 'styles';
+import {useParentNavigation} from 'utils/Navigation';
 
 const ProfileScreen = () => {
-  const navigation = useNavigation<ProfileScreenNavigationProp>();
+  const navigation = useParentNavigation();
   const {user} = useUserContext();
   const {signOut} = useAuthContext();
 
@@ -27,7 +26,7 @@ const ProfileScreen = () => {
       {!!birthday && <Text>{`Birthday: ${birthday}`}</Text>}
       {!!height && <Text>{height}</Text>}
       {!!weight && <Text>{weight}</Text>}
-      <Button title="Update" onPress={() => navigation.navigate(USER_INFO)} />
+      <Button title="Update" onPress={() => navigation?.navigate(USER_INFO)} />
       <Button title="Sign Out" onPress={signOut} />
     </View>
   );

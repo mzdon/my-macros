@@ -4,6 +4,7 @@ import {createStackNavigator} from '@react-navigation/stack';
 
 import {withScreenEnhancers} from 'navigation/Common';
 import * as NavConstants from 'navigation/Constants';
+import Drawer from 'navigation/Drawer';
 import FoodCrudStack from 'navigation/FoodCrudStack';
 import {PrivateStackParamList} from 'navigation/RouteTypes';
 import JournalProvider from 'providers/JournalProvider';
@@ -11,9 +12,6 @@ import RealmProvider from 'providers/RealmProvider';
 import UserProvider, {useUserContext} from 'providers/UserProvider';
 import User from 'schemas/User';
 import AddMealScreen from 'screens/AddMealScreen';
-import DateSelectorScreen from 'screens/DateSelectorScreen';
-import FoodJournalScreen from 'screens/FoodJournalScreen';
-import ProfileScreen from 'screens/ProfileScreen';
 import UserInfoScreen from 'screens/userInfo/UserInfoScreen';
 
 const getInitialRouteName = (user: User | undefined) => {
@@ -30,20 +28,9 @@ const PrivateStack = () => {
     <Stack.Navigator initialRouteName={getInitialRouteName(user)}>
       <Stack.Group>
         <Stack.Screen
-          key="journal"
-          name={NavConstants.JOURNAL}
-          initialParams={{date: new Date().toDateString()}}
-          component={withScreenEnhancers(FoodJournalScreen)}
-        />
-        <Stack.Screen
-          key="date-selector"
-          name={NavConstants.DATE_SELECTOR}
-          component={withScreenEnhancers(DateSelectorScreen)}
-        />
-        <Stack.Screen
-          key="profile"
-          name={NavConstants.PROFILE}
-          component={withScreenEnhancers(ProfileScreen)}
+          key="drawer"
+          name={NavConstants.DRAWER}
+          component={Drawer}
         />
         <Stack.Screen
           key="user-info"

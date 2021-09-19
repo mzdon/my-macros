@@ -5,15 +5,15 @@ import {Button, Text, View} from 'react-native';
 
 import BaseTextInput from 'components/BaseTextInput';
 import {
-  AddMealModalNavigationProp,
-  AddMealModalRouteProp,
+  AddMealScreenNavigationProp,
+  AddMealScreenRouteProp,
 } from 'navigation/RouteTypes';
 import {useJournalContext} from 'providers/JournalProvider';
 import styles from 'styles';
 
 const AddMealScreen = () => {
-  const navigation = useNavigation<AddMealModalNavigationProp>();
-  const route = useRoute<AddMealModalRouteProp>();
+  const navigation = useNavigation<AddMealScreenNavigationProp>();
+  const route = useRoute<AddMealScreenRouteProp>();
   const {date, mealIndex} = route.params;
 
   const {saveMeal} = useJournalContext();

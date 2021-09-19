@@ -1,6 +1,7 @@
 export const ADD_FOOD_ITEM = 'AddFoodItem';
 export const ADD_MEAL = 'AddMeal';
 export const DATE_SELECTOR = 'DateSelector';
+export const DRAWER = 'Drawer';
 export const FOOD_CRUD = 'FoodCrud';
 export const ITEM_CONSUMED = 'ItemConsumed';
 export const JOURNAL = 'Journal';

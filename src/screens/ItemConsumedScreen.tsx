@@ -1,6 +1,6 @@
 import React from 'react';
 
-import {CommonActions, useNavigation} from '@react-navigation/native';
+import {useNavigation} from '@react-navigation/native';
 import {Button, Text, View} from 'react-native';
 
 import BaseNumberInput from 'components/BaseNumberInput';
@@ -14,6 +14,7 @@ import {useSimpleStateUpdater} from 'utils/State';
 import {FoodItemType, isFoodOrDrink} from 'utils/FoodItem';
 import styles from 'styles';
 import {useFoodGroupContext} from 'providers/FoodGroupProvider';
+import {useFoodCrudNavigationContext} from 'providers/FoodCrudNavigationProvider';
 
 const UOM_VALUES = {
   [FoodItemType.Food]: [
@@ -30,6 +31,7 @@ const UOM_VALUES = {
 
 const ItemConsumed = (): React.ReactElement => {
   const navigation = useNavigation<ItemConsumedNavigationProp>();
+  const foodCrudNavigation = useFoodCrudNavigationContext();
 
   const {foodGroupData} = useFoodGroupContext();
   const {foodItemData, saveConsumedFoodItem} = useFoodItemContext();
@@ -42,17 +44,17 @@ const ItemConsumed = (): React.ReactElement => {
 
   const onSave = React.useCallback(() => {
     saveConsumedFoodItem(state);
-    const parentNavigator = navigation.getParent();
-    if (parentNavigator && !foodGroupData) {
-      parentNavigator.goBack();
+    if (!foodGroupData) {
+      foodCrudNavigation.goBack();
     } else {
-      const navState = navigation.getState();
-      const key =
-        navState.routes.find(route => route.name === FOOD_ITEM_GROUP)?.key ||
-        '';
-      navigation.dispatch(CommonActions.navigate({name: FOOD_ITEM_GROUP, key}));
+      // const navState = navigation.getState();
+      // const key =
+      //   navState.routes.find(route => route.name === FOOD_ITEM_GROUP)?.key ||
+      //   '';
+      // navigation.dispatch(CommonActions.navigate({name: FOOD_ITEM_GROUP, key}));
+      foodCrudNavigation.navigate(FOOD_ITEM_GROUP);
     }
-  }, [foodGroupData, navigation, saveConsumedFoodItem, state]);
+  }, [foodCrudNavigation, foodGroupData, saveConsumedFoodItem, state]);
 
   React.useLayoutEffect(() => {
     navigation.setOptions({

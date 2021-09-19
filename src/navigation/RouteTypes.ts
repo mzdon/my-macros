@@ -10,7 +10,7 @@ export type PrivateStackParamList = {
     date: string;
     mealIndex?: number;
   };
-  DateSelector: undefined;
+  Drawer: undefined;
   FoodCrud: NavigatorScreenParams<FoodCrudStackParamList> & {
     journalEntryId?: string;
     mealIndex?: number;
@@ -19,10 +19,6 @@ export type PrivateStackParamList = {
     foodGroupId?: string;
     newFoodGroup?: boolean;
   };
-  Journal: {
-    date: string;
-  };
-  Profile: undefined;
   UserInfo: undefined;
 };
 
@@ -34,6 +30,16 @@ export type FoodCrudStackParamList = {
   ItemConsumed: undefined;
 };
 
+export type DrawerParamList = {
+  Journal: {
+    date: string;
+  };
+  DateSelector: {
+    currentDate: string | undefined;
+  };
+  Profile: undefined;
+};
+
 // These route names are defined in navigation/Constants
 
 export type WelcomeScreenNavigationProp = StackNavigationProp<
@@ -42,18 +48,20 @@ export type WelcomeScreenNavigationProp = StackNavigationProp<
 >;
 
 export type DateSelectorScreenNavigationProp = StackNavigationProp<
-  PrivateStackParamList,
+  DrawerParamList,
+  'DateSelector'
+>;
+
+export type DateSelectorScreenRouteProp = RouteProp<
+  DrawerParamList,
   'DateSelector'
 >;
 
 export type JournalScreenNavigationProp = StackNavigationProp<
-  PrivateStackParamList,
+  DrawerParamList,
   'Journal'
 >;
-export type JournalScreenRouteProp = RouteProp<
-  PrivateStackParamList,
-  'Journal'
->;
+export type JournalScreenRouteProp = RouteProp<DrawerParamList, 'Journal'>;
 
 export type UserInfoScreenNavigationProp = StackNavigationProp<
   PrivateStackParamList,
@@ -61,23 +69,28 @@ export type UserInfoScreenNavigationProp = StackNavigationProp<
 >;
 
 export type ProfileScreenNavigationProp = StackNavigationProp<
-  PrivateStackParamList,
+  DrawerParamList,
   'Profile'
 >;
 
-export type AddMealModalNavigationProp = StackNavigationProp<
+export type ProfileScreenRouteProp = RouteProp<DrawerParamList, 'Profile'>;
+
+export type AddMealScreenNavigationProp = StackNavigationProp<
   PrivateStackParamList,
   'AddMeal'
 >;
 
-export type AddMealModalRouteProp = RouteProp<PrivateStackParamList, 'AddMeal'>;
+export type AddMealScreenRouteProp = RouteProp<
+  PrivateStackParamList,
+  'AddMeal'
+>;
 
-export type FoodCrudModalNavigationProp = StackNavigationProp<
+export type FoodCrudScreenNavigationProp = StackNavigationProp<
   PrivateStackParamList,
   'FoodCrud'
 >;
 
-export type FoodCrudModalRouteProp = RouteProp<
+export type FoodCrudScreenRouteProp = RouteProp<
   PrivateStackParamList,
   'FoodCrud'
 >;
@@ -131,3 +144,10 @@ export type ItemConsumedRouteProp = RouteProp<
   FoodCrudStackParamList,
   'ItemConsumed'
 >;
+
+export type DrawerNavigationProp = StackNavigationProp<
+  PrivateStackParamList,
+  'Drawer'
+>;
+
+export type DrawerRouteProp = RouteProp<PrivateStackParamList, 'Drawer'>;

@@ -16,30 +16,30 @@ import {useFoodGroupContext} from 'providers/FoodGroupProvider';
 import FoodItem from 'schemas/FoodItem';
 import FoodItemGroup from 'schemas/FoodItemGroup';
 import styles from 'styles';
-import {useUpdateFoodCrudRoute} from 'utils/Navigation';
+import {useFoodCrudNavigationContext} from 'providers/FoodCrudNavigationProvider';
 
 const LookupOrAddScreen = (): React.ReactElement => {
   const navigation = useNavigation<LookupOrAddNavigationProp>();
-  const updateFoodCrudRoute = useUpdateFoodCrudRoute(navigation);
+  const foodCrudNavigation = useFoodCrudNavigationContext();
   const {applyFoodItemGroup} = useFoodGroupContext();
 
   const addNewFoodItem = React.useCallback(
-    () => updateFoodCrudRoute(FOOD_ITEM_DESCRIPTION),
-    [updateFoodCrudRoute],
+    () => navigation.navigate(FOOD_ITEM_DESCRIPTION),
+    [navigation],
   );
   const selectFoodItem = React.useCallback(
     (foodItem: FoodItem) => {
-      updateFoodCrudRoute(ITEM_CONSUMED, {
+      foodCrudNavigation.navigate(ITEM_CONSUMED, {
         foodItemId: foodItem._id.toHexString(),
       });
     },
-    [updateFoodCrudRoute],
+    [foodCrudNavigation],
   );
   const addNewFoodItemGroup = React.useCallback(() => {
-    updateFoodCrudRoute(FOOD_ITEM_GROUP, {
+    foodCrudNavigation.navigate(FOOD_ITEM_GROUP, {
       newFoodGroup: true,
     });
-  }, [updateFoodCrudRoute]);
+  }, [foodCrudNavigation]);
   const selectFoodItemGroup = React.useCallback(
     (foodItemGroup: FoodItemGroup) => {
       applyFoodItemGroup(foodItemGroup);

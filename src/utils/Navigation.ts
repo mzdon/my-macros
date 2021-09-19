@@ -1,6 +1,10 @@
 import React from 'react';
 
-import {CommonActions, NavigationProp} from '@react-navigation/native';
+import {
+  CommonActions,
+  NavigationProp,
+  useNavigation,
+} from '@react-navigation/native';
 
 import {FOOD_CRUD} from 'navigation/Constants';
 import {
@@ -59,4 +63,10 @@ export const useUpdateFoodCrudRoute = (
     },
     [navigation],
   );
+};
+
+export const useParentNavigation = () => {
+  const navigation = useNavigation();
+  const stackNavigation = navigation.getParent();
+  return stackNavigation;
 };

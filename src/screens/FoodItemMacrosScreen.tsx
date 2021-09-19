@@ -10,11 +10,9 @@ import {FoodItemMacrosNavigationProp} from 'navigation/RouteTypes';
 import {useFoodItemContext} from 'providers/FoodItemProvider';
 import {useSimpleStateUpdater} from 'utils/State';
 import styles from 'styles';
-import {useUpdateFoodCrudRoute} from 'utils/Navigation';
 
 const FoodItemMacrosScreen = (): React.ReactElement => {
   const navigation = useNavigation<FoodItemMacrosNavigationProp>();
-  const updateFoodCrudRoute = useUpdateFoodCrudRoute(navigation);
 
   const {foodItemData, saveFoodItem} = useFoodItemContext();
 
@@ -28,8 +26,8 @@ const FoodItemMacrosScreen = (): React.ReactElement => {
 
   const onNext = React.useCallback(() => {
     saveFoodItem(state);
-    updateFoodCrudRoute(ITEM_CONSUMED);
-  }, [saveFoodItem, state, updateFoodCrudRoute]);
+    navigation.navigate(ITEM_CONSUMED);
+  }, [navigation, saveFoodItem, state]);
 
   React.useLayoutEffect(() => {
     navigation.setOptions({

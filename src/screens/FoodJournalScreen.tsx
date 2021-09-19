@@ -6,38 +6,24 @@ import {Button, View} from 'react-native';
 import JouranlEntryList from 'components/JournalEntryList';
 import Spacer from 'components/Spacer';
 import Stats from 'components/Stats';
+import {ADD_MEAL, ITEM_CONSUMED, LOOKUP_OR_ADD} from 'navigation/Constants';
 import {
-  ADD_MEAL,
-  DATE_SELECTOR,
-  FOOD_CRUD,
-  ITEM_CONSUMED,
-  LOOKUP_OR_ADD,
-} from 'navigation/Constants';
-import {
-  JournalScreenNavigationProp,
+  FoodCrudScreenNavigationProp,
   JournalScreenRouteProp,
 } from 'navigation/RouteTypes';
+import {useFoodCrudNavigationContext} from 'providers/FoodCrudNavigationProvider';
 import {useJournalContext} from 'providers/JournalProvider';
 import {useUserContext} from 'providers/UserProvider';
 import styles from 'styles';
 import JournalEntry from 'schemas/JournalEntry';
-
-const ChangeDateButton = () => {
-  const navigation = useNavigation<JournalScreenNavigationProp>();
-  return (
-    <Button
-      title="Change Date"
-      onPress={() => navigation.navigate(DATE_SELECTOR)}
-    />
-  );
-};
+import {useParentNavigation} from 'utils/Navigation';
 
 interface Props {
   date: string;
 }
 
 const AddMealButton = ({date}: Props) => {
-  const navigation = useNavigation<JournalScreenNavigationProp>();
+  const navigation = useNavigation<FoodCrudScreenNavigationProp>();
   return (
     <Button
       title="Add Meal"
@@ -52,7 +38,8 @@ const FoodJournalScreen = () => {
   } = useRoute<JournalScreenRouteProp>();
   const {user} = useUserContext();
   const {todaysEntry, deleteMeal, deleteConsumedFoodItem} = useJournalContext();
-  const navigation = useNavigation<JournalScreenNavigationProp>();
+  const navigation = useParentNavigation();
+  const foodCrudNavigation = useFoodCrudNavigationContext();
 
   const AddMealButtonFunction = React.useCallback(
     () => <AddMealButton date={date} />,
@@ -60,26 +47,24 @@ const FoodJournalScreen = () => {
   );
 
   React.useLayoutEffect(() => {
-    navigation.setOptions({
+    foodCrudNavigation.setOptions({
       title: date,
-      headerLeft: () => <ChangeDateButton />,
       headerRight: AddMealButtonFunction,
     });
-  }, [navigation, date, AddMealButtonFunction]);
+  }, [date, AddMealButtonFunction, foodCrudNavigation]);
 
   const addItem = React.useCallback(
     (journalEntryId: JournalEntry['_id'], mealIndex: number) =>
-      navigation.navigate(FOOD_CRUD, {
-        screen: LOOKUP_OR_ADD,
+      foodCrudNavigation.navigate(LOOKUP_OR_ADD, {
         journalEntryId: journalEntryId.toHexString(),
         mealIndex,
       }),
-    [navigation],
+    [foodCrudNavigation],
   );
 
   const editMeal = React.useCallback(
     (journalEntryDate: Date, mealIndex: number) =>
-      navigation.navigate(ADD_MEAL, {
+      navigation?.navigate(ADD_MEAL, {
         date: journalEntryDate.toDateString(),
         mealIndex,
       }),
@@ -92,13 +77,12 @@ const FoodJournalScreen = () => {
       mealIndex: number,
       consumedItemIndex: number,
     ) =>
-      navigation.navigate(FOOD_CRUD, {
-        screen: ITEM_CONSUMED,
+      foodCrudNavigation.navigate(ITEM_CONSUMED, {
         journalEntryId: journalEntryId.toHexString(),
         mealIndex,
         consumedItemIndex,
       }),
-    [navigation],
+    [foodCrudNavigation],
   );
 
   const macros = user.getCurrentMacros();

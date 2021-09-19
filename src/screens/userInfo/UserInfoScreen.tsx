@@ -4,7 +4,7 @@ import {useNavigation} from '@react-navigation/native';
 import {Button, LayoutAnimation, StyleSheet, Text, View} from 'react-native';
 
 import Spacer from 'components/Spacer';
-import {JOURNAL} from 'navigation/Constants';
+import {DRAWER} from 'navigation/Constants';
 import {UserInfoScreenNavigationProp} from 'navigation/RouteTypes';
 import {useUserContext} from 'providers/UserProvider';
 import MacroDefinition from 'schemas/MacroDefinition';
@@ -64,7 +64,7 @@ const UserInfoScreen = () => {
       if (navigation.canGoBack()) {
         navigation.goBack();
       } else {
-        navigation.navigate(JOURNAL, {date: new Date().toDateString()});
+        navigation.replace(DRAWER);
       }
     }
   }, [onSaveUser, updateStep, step, navigation]);

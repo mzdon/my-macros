@@ -1,14 +1,16 @@
 import React from 'react';
 
-import {useRoute} from '@react-navigation/core';
+import {useNavigation, useRoute} from '@react-navigation/core';
 import {createStackNavigator} from '@react-navigation/stack';
 
 import {withScreenEnhancers} from 'navigation/Common';
 import * as NavConstants from 'navigation/Constants';
 import {
-  FoodCrudModalRouteProp,
+  FoodCrudScreenRouteProp,
+  FoodCrudScreenNavigationProp,
   FoodCrudStackParamList,
 } from 'navigation/RouteTypes';
+import FoodCrudNavigationProvider from 'providers/FoodCrudNavigationProvider';
 import FoodGroupProvider, {
   useFoodGroupContext,
 } from 'providers/FoodGroupProvider';
@@ -23,7 +25,7 @@ import LookupOrAddScreen from 'screens/LookupOrAddScreen';
 const Stack = createStackNavigator<FoodCrudStackParamList>();
 
 const FoodCrudStack = () => {
-  const route = useRoute<FoodCrudModalRouteProp>();
+  const route = useRoute<FoodCrudScreenRouteProp>();
   const {
     journalEntryId,
     mealIndex,
@@ -73,20 +75,23 @@ const FoodCrudStack = () => {
 };
 
 const FoodCrudStack2 = () => {
-  const route = useRoute<FoodCrudModalRouteProp>();
+  const navigation = useNavigation<FoodCrudScreenNavigationProp>();
+  const route = useRoute<FoodCrudScreenRouteProp>();
   const {journalEntryId, mealIndex, foodGroupId, newFoodGroup} = route.params;
 
   const {applyFoodItemGroup, saveConsumedFoodItem} = useJournalContext();
   return (
-    <FoodGroupProvider
-      newFoodGroup={!!newFoodGroup}
-      journalEntryId={journalEntryId}
-      mealIndex={mealIndex}
-      foodGroupId={foodGroupId}
-      applyFoodItemGroup={applyFoodItemGroup}
-      saveConsumedFoodItem={saveConsumedFoodItem}>
-      <FoodCrudStack />
-    </FoodGroupProvider>
+    <FoodCrudNavigationProvider navigation={navigation}>
+      <FoodGroupProvider
+        newFoodGroup={!!newFoodGroup}
+        journalEntryId={journalEntryId}
+        mealIndex={mealIndex}
+        foodGroupId={foodGroupId}
+        applyFoodItemGroup={applyFoodItemGroup}
+        saveConsumedFoodItem={saveConsumedFoodItem}>
+        <FoodCrudStack />
+      </FoodGroupProvider>
+    </FoodCrudNavigationProvider>
   );
 };
 

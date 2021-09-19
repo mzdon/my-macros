@@ -12,11 +12,11 @@ import {FoodItemGroupNavigationProp} from 'navigation/RouteTypes';
 import {useFoodGroupContext} from 'providers/FoodGroupProvider';
 import FoodItem from 'schemas/FoodItem';
 import styles from 'styles';
-import {useUpdateFoodCrudRoute} from 'utils/Navigation';
+import {useFoodCrudNavigationContext} from 'providers/FoodCrudNavigationProvider';
 
 const FoodItemGroupScreen = () => {
   const navigation = useNavigation<FoodItemGroupNavigationProp>();
-  const updateFoodCrudRoute = useUpdateFoodCrudRoute(navigation);
+  const foodCrudNavigation = useFoodCrudNavigationContext();
 
   const {foodGroupData, saveFoodGroup} = useFoodGroupContext();
 
@@ -26,23 +26,24 @@ const FoodItemGroupScreen = () => {
 
   const addNewFoodItem = React.useCallback(
     () =>
-      updateFoodCrudRoute(FOOD_ITEM_DESCRIPTION, {
+      foodCrudNavigation.navigate(FOOD_ITEM_DESCRIPTION, {
         foodItemId: undefined,
       }),
-    [updateFoodCrudRoute],
+    [foodCrudNavigation],
   );
   const selectFoodItem = React.useCallback(
     (foodItem: FoodItem) => {
-      updateFoodCrudRoute(ITEM_CONSUMED, {
+      foodCrudNavigation.navigate(ITEM_CONSUMED, {
         foodItemId: foodItem._id.toHexString(),
       });
     },
-    [updateFoodCrudRoute],
+    [foodCrudNavigation],
   );
 
   const onSave = React.useCallback(() => {
     saveFoodGroup(description);
-  }, [description, saveFoodGroup]);
+    foodCrudNavigation.goBack();
+  }, [description, foodCrudNavigation, saveFoodGroup]);
 
   React.useLayoutEffect(() => {
     navigation.setOptions({
