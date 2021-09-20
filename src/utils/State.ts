@@ -2,7 +2,11 @@ import React from 'react';
 
 export function useSimpleStateUpdater<S>(
   initialState: S,
-): [S, <T = string>(key: keyof S) => (val: T) => void] {
+): [
+  S,
+  <T = string>(key: keyof S) => (val: T) => void,
+  React.Dispatch<React.SetStateAction<S>>,
+] {
   const [state, setState] = React.useState<S>(initialState);
 
   const updateState = (key: keyof S, value: any) => {
@@ -19,7 +23,7 @@ export function useSimpleStateUpdater<S>(
     return callback;
   }
 
-  return [state, useStateUpdater];
+  return [state, useStateUpdater, setState];
 }
 
 export function useUpdater<R = string>(

@@ -10,9 +10,9 @@ import Spacer from 'components/Spacer';
 import {FOOD_ITEM_MACROS} from 'navigation/Constants';
 import {FoodItemDescriptionNavigationProp} from 'navigation/RouteTypes';
 import {UnitOfMeasurement} from 'types/UnitOfMeasurement';
-import {useSimpleStateUpdater} from 'utils/State';
 import {useFoodItemContext} from 'providers/FoodItemProvider';
 import styles from 'styles';
+import {InitFoodItemData} from 'schemas/FoodItem';
 
 const SERVING_UMO_VALUES = [
   UnitOfMeasurement.Grams,
@@ -24,26 +24,29 @@ const SERVING_UMO_VALUES = [
 const FoodItemDescriptionScreen = () => {
   const navigation = useNavigation<FoodItemDescriptionNavigationProp>();
   const {foodItemData, updateFoodItemData} = useFoodItemContext();
-
-  const [state, updater] = useSimpleStateUpdater({
-    description: foodItemData?.description || '',
-    servingSize: foodItemData?.servingSize || 0,
-    servingUnitOfMeasurement:
-      foodItemData?.servingUnitOfMeasurement || UnitOfMeasurement.Grams,
-    servingSizeNote: foodItemData?.servingSizeNote || '',
-    calories: foodItemData?.calories || 0,
-  });
+  const {
+    description = '',
+    servingSize = 0,
+    servingUnitOfMeasurement = UnitOfMeasurement.Grams,
+    servingSizeNote = '',
+    calories = 0,
+  } = foodItemData || {};
 
   const onNext = React.useCallback(() => {
-    updateFoodItemData(state);
     navigation.navigate(FOOD_ITEM_MACROS);
-  }, [updateFoodItemData, state, navigation]);
+  }, [navigation]);
 
   React.useLayoutEffect(() => {
     navigation.setOptions({
       headerRight: () => <Button title="Next" onPress={onNext} />,
     });
   }, [navigation, onNext]);
+
+  function updater<T>(fieldName: keyof InitFoodItemData) {
+    return (value: T) => {
+      updateFoodItemData({[fieldName]: value});
+    };
+  }
 
   // TODO: Warn if a food item exists with the same description
   const updateDescription = updater('description');
@@ -64,19 +67,19 @@ const FoodItemDescriptionScreen = () => {
       <BaseTextInput
         label="Description"
         placeholder="New item description..."
-        value={state.description}
+        value={description}
         onChangeText={updateDescription}
       />
       <Spacer />
       <BaseNumberInput
         label="Serving Size"
         placeholder="What's the serving size?"
-        value={state.servingSize}
+        value={servingSize}
         onChangeText={updateServingSize}
       />
       <Spacer />
       <RadioButtons
-        value={state.servingUnitOfMeasurement}
+        value={servingUnitOfMeasurement}
         values={SERVING_UMO_VALUES}
         onChange={updateUnitOfMeasurement}
       />
@@ -84,14 +87,14 @@ const FoodItemDescriptionScreen = () => {
       <BaseTextInput
         label="Serving Size Note"
         placeholder="Aribitrary info like '3 cakes'"
-        value={state.servingSizeNote}
+        value={servingSizeNote}
         onChangeText={updateServingNote}
       />
       <Spacer />
       <BaseNumberInput
         label="Calories"
         placeholder="Calories"
-        value={state.calories}
+        value={calories}
         onChangeText={updateCalories}
       />
       <Spacer />

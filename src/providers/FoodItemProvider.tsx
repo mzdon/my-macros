@@ -8,6 +8,7 @@ import {useUserContext} from 'providers/UserProvider';
 import {InitConsumedFoodItemData} from 'schemas/ConsumedFoodItem';
 import FoodItem, {InitFoodItemData} from 'schemas/FoodItem';
 import JournalEntry from 'schemas/JournalEntry';
+import {UnitOfMeasurement} from 'types/UnitOfMeasurement';
 import {RecoverableError} from 'utils/Errors';
 import {useGetFoodItemById} from 'utils/Queries';
 
@@ -17,8 +18,8 @@ type ConsumedFoodItemDataProvided = Pick<
 >;
 
 export interface FoodItemContextValue {
-  foodItemData: Partial<InitFoodItemData> | null;
-  saveFoodItem: (data: Partial<InitFoodItemData>) => void;
+  foodItemData: InitFoodItemData | null;
+  saveFoodItem: () => void;
   updateFoodItemData: (data: Partial<InitFoodItemData>) => void;
   saveConsumedFoodItem: (
     consumedFoodItemData: ConsumedFoodItemDataProvided,
@@ -67,12 +68,15 @@ const FoodItemProvider = ({
   const getFoodItemById = useGetFoodItemById(realm);
 
   const [foodItemData, setFoodItemData] =
-    React.useState<Partial<InitFoodItemData> | null>(null);
+    React.useState<InitFoodItemData | null>(null);
 
   const updateFoodItemData = React.useCallback(
     (data: Partial<InitFoodItemData>) => {
+      if (!foodItemData) {
+        throw new RecoverableError('Food item data state not initialized yet');
+      }
       setFoodItemData({
-        ...(foodItemData || {}),
+        ...foodItemData,
         ...data,
       });
     },
@@ -111,7 +115,7 @@ const FoodItemProvider = ({
       return getFoodItemById(consumedItem.itemId);
     };
 
-    let data: Partial<InitFoodItemData>;
+    let data: InitFoodItemData;
     if (foodItemId) {
       // case [1], [4]
       data = getFoodItemById(foodItemId).getData();
@@ -130,7 +134,18 @@ const FoodItemProvider = ({
       data = foodItem.getData();
     } else {
       // case [3]
-      data = {};
+      data = {
+        description: '',
+        calories: 0,
+        carbs: 0,
+        protein: 0,
+        fat: 0,
+        sugar: 0,
+        fiber: 0,
+        servingSize: 0,
+        servingUnitOfMeasurement: UnitOfMeasurement.Grams,
+        servingSizeNote: '',
+      };
     }
 
     setFoodItemData(data);
@@ -160,36 +175,21 @@ const FoodItemProvider = ({
     [realm, user],
   );
 
-  const saveFoodItem = React.useCallback(
-    (data: Partial<InitFoodItemData>) => {
-      if (!foodItemData) {
-        throw new RecoverableError('No food item data save');
+  const saveFoodItem = React.useCallback(() => {
+    if (!foodItemData) {
+      throw new RecoverableError('No food item data save');
+    }
+    if (foodItemId) {
+      const validItem = FoodItem.verifyInitFoodItemData(foodItemData);
+      if (!validItem) {
+        throw new RecoverableError(
+          'Some food item data appears to be missing in order to create a consumed food item',
+        );
       }
-      if (journalEntryId) {
-        // if we are adding a new food item, just update state
-        updateFoodItemData(data);
-      } else if (foodItemId) {
-        const validItem = FoodItem.verifyInitFoodItemData(foodItemData);
-        if (!validItem) {
-          throw new RecoverableError(
-            'Some food item data appears to be missing in order to create a consumed food item',
-          );
-        }
-        // if we are editing an existing food item, save it to realm
-        writeFoodItemToRealm({
-          ...validItem,
-          ...data,
-        });
-      }
-    },
-    [
-      foodItemData,
-      foodItemId,
-      journalEntryId,
-      updateFoodItemData,
-      writeFoodItemToRealm,
-    ],
-  );
+      // if we are editing an existing food item, save it to realm
+      writeFoodItemToRealm(validItem);
+    }
+  }, [foodItemData, foodItemId, writeFoodItemToRealm]);
 
   const internalSaveConsumedFoodItem = React.useCallback(
     (data: ConsumedFoodItemDataProvided) => {

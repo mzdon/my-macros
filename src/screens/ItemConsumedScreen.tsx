@@ -8,7 +8,10 @@ import Spacer from 'components/Spacer';
 import RadioButtons from 'components/RadioButtons';
 import {FOOD_ITEM_GROUP} from 'navigation/Constants';
 import {ItemConsumedNavigationProp} from 'navigation/RouteTypes';
-import {useFoodItemContext} from 'providers/FoodItemProvider';
+import {
+  FoodItemContextValue,
+  useFoodItemContext,
+} from 'providers/FoodItemProvider';
 import {Servings, UnitOfMeasurement} from 'types/UnitOfMeasurement';
 import {useSimpleStateUpdater} from 'utils/State';
 import {FoodItemType, isFoodOrDrink} from 'utils/FoodItem';
@@ -29,6 +32,14 @@ const UOM_VALUES = {
   ],
 };
 
+const getInitialState = (
+  foodItemData: FoodItemContextValue['foodItemData'],
+) => ({
+  quantity: foodItemData?.servingSize || 0,
+  unitOfMeasurement:
+    foodItemData?.servingUnitOfMeasurement || UnitOfMeasurement.Grams,
+});
+
 const ItemConsumed = (): React.ReactElement => {
   const navigation = useNavigation<ItemConsumedNavigationProp>();
   const foodCrudNavigation = useFoodCrudNavigationContext();
@@ -36,11 +47,13 @@ const ItemConsumed = (): React.ReactElement => {
   const {foodGroupData} = useFoodGroupContext();
   const {foodItemData, saveConsumedFoodItem} = useFoodItemContext();
 
-  const [state, updater] = useSimpleStateUpdater({
-    quantity: foodItemData?.servingSize || 0,
-    unitOfMeasurement:
-      foodItemData?.servingUnitOfMeasurement || UnitOfMeasurement.Grams,
-  });
+  const [state, updater, setState] = useSimpleStateUpdater(
+    getInitialState(foodItemData),
+  );
+
+  React.useEffect(() => {
+    setState(getInitialState(foodItemData));
+  }, [foodItemData, setState]);
 
   const onSave = React.useCallback(() => {
     saveConsumedFoodItem(state);
@@ -76,15 +89,15 @@ const ItemConsumed = (): React.ReactElement => {
       )
     ];
 
-  const item = foodItemData || {};
-  const {servingSize, servingUnitOfMeasurement, servingSizeNote} = item;
+  const {description, servingSize, servingUnitOfMeasurement, servingSizeNote} =
+    foodItemData || {};
   const quantityLabel = `Quantity (1 serving = ${servingSize}${servingUnitOfMeasurement}${
     servingSizeNote ? ` or ${servingSizeNote}` : ''
   })`;
 
   return (
     <View style={styles.screen}>
-      <Text>{`How much ${item.description} did you eat?`}</Text>
+      <Text>{`How much ${description} did you eat?`}</Text>
       <Spacer />
       <BaseNumberInput
         label={quantityLabel}

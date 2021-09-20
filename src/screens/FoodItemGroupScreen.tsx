@@ -18,11 +18,8 @@ const FoodItemGroupScreen = () => {
   const navigation = useNavigation<FoodItemGroupNavigationProp>();
   const foodCrudNavigation = useFoodCrudNavigationContext();
 
-  const {foodGroupData, saveFoodGroup} = useFoodGroupContext();
-
-  const [description, updateDescription] = React.useState(
-    foodGroupData?.description || '',
-  );
+  const {foodGroupData, updateDescription, saveFoodGroup} =
+    useFoodGroupContext();
 
   const addNewFoodItem = React.useCallback(
     () =>
@@ -41,9 +38,9 @@ const FoodItemGroupScreen = () => {
   );
 
   const onSave = React.useCallback(() => {
-    saveFoodGroup(description);
+    saveFoodGroup();
     foodCrudNavigation.goBack();
-  }, [description, foodCrudNavigation, saveFoodGroup]);
+  }, [foodCrudNavigation, saveFoodGroup]);
 
   React.useLayoutEffect(() => {
     navigation.setOptions({
@@ -58,7 +55,7 @@ const FoodItemGroupScreen = () => {
       <BaseTextInput
         label="Description"
         placeholder="New group description..."
-        value={description}
+        value={foodGroupData?.description || ''}
         onChangeText={updateDescription}
       />
       <Spacer />

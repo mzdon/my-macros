@@ -8,6 +8,7 @@ import MacroDefinition from 'schemas/MacroDefinition';
 const _styles = StyleSheet.create({
   container: {flexDirection: 'row'},
   inner: {flex: 1},
+  header: {fontWeight: 'bold', fontSize: 16},
 });
 
 interface Props {
@@ -69,18 +70,6 @@ function getStats(macros: MacroDefinition, meals: Meal[] | undefined) {
   return {consumed, remaining};
 }
 
-const optionalMacrosConsumed = (
-  title: string,
-  value: number,
-  target: number | null,
-) => {
-  let result = `${title}: ${value}`;
-  if (target) {
-    result += `/${target}`;
-  }
-  return result;
-};
-
 const optionalMacrosRemaining = (
   title: string,
   value: number,
@@ -90,7 +79,7 @@ const optionalMacrosRemaining = (
   if (!target) {
     result += 'n/a';
   } else {
-    result += `${value}/${target}`;
+    result += `${value}g`;
   }
   return result;
 };
@@ -100,24 +89,20 @@ const Stats = ({macros, meals}: Props): React.ReactElement<Props> => {
   return (
     <View style={_styles.container}>
       <View style={_styles.inner}>
-        <Text>Macros Consumed</Text>
-        <Text>{`Calories: ${consumed.calories}/${macros.calories}`}</Text>
-        <Text>{`Carbs: ${consumed.carbs}/${macros.carbs}`}</Text>
-        <Text>{`Protein: ${consumed.protein}/${macros.protein}`}</Text>
-        <Text>{`Fat: ${consumed.fat}/${macros.fat}`}</Text>
-        <Text>
-          {optionalMacrosConsumed('Sugar', consumed.sugar, macros.sugar)}
-        </Text>
-        <Text>
-          {optionalMacrosConsumed('Fiber', consumed.fiber, macros.fiber)}
-        </Text>
+        <Text style={_styles.header}>Consumed</Text>
+        <Text>{`Calories: ${consumed.calories}`}</Text>
+        <Text>{`Carbs: ${consumed.carbs}g`}</Text>
+        <Text>{`Protein: ${consumed.protein}g`}</Text>
+        <Text>{`Fat: ${consumed.fat}g`}</Text>
+        <Text>{`Sugar ${consumed.sugar}g`}</Text>
+        <Text>{`Fiber ${consumed.fiber}g`}</Text>
       </View>
       <View style={_styles.inner}>
-        <Text>Macros Remaining</Text>
-        <Text>{`Calories: ${remaining.calories}/${macros.calories}`}</Text>
-        <Text>{`Carbs: ${remaining.carbs}/${macros.carbs}`}</Text>
-        <Text>{`Protein: ${remaining.protein}/${macros.protein}`}</Text>
-        <Text>{`Fat: ${remaining.fat}/${macros.fat}`}</Text>
+        <Text style={_styles.header}>Remaining</Text>
+        <Text>{`Calories: ${remaining.calories}`}</Text>
+        <Text>{`Carbs: ${remaining.carbs}g`}</Text>
+        <Text>{`Protein: ${remaining.protein}g`}</Text>
+        <Text>{`Fat: ${remaining.fat}g`}</Text>
         <Text>
           {optionalMacrosRemaining('Sugar', consumed.sugar, macros.sugar)}
         </Text>

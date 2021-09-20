@@ -8,26 +8,31 @@ import Spacer from 'components/Spacer';
 import {ITEM_CONSUMED} from 'navigation/Constants';
 import {FoodItemMacrosNavigationProp} from 'navigation/RouteTypes';
 import {useFoodItemContext} from 'providers/FoodItemProvider';
-import {useSimpleStateUpdater} from 'utils/State';
 import styles from 'styles';
+import {InitFoodItemData} from 'schemas/FoodItem';
 
 const FoodItemMacrosScreen = (): React.ReactElement => {
   const navigation = useNavigation<FoodItemMacrosNavigationProp>();
 
-  const {foodItemData, saveFoodItem} = useFoodItemContext();
+  const {foodItemData, updateFoodItemData, saveFoodItem} = useFoodItemContext();
+  const {
+    carbs = 0,
+    protein = 0,
+    fat = 0,
+    sugar = 0,
+    fiber = 0,
+  } = foodItemData || {};
 
-  const [state, updater] = useSimpleStateUpdater({
-    carbs: foodItemData?.carbs || 0,
-    protein: foodItemData?.protein || 0,
-    fat: foodItemData?.fat || 0,
-    sugar: foodItemData?.sugar || 0,
-    fiber: foodItemData?.fiber || 0,
-  });
+  function updater<T>(fieldName: keyof InitFoodItemData) {
+    return (value: T) => {
+      updateFoodItemData({[fieldName]: value});
+    };
+  }
 
   const onNext = React.useCallback(() => {
-    saveFoodItem(state);
+    saveFoodItem();
     navigation.navigate(ITEM_CONSUMED);
-  }, [navigation, saveFoodItem, state]);
+  }, [navigation, saveFoodItem]);
 
   React.useLayoutEffect(() => {
     navigation.setOptions({
@@ -48,35 +53,35 @@ const FoodItemMacrosScreen = (): React.ReactElement => {
       <BaseNumberInput
         label="Carbs"
         placeholder="Carbs"
-        value={state.carbs}
+        value={carbs}
         onChangeText={updateCarbs}
       />
       <Spacer />
       <BaseNumberInput
         label="Protein"
         placeholder="Protein"
-        value={state.protein}
+        value={protein}
         onChangeText={updateProtein}
       />
       <Spacer />
       <BaseNumberInput
         label="Fat"
         placeholder="Fat"
-        value={state.fat}
+        value={fat}
         onChangeText={updateFat}
       />
       <Spacer />
       <BaseNumberInput
         label="Sugar"
         placeholder="Sugar"
-        value={state.sugar}
+        value={sugar}
         onChangeText={updateSugar}
       />
       <Spacer />
       <BaseNumberInput
         label="Fiber"
         placeholder="Fiber"
-        value={state.fiber}
+        value={fiber}
         onChangeText={updateFiber}
       />
       <Spacer />

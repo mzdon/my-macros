@@ -35,7 +35,6 @@ const FoodCrudNavigationProvider = ({
   const navigate = React.useCallback(
     (screen: Screen, params: Params = {}) => {
       const navState = navigation.getState();
-      console.log(navState);
       if (!navState) {
         throw new RecoverableError(
           'No navigation state found on private stack navigator',

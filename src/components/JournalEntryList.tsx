@@ -1,8 +1,9 @@
 import React from 'react';
 
-import {Button, SectionList, StyleSheet, Text, View} from 'react-native';
+import {Button, SectionList, StyleSheet, View} from 'react-native';
 
 import ConsumedFoodItem from 'components/ConsumedFoodItem';
+import MealHeader from 'components/MealHeader';
 import Spacer from 'components/Spacer';
 import SwipeableRow from 'components/SwipeableRow';
 import ConsumedFoodItemSchema from 'schemas/ConsumedFoodItem';
@@ -38,7 +39,6 @@ interface Props {
 }
 
 type Section = {
-  title: string;
   meal: Meal;
   mealIndex: number;
   journalEntry: JournalEntry;
@@ -53,7 +53,6 @@ function formatSections(journalEntry: JournalEntry | null): Section[] {
   return journalEntry.meals.reduce((result, meal, idx) => {
     const nextResult = [...result];
     nextResult.push({
-      title: meal.description,
       meal,
       mealIndex: idx,
       data: meal.items,
@@ -109,7 +108,7 @@ const JouranlEntryList = (props: Props): React.ReactElement<Props> => {
   );
 
   const renderSectionHeader = React.useCallback(
-    ({section: {title, meal, journalEntry, mealIndex}}: {section: Section}) => (
+    ({section: {meal, journalEntry, mealIndex}}: {section: Section}) => (
       <SwipeableRow
         rightActions={[
           {
@@ -124,7 +123,7 @@ const JouranlEntryList = (props: Props): React.ReactElement<Props> => {
           },
         ]}>
         <View style={_styles.titleContainer}>
-          <Text style={_styles.title}>{title}</Text>
+          <MealHeader meal={meal} />
         </View>
       </SwipeableRow>
     ),
@@ -153,6 +152,7 @@ const JouranlEntryList = (props: Props): React.ReactElement<Props> => {
       keyExtractor={item => item._objectId()}
       ListEmptyComponent={EmptyComponent}
       ItemSeparatorComponent={Spacer}
+      stickySectionHeadersEnabled={false}
     />
   );
 };

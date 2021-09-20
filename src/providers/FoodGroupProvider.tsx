@@ -18,7 +18,8 @@ type FoodGroupStateData = {
 
 export interface FoodGroupContextValue {
   foodGroupData: FoodGroupStateData;
-  saveFoodGroup: (description: string) => void;
+  updateDescription: (description: string) => void;
+  saveFoodGroup: () => void;
   saveConsumedFoodItem: (
     entryId: string,
     mealIdx: number,
@@ -78,6 +79,19 @@ const FoodGroupProvider = ({
   const [foodGroupData, setFoodGroupData] =
     React.useState<FoodGroupStateData>(null);
 
+  const updateDescription = React.useCallback(
+    (description: string) => {
+      if (!foodGroupData) {
+        throw new RecoverableError('Food group item data no initialized');
+      }
+      setFoodGroupData({
+        ...foodGroupData,
+        description,
+      });
+    },
+    [foodGroupData],
+  );
+
   React.useEffect(() => {
     if (!foodGroupData) {
       let data: FoodGroupStateData = null;
@@ -120,31 +134,25 @@ const FoodGroupProvider = ({
     [applyFoodItemGroup, journalEntryId, mealIndex],
   );
 
-  const saveFoodGroup = React.useCallback(
-    (description: string) => {
-      if (!foodGroupData) {
-        throw new RecoverableError('No food group data to save');
-      }
-      let result;
-      realm.write(() => {
-        result = realm.create<FoodItemGroup>(
-          FoodItemGroup,
-          // @ts-ignore TODO
-          FoodItemGroup.generate({
-            foodItems: foodGroupData.foodItems,
-            description,
-          }),
-          UpdateMode.Modified,
-        );
-        user.addFoodItemGroup(result);
-      });
-      if (!foodGroupId) {
-        // @ts-ignore
-        internalApplyFoodItemGroup(result);
-      }
-    },
-    [foodGroupData, foodGroupId, internalApplyFoodItemGroup, realm, user],
-  );
+  const saveFoodGroup = React.useCallback(() => {
+    if (!foodGroupData) {
+      throw new RecoverableError('No food group data to save');
+    }
+    let result;
+    realm.write(() => {
+      result = realm.create<FoodItemGroup>(
+        FoodItemGroup,
+        // @ts-ignore TODO
+        FoodItemGroup.generate(foodGroupData),
+        UpdateMode.Modified,
+      );
+      user.addFoodItemGroup(result);
+    });
+    if (!foodGroupId) {
+      // @ts-ignore
+      internalApplyFoodItemGroup(result);
+    }
+  }, [foodGroupData, foodGroupId, internalApplyFoodItemGroup, realm, user]);
 
   const saveConsumedFoodItemToGroup = React.useCallback(
     (
@@ -184,6 +192,7 @@ const FoodGroupProvider = ({
     <FoodGroupContext.Provider
       value={{
         foodGroupData,
+        updateDescription,
         saveFoodGroup,
         saveConsumedFoodItem: foodGroupData
           ? saveConsumedFoodItemToGroup
