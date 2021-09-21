@@ -10,6 +10,7 @@ import {DrawerParamList, DrawerNavigationProp} from 'navigation/RouteTypes';
 import FoodCrudNavigationProvider from 'providers/FoodCrudNavigationProvider';
 import DateSelectorScreen from 'screens/DateSelectorScreen';
 import FoodJournalScreen from 'screens/FoodJournalScreen';
+import FoodSelectorScreen from 'screens/FoodSelectorScreen';
 import ProfileScreen from 'screens/ProfileScreen';
 
 const DrawerNav = createDrawerNavigator<DrawerParamList>();
@@ -36,6 +37,11 @@ const Drawer = () => {
           name={NavConstants.JOURNAL}
           initialParams={{date: new Date().toDateString()}}
           component={withScreenEnhancers(FoodJournalScreen)}
+        />
+        <DrawerNav.Screen
+          key="food-editor"
+          name={NavConstants.FOOD_EDITOR}
+          component={withScreenEnhancers(FoodSelectorScreen)}
         />
         <DrawerNav.Screen
           key="date-selector"

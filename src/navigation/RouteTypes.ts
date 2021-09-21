@@ -34,6 +34,7 @@ export type DrawerParamList = {
   Journal: {
     date: string;
   };
+  FoodEditor: undefined;
   DateSelector: {
     currentDate: string | undefined;
   };

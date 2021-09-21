@@ -5,7 +5,7 @@ import {Button, SectionList, StyleSheet, View} from 'react-native';
 import ConsumedFoodItem from 'components/ConsumedFoodItem';
 import MealHeader from 'components/MealHeader';
 import Spacer from 'components/Spacer';
-import SwipeableRow from 'components/SwipeableRow';
+import SwipeableRow, {getEditAndDeleteActions} from 'components/SwipeableRow';
 import ConsumedFoodItemSchema from 'schemas/ConsumedFoodItem';
 import JournalEntry from 'schemas/JournalEntry';
 import Meal from 'schemas/Meal';
@@ -85,19 +85,11 @@ const JouranlEntryList = (props: Props): React.ReactElement<Props> => {
       const {journalEntry, mealIndex} = section;
       return (
         <SwipeableRow
-          rightActions={[
-            {
-              color: 'purple',
-              label: 'Edit',
-              onPress: () =>
-                onEditConsumedFoodItem(journalEntry._id, mealIndex, index),
-            },
-            {
-              color: 'red',
-              label: 'Delete',
-              onPress: () => onDeleteConsumedFoodItem(item),
-            },
-          ]}>
+          rightActions={getEditAndDeleteActions({
+            onEditPress: () =>
+              onEditConsumedFoodItem(journalEntry._id, mealIndex, index),
+            onDeletePress: () => onDeleteConsumedFoodItem(item),
+          })}>
           <View style={_styles.titleContainer}>
             <ConsumedFoodItem item={item} />
           </View>
@@ -110,18 +102,10 @@ const JouranlEntryList = (props: Props): React.ReactElement<Props> => {
   const renderSectionHeader = React.useCallback(
     ({section: {meal, journalEntry, mealIndex}}: {section: Section}) => (
       <SwipeableRow
-        rightActions={[
-          {
-            color: 'purple',
-            label: 'Edit',
-            onPress: () => onEditMeal(journalEntry.date, mealIndex),
-          },
-          {
-            color: 'red',
-            label: 'Delete',
-            onPress: () => onDeleteMeal(meal),
-          },
-        ]}>
+        rightActions={getEditAndDeleteActions({
+          onEditPress: () => onEditMeal(journalEntry.date, mealIndex),
+          onDeletePress: () => onDeleteMeal(meal),
+        })}>
         <View style={_styles.titleContainer}>
           <MealHeader meal={meal} />
         </View>

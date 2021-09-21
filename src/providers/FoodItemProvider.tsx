@@ -35,7 +35,6 @@ type Props = React.PropsWithChildren<{
   mealIndex: number | undefined;
   consumedItemIndex: number | undefined;
   foodItemId: string | undefined;
-  foodGroupId: string | undefined;
   saveConsumedFoodItem: (
     journalEntryId: string,
     mealIndex: number,

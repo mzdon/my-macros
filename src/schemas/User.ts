@@ -145,7 +145,7 @@ class User extends Realm.Object {
     };
   }
 
-  update(userData: UserData) {
+  updateData(userData: UserData) {
     // name
     if (userData.name !== this.name) {
       this.name = userData.name;
@@ -216,9 +216,31 @@ class User extends Realm.Object {
     }
   }
 
+  deleteFoodItem(foodItem: FoodItem) {
+    const idx = this.foodItems.findIndex(uuid => foodItem._id.equals(uuid));
+    if (idx !== -1) {
+      this.foodItems = [
+        ...this.foodItems.slice(0, idx),
+        ...this.foodItems.slice(idx + 1),
+      ];
+    }
+  }
+
   addFoodItemGroup(foodItemGroup: FoodItemGroup) {
     if (!this.foodItemGroups.find(uuid => foodItemGroup._id.equals(uuid))) {
       this.foodItemGroups.push(foodItemGroup._id);
+    }
+  }
+
+  deleteFoodItemGroup(foodItemGroup: FoodItemGroup) {
+    const idx = this.foodItemGroups.findIndex(uuid =>
+      foodItemGroup._id.equals(uuid),
+    );
+    if (idx !== -1) {
+      this.foodItemGroups = [
+        ...this.foodItemGroups.slice(0, idx),
+        ...this.foodItemGroups.slice(idx + 1),
+      ];
     }
   }
 

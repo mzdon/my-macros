@@ -35,3 +35,20 @@ export const useGetFoodItemById = (realm: Realm) =>
 
 export const useGetFoodItemGroupById = (realm: Realm) =>
   useGetTypeById<FoodItemGroup>(realm, 'FoodItemGroup');
+
+export const useDeleteItem = <T extends Realm.Object = Realm.Object>(
+  realm: Realm,
+  before?: (obj: T) => void,
+  after?: (obj: T) => void,
+) => {
+  return React.useCallback(
+    (obj: T) => {
+      realm.write(() => {
+        before && before(obj);
+        realm.delete(obj);
+        after && after(obj);
+      });
+    },
+    [realm, before, after],
+  );
+};

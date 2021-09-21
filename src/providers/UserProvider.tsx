@@ -40,7 +40,7 @@ const UserProvider = ({children}: Props): React.ReactElement<Props> => {
         const updateUser = (userData: UserData) => {
           const user = getUser();
           realm.write(() => {
-            user.update(userData);
+            user.updateData(userData);
           });
           return getUser();
         };

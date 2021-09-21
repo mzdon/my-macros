@@ -164,3 +164,28 @@ const SwipeableRow = ({
 };
 
 export default SwipeableRow;
+
+interface UseEditAndDeleteActionCallbacks {
+  onEditPress: () => void;
+  onDeletePress: () => void;
+}
+
+export const getEditAndDeleteActions = ({
+  onEditPress,
+  onDeletePress,
+}: UseEditAndDeleteActionCallbacks): Action[] => [
+  {
+    color: 'purple',
+    label: 'Edit',
+    onPress: onEditPress,
+  },
+  {
+    color: 'red',
+    label: 'Delete',
+    onPress: onDeletePress,
+  },
+];
+
+export const useEditAndDeleteActions = (
+  callbacks: UseEditAndDeleteActionCallbacks,
+) => React.useMemo(() => getEditAndDeleteActions(callbacks), [callbacks]);

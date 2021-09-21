@@ -14,7 +14,11 @@ import FoodItemGroup from 'schemas/FoodItemGroup';
 import Meal from 'schemas/Meal';
 import {isSameDay} from 'utils/Date';
 import {CatastrophicError, RecoverableError} from 'utils/Errors';
-import {useGetFoodItemById, useGetJournalEntryById} from 'utils/Queries';
+import {
+  useDeleteItem,
+  useGetFoodItemById,
+  useGetJournalEntryById,
+} from 'utils/Queries';
 
 interface JournalContext {
   todaysEntry: JournalEntry | null;
@@ -111,14 +115,7 @@ const JournalProvider = ({
     [getEntryForDate, realm, userId],
   );
 
-  const deleteMeal = React.useCallback(
-    (meal: Meal) => {
-      realm.write(() => {
-        realm.delete(meal);
-      });
-    },
-    [realm],
-  );
+  const deleteMeal = useDeleteItem<Meal>(realm);
 
   const saveConsumedFoodItem = React.useCallback(
     (
@@ -168,14 +165,7 @@ const JournalProvider = ({
     [getEntryById, realm],
   );
 
-  const deleteConsumedFoodItem = React.useCallback(
-    (item: ConsumedFoodItem) => {
-      realm.write(() => {
-        realm.delete(item);
-      });
-    },
-    [realm],
-  );
+  const deleteConsumedFoodItem = useDeleteItem<ConsumedFoodItem>(realm);
 
   const hydrateConsumedFoodItem = React.useCallback(
     (data: ReturnedConsumedFoodItemData): InitConsumedFoodItemData => {

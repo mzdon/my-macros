@@ -12,8 +12,8 @@ import {
 import {FOOD_CRUD} from 'navigation/Constants';
 import {RecoverableError} from 'utils/Errors';
 
-type Screen = NavigatorScreenParams<FoodCrudStackParamList>['screen'];
-type Params = Partial<PrivateStackParamList['FoodCrud']>;
+export type Screen = NavigatorScreenParams<FoodCrudStackParamList>['screen'];
+export type Params = Partial<PrivateStackParamList['FoodCrud']>;
 
 interface FoodCrudNavigationContextValue {
   navigate: (screen: Screen, params?: Params) => void;

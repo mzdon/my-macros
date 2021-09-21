@@ -159,14 +159,22 @@ const FoodGroupProvider = ({
       _entryId: string,
       _mealIdx: number,
       foodItem: InitConsumedFoodItemData,
-      _itemIndex?: number,
+      itemIndex?: number,
     ) => {
       if (!foodGroupData) {
         throw new RecoverableError('No food group data to add a food item to');
       }
+      const newFoodItems =
+        itemIndex !== undefined
+          ? [
+              ...foodGroupData.foodItems.slice(0, itemIndex),
+              foodItem,
+              ...foodGroupData.foodItems.slice(itemIndex + 1),
+            ]
+          : [...foodGroupData.foodItems, foodItem];
       setFoodGroupData({
         ...foodGroupData,
-        foodItems: [...foodGroupData.foodItems, foodItem],
+        foodItems: newFoodItems,
       });
     },
     [foodGroupData],

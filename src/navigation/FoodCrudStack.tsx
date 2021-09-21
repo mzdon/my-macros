@@ -26,13 +26,8 @@ const Stack = createStackNavigator<FoodCrudStackParamList>();
 
 const FoodCrudStack = () => {
   const route = useRoute<FoodCrudScreenRouteProp>();
-  const {
-    journalEntryId,
-    mealIndex,
-    consumedItemIndex,
-    foodItemId,
-    foodGroupId,
-  } = route.params;
+  const {journalEntryId, mealIndex, consumedItemIndex, foodItemId} =
+    route.params;
 
   const {saveConsumedFoodItem} = useFoodGroupContext();
   return (
@@ -41,7 +36,6 @@ const FoodCrudStack = () => {
       mealIndex={mealIndex}
       consumedItemIndex={consumedItemIndex}
       foodItemId={foodItemId}
-      foodGroupId={foodGroupId}
       saveConsumedFoodItem={saveConsumedFoodItem}>
       <Stack.Navigator>
         <Stack.Screen
