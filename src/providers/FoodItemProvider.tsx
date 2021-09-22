@@ -4,6 +4,7 @@ import {UUID} from 'bson';
 import {withRealm} from 'react-realm-context';
 import {UpdateMode} from 'realm';
 
+import {useFoodGroupContext} from 'providers/FoodGroupProvider';
 import {useUserContext} from 'providers/UserProvider';
 import {InitConsumedFoodItemData} from 'schemas/ConsumedFoodItem';
 import FoodItem, {InitFoodItemData} from 'schemas/FoodItem';
@@ -35,12 +36,6 @@ type Props = React.PropsWithChildren<{
   mealIndex: number | undefined;
   consumedItemIndex: number | undefined;
   foodItemId: string | undefined;
-  saveConsumedFoodItem: (
-    journalEntryId: string,
-    mealIndex: number,
-    data: InitConsumedFoodItemData,
-    itemIndex?: number,
-  ) => void;
 }>;
 
 /**
@@ -60,11 +55,11 @@ const FoodItemProvider = ({
   mealIndex,
   consumedItemIndex,
   foodItemId,
-  saveConsumedFoodItem,
   children,
 }: Props): React.ReactElement<Props> => {
   const {user} = useUserContext();
   const getFoodItemById = useGetFoodItemById(realm);
+  const {saveConsumedFoodItem} = useFoodGroupContext();
 
   const [foodItemData, setFoodItemData] =
     React.useState<InitFoodItemData | null>(null);
@@ -215,14 +210,22 @@ const FoodItemProvider = ({
     [foodItemData, onSaveConsumedFoodItem, writeFoodItemToRealm],
   );
 
+  const contextValue = React.useMemo(() => {
+    return {
+      foodItemData,
+      saveFoodItem,
+      updateFoodItemData,
+      saveConsumedFoodItem: internalSaveConsumedFoodItem,
+    };
+  }, [
+    foodItemData,
+    internalSaveConsumedFoodItem,
+    saveFoodItem,
+    updateFoodItemData,
+  ]);
+
   return (
-    <FoodItemContext.Provider
-      value={{
-        foodItemData,
-        saveFoodItem,
-        updateFoodItemData,
-        saveConsumedFoodItem: internalSaveConsumedFoodItem,
-      }}>
+    <FoodItemContext.Provider value={contextValue}>
       {children}
     </FoodItemContext.Provider>
   );

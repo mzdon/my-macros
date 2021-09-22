@@ -187,17 +187,27 @@ const JournalProvider = ({
     [hydrateConsumedFoodItem, saveConsumedFoodItem],
   );
 
+  const contextValue = React.useMemo(() => {
+    return {
+      todaysEntry,
+      getEntries,
+      saveMeal,
+      deleteMeal,
+      saveConsumedFoodItem,
+      deleteConsumedFoodItem,
+      applyFoodItemGroup,
+    };
+  }, [
+    applyFoodItemGroup,
+    deleteConsumedFoodItem,
+    deleteMeal,
+    saveConsumedFoodItem,
+    saveMeal,
+    todaysEntry,
+  ]);
+
   return (
-    <JournalContext.Provider
-      value={{
-        todaysEntry,
-        getEntries,
-        saveMeal,
-        deleteMeal,
-        saveConsumedFoodItem,
-        deleteConsumedFoodItem,
-        applyFoodItemGroup,
-      }}>
+    <JournalContext.Provider value={contextValue}>
       {children}
     </JournalContext.Provider>
   );

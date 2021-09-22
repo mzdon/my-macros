@@ -27,6 +27,12 @@ const FoodItemGroupScreen = () => {
     removeFoodItemFromGroup,
   } = useFoodGroupContext();
 
+  const {description = '', foodItems = []} = foodGroupData || {};
+  const onUpdateDescription = React.useCallback(
+    (val: string) => updateDescription(val),
+    [updateDescription],
+  );
+
   const addNewFoodItem = React.useCallback(
     () =>
       foodCrudNavigation.navigate(FOOD_ITEM_DESCRIPTION, {
@@ -84,9 +90,9 @@ const FoodItemGroupScreen = () => {
       <Spacer />
       <BaseTextInput
         label="Description"
-        placeholder="New group description..."
-        value={foodGroupData?.description || ''}
-        onChangeText={updateDescription}
+        placeholder="Group description..."
+        value={description}
+        onChangeText={onUpdateDescription}
       />
       <Spacer />
       <LookupFoodItem
@@ -94,7 +100,7 @@ const FoodItemGroupScreen = () => {
         selectFoodItem={selectFoodItem}
       />
       <FlatList
-        data={foodGroupData?.foodItems}
+        data={foodItems}
         ListHeaderComponent={<Text>Food Items</Text>}
         renderItem={renderItem}
         keyExtractor={(_item, idx) => `consumedItem-${idx}`}

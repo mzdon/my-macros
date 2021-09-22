@@ -82,7 +82,7 @@ const FoodGroupProvider = ({
   const updateDescription = React.useCallback(
     (description: string) => {
       if (!foodGroupData) {
-        throw new RecoverableError('Food group item data no initialized');
+        throw new RecoverableError('Food group item data not initialized');
       }
       setFoodGroupData({
         ...foodGroupData,
@@ -196,18 +196,29 @@ const FoodGroupProvider = ({
     [foodGroupData],
   );
 
+  const contextValue = React.useMemo(() => {
+    return {
+      foodGroupData,
+      updateDescription,
+      saveFoodGroup,
+      saveConsumedFoodItem: foodGroupData
+        ? saveConsumedFoodItemToGroup
+        : saveConsumedFoodItem,
+      removeFoodItemFromGroup,
+      applyFoodItemGroup: internalApplyFoodItemGroup,
+    };
+  }, [
+    foodGroupData,
+    internalApplyFoodItemGroup,
+    removeFoodItemFromGroup,
+    saveConsumedFoodItem,
+    saveConsumedFoodItemToGroup,
+    saveFoodGroup,
+    updateDescription,
+  ]);
+
   return (
-    <FoodGroupContext.Provider
-      value={{
-        foodGroupData,
-        updateDescription,
-        saveFoodGroup,
-        saveConsumedFoodItem: foodGroupData
-          ? saveConsumedFoodItemToGroup
-          : saveConsumedFoodItem,
-        removeFoodItemFromGroup,
-        applyFoodItemGroup: internalApplyFoodItemGroup,
-      }}>
+    <FoodGroupContext.Provider value={contextValue}>
       {children}
     </FoodGroupContext.Provider>
   );

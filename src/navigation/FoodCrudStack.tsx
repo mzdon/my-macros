@@ -11,9 +11,7 @@ import {
   FoodCrudStackParamList,
 } from 'navigation/RouteTypes';
 import FoodCrudNavigationProvider from 'providers/FoodCrudNavigationProvider';
-import FoodGroupProvider, {
-  useFoodGroupContext,
-} from 'providers/FoodGroupProvider';
+import FoodGroupProvider from 'providers/FoodGroupProvider';
 import FoodItemProvider from 'providers/FoodItemProvider';
 import {useJournalContext} from 'providers/JournalProvider';
 import FoodItemDescriptionScreen from 'screens/FoodItemDescriptionScreen';
@@ -24,19 +22,17 @@ import LookupOrAddScreen from 'screens/LookupOrAddScreen';
 
 const Stack = createStackNavigator<FoodCrudStackParamList>();
 
-const FoodCrudStack = () => {
+const InnerFoodCrudStack = () => {
   const route = useRoute<FoodCrudScreenRouteProp>();
   const {journalEntryId, mealIndex, consumedItemIndex, foodItemId} =
     route.params;
 
-  const {saveConsumedFoodItem} = useFoodGroupContext();
   return (
     <FoodItemProvider
       journalEntryId={journalEntryId}
       mealIndex={mealIndex}
       consumedItemIndex={consumedItemIndex}
-      foodItemId={foodItemId}
-      saveConsumedFoodItem={saveConsumedFoodItem}>
+      foodItemId={foodItemId}>
       <Stack.Navigator>
         <Stack.Screen
           key="lookup-or-add"
@@ -68,7 +64,7 @@ const FoodCrudStack = () => {
   );
 };
 
-const FoodCrudStack2 = () => {
+const FoodCrudStack = () => {
   const navigation = useNavigation<FoodCrudScreenNavigationProp>();
   const route = useRoute<FoodCrudScreenRouteProp>();
   const {journalEntryId, mealIndex, foodGroupId, newFoodGroup} = route.params;
@@ -83,10 +79,10 @@ const FoodCrudStack2 = () => {
         foodGroupId={foodGroupId}
         applyFoodItemGroup={applyFoodItemGroup}
         saveConsumedFoodItem={saveConsumedFoodItem}>
-        <FoodCrudStack />
+        <InnerFoodCrudStack />
       </FoodGroupProvider>
     </FoodCrudNavigationProvider>
   );
 };
 
-export default FoodCrudStack2;
+export default FoodCrudStack;

@@ -53,13 +53,17 @@ const FoodCrudNavigationProvider = ({
     },
     [navigation],
   );
+
+  const contextValue = React.useMemo(() => {
+    return {
+      navigate,
+      setOptions: navigation.setOptions,
+      goBack: navigation.goBack,
+    };
+  }, [navigate, navigation.goBack, navigation.setOptions]);
+
   return (
-    <FoodCrudNavigationContext.Provider
-      value={{
-        navigate,
-        setOptions: navigation.setOptions,
-        goBack: navigation.goBack,
-      }}>
+    <FoodCrudNavigationContext.Provider value={contextValue}>
       {children}
     </FoodCrudNavigationContext.Provider>
   );
