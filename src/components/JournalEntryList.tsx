@@ -137,6 +137,7 @@ const JouranlEntryList = (props: Props): React.ReactElement<Props> => {
       ListEmptyComponent={EmptyComponent}
       ItemSeparatorComponent={Spacer}
       stickySectionHeadersEnabled={false}
+      initialNumToRender={40}
     />
   );
 };

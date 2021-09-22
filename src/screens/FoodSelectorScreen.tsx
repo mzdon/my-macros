@@ -137,6 +137,7 @@ const FoodSelectorScreen = ({realm}: Props): React.ReactElement<Props> => {
         renderSectionHeader={renderSectionHeader}
         renderItem={renderItem}
         keyExtractor={item => item.data._objectId()}
+        initialNumToRender={40}
       />
     </View>
   );
