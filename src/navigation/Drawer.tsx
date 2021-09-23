@@ -8,10 +8,10 @@ import {withScreenEnhancers} from 'navigation/Common';
 import * as NavConstants from 'navigation/Constants';
 import {DrawerParamList, DrawerNavigationProp} from 'navigation/RouteTypes';
 import FoodCrudNavigationProvider from 'providers/FoodCrudNavigationProvider';
-import DateSelectorScreen from 'screens/DateSelectorScreen';
-import FoodJournalScreen from 'screens/FoodJournalScreen';
-import FoodSelectorScreen from 'screens/FoodSelectorScreen';
-import ProfileScreen from 'screens/ProfileScreen';
+import DateSelectorScreen from 'screens/drawer/DateSelectorScreen';
+import FoodJournalScreen from 'screens/drawer/FoodJournalScreen';
+import FoodSelectorScreen from 'screens/drawer/FoodSelectorScreen';
+import ProfileScreen from 'screens/drawer/ProfileScreen';
 
 const DrawerNav = createDrawerNavigator<DrawerParamList>();
 

@@ -5,7 +5,7 @@ import {createStackNavigator} from '@react-navigation/stack';
 import {withScreenEnhancers} from 'navigation/Common';
 import {WELCOME} from 'navigation/Constants';
 import {PublicStackParamList} from 'navigation/RouteTypes';
-import WelcomeScreen from 'screens/WelcomeScreen';
+import WelcomeScreen from 'screens/public/WelcomeScreen';
 
 const Stack = createStackNavigator<PublicStackParamList>();
 

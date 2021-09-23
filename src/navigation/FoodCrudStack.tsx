@@ -14,11 +14,11 @@ import FoodCrudNavigationProvider from 'providers/FoodCrudNavigationProvider';
 import FoodGroupProvider from 'providers/FoodGroupProvider';
 import FoodItemProvider from 'providers/FoodItemProvider';
 import {useJournalContext} from 'providers/JournalProvider';
-import FoodItemDescriptionScreen from 'screens/FoodItemDescriptionScreen';
-import FoodItemGroupScreen from 'screens/FoodItemGroupScreen';
-import FoodItemMacrosScreen from 'screens/FoodItemMacrosScreen';
-import ItemConsumedScreen from 'screens/ItemConsumedScreen';
-import LookupOrAddScreen from 'screens/LookupOrAddScreen';
+import FoodItemDescriptionScreen from 'screens/foodCrud/FoodItemDescriptionScreen';
+import FoodItemGroupScreen from 'screens/foodCrud/FoodItemGroupScreen';
+import FoodItemMacrosScreen from 'screens/foodCrud/FoodItemMacrosScreen';
+import ItemConsumedScreen from 'screens/foodCrud/ItemConsumedScreen';
+import LookupOrAddScreen from 'screens/foodCrud/LookupOrAddScreen';
 
 const Stack = createStackNavigator<FoodCrudStackParamList>();
 

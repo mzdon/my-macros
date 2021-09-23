@@ -41,6 +41,11 @@ export type DrawerParamList = {
   Profile: undefined;
 };
 
+export type UserInfoStackParamList = {
+  UserInfoStep1: undefined;
+  UserInfoStep2: undefined;
+};
+
 // These route names are defined in navigation/Constants
 
 export type WelcomeScreenNavigationProp = StackNavigationProp<
@@ -152,3 +157,23 @@ export type DrawerNavigationProp = StackNavigationProp<
 >;
 
 export type DrawerRouteProp = RouteProp<PrivateStackParamList, 'Drawer'>;
+
+export type UserInfoStep1NavigationProp = StackNavigationProp<
+  UserInfoStackParamList,
+  'UserInfoStep1'
+>;
+
+export type UserInfoStep1RouteProp = RouteProp<
+  UserInfoStackParamList,
+  'UserInfoStep1'
+>;
+
+export type UserInfoStep2NavigationProp = StackNavigationProp<
+  UserInfoStackParamList,
+  'UserInfoStep2'
+>;
+
+export type UserInfoStep2RouteProp = RouteProp<
+  UserInfoStackParamList,
+  'UserInfoStep2'
+>;

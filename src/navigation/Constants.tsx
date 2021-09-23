@@ -12,4 +12,6 @@ export const FOOD_ITEM_DESCRIPTION = 'FoodItemDescription';
 export const FOOD_ITEM_MACROS = 'FoodItemMacros';
 export const FOOD_ITEM_GROUP = 'FoodItemGroup';
 export const USER_INFO = 'UserInfo';
+export const USER_INFO_STEP_1 = 'UserInfoStep1';
+export const USER_INFO_STEP_2 = 'UserInfoStep2';
 export const WELCOME = 'Welcome';
