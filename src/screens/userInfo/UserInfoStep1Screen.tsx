@@ -1,7 +1,7 @@
 import React from 'react';
 
 import {useNavigation} from '@react-navigation/native';
-import {Button} from 'react-native';
+import {Button, View} from 'react-native';
 
 import BaseTextInput from 'components/BaseTextInput';
 import BirthdayInput from 'components/BirthdayInput';
@@ -14,6 +14,7 @@ import {UserInfoStep1NavigationProp} from 'navigation/RouteTypes';
 import {useUserInfoContext} from 'providers/UserInfoProvider';
 import {MeasurementSystem} from 'types/MeasurementSystem';
 import {UserData} from 'schemas/User';
+import styles from 'styles';
 
 const UserInfoStep1Screen = (): React.ReactElement => {
   const navigation = useNavigation<UserInfoStep1NavigationProp>();
@@ -49,7 +50,7 @@ const UserInfoStep1Screen = (): React.ReactElement => {
   const updateWeight = updater('weight');
 
   return (
-    <>
+    <View style={styles.screen}>
       <BaseTextInput
         label="Name"
         value={name}
@@ -77,7 +78,7 @@ const UserInfoStep1Screen = (): React.ReactElement => {
         measurementSystem={measurementSystem}
         onChangeText={updateWeight}
       />
-    </>
+    </View>
   );
 };
 

@@ -10,7 +10,7 @@ export type PrivateStackParamList = {
     date: string;
     mealIndex?: number;
   };
-  Drawer: undefined;
+  Drawer: NavigatorScreenParams<DrawerParamList> | undefined;
   FoodCrud: NavigatorScreenParams<FoodCrudStackParamList> & {
     journalEntryId?: string;
     mealIndex?: number;
@@ -19,7 +19,7 @@ export type PrivateStackParamList = {
     foodGroupId?: string;
     newFoodGroup?: boolean;
   };
-  UserInfo: undefined;
+  UserInfo: NavigatorScreenParams<UserInfoStackParamList> | undefined;
 };
 
 export type FoodCrudStackParamList = {
@@ -157,6 +157,11 @@ export type DrawerNavigationProp = StackNavigationProp<
 >;
 
 export type DrawerRouteProp = RouteProp<PrivateStackParamList, 'Drawer'>;
+
+export type UserInfoNavigationProp = StackNavigationProp<
+  PrivateStackParamList,
+  'UserInfo'
+>;
 
 export type UserInfoStep1NavigationProp = StackNavigationProp<
   UserInfoStackParamList,

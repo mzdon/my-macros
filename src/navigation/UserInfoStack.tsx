@@ -4,11 +4,12 @@ import {createStackNavigator} from '@react-navigation/stack';
 
 import {withScreenEnhancers} from 'navigation/Common';
 import * as NavConstants from 'navigation/Constants';
-import UserInfoProvider from 'providers/UserInfo';
+import {UserInfoStackParamList} from 'navigation/RouteTypes';
+import UserInfoProvider from 'providers/UserInfoProvider';
 import UserInfoStep1Screen from 'screens/userInfo/UserInfoStep1Screen';
 import UserInfoStep2Screen from 'screens/userInfo/UserInfoStep2Screen';
 
-const Stack = createStackNavigator();
+const Stack = createStackNavigator<UserInfoStackParamList>();
 
 const UserInfoStack = () => (
   <UserInfoProvider>

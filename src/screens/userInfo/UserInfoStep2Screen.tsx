@@ -1,12 +1,17 @@
 import React from 'react';
 
 import {useNavigation} from '@react-navigation/native';
-import {Button} from 'react-native';
+import {Button, View} from 'react-native';
 
 import MacroDefinitionsInput from 'components/MacroDefinitionsInput';
-import {UserInfoStep2NavigationProp} from 'navigation/RouteTypes';
+import {
+  UserInfoNavigationProp,
+  UserInfoStep2NavigationProp,
+} from 'navigation/RouteTypes';
 import {useUserInfoContext} from 'providers/UserInfoProvider';
 import {UserData} from 'schemas/User';
+import styles from 'styles';
+import {DRAWER} from 'navigation/Constants';
 
 const UserInfoStep2Screen = (): React.ReactElement => {
   const navigation = useNavigation<UserInfoStep2NavigationProp>();
@@ -14,8 +19,12 @@ const UserInfoStep2Screen = (): React.ReactElement => {
   const {macroDefinition} = userData;
 
   React.useLayoutEffect(() => {
+    const onSave = () => {
+      saveUser();
+      navigation.getParent<UserInfoNavigationProp>().replace(DRAWER);
+    };
     navigation.setOptions({
-      headerRight: () => <Button title="Save" onPress={saveUser} />,
+      headerRight: () => <Button title="Save" onPress={onSave} />,
     });
   });
 
@@ -32,10 +41,12 @@ const UserInfoStep2Screen = (): React.ReactElement => {
   const updateMacroDefinition = updater('macroDefinition');
 
   return (
-    <MacroDefinitionsInput
-      value={macroDefinition}
-      onChange={updateMacroDefinition}
-    />
+    <View style={styles.screen}>
+      <MacroDefinitionsInput
+        value={macroDefinition}
+        onChange={updateMacroDefinition}
+      />
+    </View>
   );
 };
 
