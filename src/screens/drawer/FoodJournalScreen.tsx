@@ -1,7 +1,9 @@
 import React from 'react';
 
 import {useNavigation, useRoute} from '@react-navigation/native';
-import {Button, View} from 'react-native';
+import moment from 'moment';
+import {Button, LayoutAnimation, StyleSheet, View} from 'react-native';
+import CalendarStrip from 'react-native-calendar-strip';
 
 import JouranlEntryList from 'components/JournalEntryList';
 import Spacer from 'components/Spacer';
@@ -16,10 +18,20 @@ import {useJournalContext} from 'providers/JournalProvider';
 import {useUserContext} from 'providers/UserProvider';
 import styles from 'styles';
 import JournalEntry from 'schemas/JournalEntry';
+import {isSameDay} from 'utils/Date';
 import {useParentNavigation} from 'utils/Navigation';
 
+const _styles = StyleSheet.create({
+  calendar: {
+    height: 100,
+  },
+  selectedDateContainer: {
+    backgroundColor: 'pink',
+  },
+});
+
 interface Props {
-  date: string;
+  date: Date;
 }
 
 const AddMealButton = ({date}: Props) => {
@@ -27,31 +39,52 @@ const AddMealButton = ({date}: Props) => {
   return (
     <Button
       title="Add Meal"
-      onPress={() => navigation.navigate(ADD_MEAL, {date})}
+      onPress={() => navigation.navigate(ADD_MEAL, {date: date.getTime()})}
     />
   );
 };
 
 const FoodJournalScreen = () => {
   const {
-    params: {date},
+    params: {date: initialDate},
   } = useRoute<JournalScreenRouteProp>();
   const {user} = useUserContext();
-  const {todaysEntry, deleteMeal, deleteConsumedFoodItem} = useJournalContext();
+  const {entries, deleteMeal, deleteConsumedFoodItem} = useJournalContext();
   const navigation = useParentNavigation();
   const foodCrudNavigation = useFoodCrudNavigationContext();
+
+  const [date, setDate] = React.useState(new Date(initialDate));
+  const onSetDate = React.useCallback((selectedDate: moment.Moment) => {
+    setDate(selectedDate.toDate());
+  }, []);
+  const [showCalendarStrip, setShowCalendarStrip] = React.useState(false);
+
+  const toggleCalendarStrip = React.useCallback(() => {
+    LayoutAnimation.easeInEaseOut();
+    setShowCalendarStrip(!showCalendarStrip);
+  }, [showCalendarStrip]);
 
   const AddMealButtonFunction = React.useCallback(
     () => <AddMealButton date={date} />,
     [date],
   );
 
+  const DateHeaderTitle = React.useCallback(() => {
+    const icon = showCalendarStrip ? '\u25B2' : '\u25BC';
+    return (
+      <Button
+        title={`${moment(date).format('ddd MM DD YYYY')} ${icon}`}
+        onPress={toggleCalendarStrip}
+      />
+    );
+  }, [date, showCalendarStrip, toggleCalendarStrip]);
+
   React.useLayoutEffect(() => {
     foodCrudNavigation.setOptions({
-      title: date,
+      headerTitle: DateHeaderTitle,
       headerRight: AddMealButtonFunction,
     });
-  }, [date, AddMealButtonFunction, foodCrudNavigation]);
+  }, [AddMealButtonFunction, foodCrudNavigation, DateHeaderTitle]);
 
   const addItem = React.useCallback(
     (journalEntryId: JournalEntry['_id'], mealIndex: number) =>
@@ -65,7 +98,7 @@ const FoodJournalScreen = () => {
   const editMeal = React.useCallback(
     (journalEntryDate: Date, mealIndex: number) =>
       navigation?.navigate(ADD_MEAL, {
-        date: journalEntryDate.toDateString(),
+        date: journalEntryDate.getTime(),
         mealIndex,
       }),
     [navigation],
@@ -85,14 +118,30 @@ const FoodJournalScreen = () => {
     [foodCrudNavigation],
   );
 
+  const viewedEntry = React.useMemo(() => {
+    return entries.find(entry => isSameDay(entry.date, date)) || null;
+  }, [date, entries]);
   const macros = user.getCurrentMacros();
+  const markedDates = React.useMemo(() => {
+    return entries.map(entry => ({date: entry.date, dots: [{color: 'blue'}]}));
+  }, [entries]);
 
   return (
     <View style={styles.screen}>
-      <Stats macros={macros} meals={todaysEntry?.meals} />
+      {showCalendarStrip && (
+        <CalendarStrip
+          style={_styles.calendar}
+          highlightDateContainerStyle={_styles.selectedDateContainer}
+          scrollable
+          selectedDate={date}
+          onDateSelected={onSetDate}
+          markedDates={markedDates}
+        />
+      )}
+      <Stats macros={macros} meals={viewedEntry?.meals} />
       <Spacer />
       <JouranlEntryList
-        journalEntry={todaysEntry}
+        journalEntry={viewedEntry}
         onAddItem={addItem}
         onEditMeal={editMeal}
         onDeleteMeal={deleteMeal}

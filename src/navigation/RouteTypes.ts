@@ -7,7 +7,7 @@ export type PublicStackParamList = {
 
 export type PrivateStackParamList = {
   AddMeal: {
-    date: string;
+    date: number;
     mealIndex?: number;
   };
   Drawer: NavigatorScreenParams<DrawerParamList> | undefined;
@@ -32,12 +32,9 @@ export type FoodCrudStackParamList = {
 
 export type DrawerParamList = {
   Journal: {
-    date: string;
+    date: number;
   };
   FoodEditor: undefined;
-  DateSelector: {
-    currentDate: string | undefined;
-  };
   Profile: undefined;
 };
 
@@ -51,16 +48,6 @@ export type UserInfoStackParamList = {
 export type WelcomeScreenNavigationProp = StackNavigationProp<
   PublicStackParamList,
   'Welcome'
->;
-
-export type DateSelectorScreenNavigationProp = StackNavigationProp<
-  DrawerParamList,
-  'DateSelector'
->;
-
-export type DateSelectorScreenRouteProp = RouteProp<
-  DrawerParamList,
-  'DateSelector'
 >;
 
 export type JournalScreenNavigationProp = StackNavigationProp<

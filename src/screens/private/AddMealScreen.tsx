@@ -10,11 +10,14 @@ import {
 } from 'navigation/RouteTypes';
 import {useJournalContext} from 'providers/JournalProvider';
 import styles from 'styles';
+import moment from 'moment';
 
 const AddMealScreen = () => {
   const navigation = useNavigation<AddMealScreenNavigationProp>();
   const route = useRoute<AddMealScreenRouteProp>();
-  const {date, mealIndex} = route.params;
+  const {date: dateParam, mealIndex} = route.params;
+
+  const date = React.useMemo(() => new Date(dateParam), [dateParam]);
 
   const {saveMeal} = useJournalContext();
 
@@ -54,7 +57,7 @@ const AddMealScreen = () => {
 
   return (
     <View style={styles.screen}>
-      <Text>{`Add Meal on ${date}`}</Text>
+      <Text>{`Add Meal on ${moment(date).format('ddd MM DD YYYY')}`}</Text>
       <Button title="Breakfast" onPress={onAddBreakfast} />
       <Button title="Lunch" onPress={onAddLunch} />
       <Button title="Dinner" onPress={onAddDinner} />

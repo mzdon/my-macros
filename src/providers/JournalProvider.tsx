@@ -21,9 +21,8 @@ import {
 } from 'utils/Queries';
 
 interface JournalContext {
-  todaysEntry: JournalEntry | null;
-  getEntries: (startDate: Date, endDate: Date) => JournalEntry[];
-  saveMeal: (date: string, description: string, order?: number) => void;
+  entries: JournalEntry[];
+  saveMeal: (date: Date, description: string, order?: number) => void;
   deleteMeal: (meal: Meal) => void;
   saveConsumedFoodItem: (
     entryId: string,
@@ -63,7 +62,6 @@ const JournalProvider = ({
   }
 
   const userId = user._id;
-  const today = new Date(new Date().toDateString());
 
   const getEntryById = useGetJournalEntryById(realm);
   const getFoodItemById = useGetFoodItemById(realm);
@@ -79,14 +77,13 @@ const JournalProvider = ({
     [realm],
   );
 
-  const todaysEntry = getEntryForDate(today);
-
-  const getEntries = () => [];
+  const getEntries = React.useCallback(() => {
+    return realm.objects<JournalEntry>('JournalEntry').sorted('date');
+  }, [realm]);
 
   const saveMeal = React.useCallback(
-    (date: string, description: string, mealIndex?: number) => {
-      const d = new Date(date);
-      const entry = getEntryForDate(d);
+    (date: Date, description: string, mealIndex?: number) => {
+      const entry = getEntryForDate(date);
       let meals = entry ? [...entry.meals] : [];
       if (mealIndex === undefined) {
         const newMeal = {description};
@@ -102,7 +99,7 @@ const JournalProvider = ({
         });
       }
 
-      const entryData = {userId, date: d, meals, id: entry?._id};
+      const entryData = {userId, date, meals, id: entry?._id};
       realm.write(() => {
         realm.create<JournalEntry>(
           JournalEntry,
@@ -189,8 +186,7 @@ const JournalProvider = ({
 
   const contextValue = React.useMemo(() => {
     return {
-      todaysEntry,
-      getEntries,
+      entries: [...getEntries()],
       saveMeal,
       deleteMeal,
       saveConsumedFoodItem,
@@ -201,9 +197,9 @@ const JournalProvider = ({
     applyFoodItemGroup,
     deleteConsumedFoodItem,
     deleteMeal,
+    getEntries,
     saveConsumedFoodItem,
     saveMeal,
-    todaysEntry,
   ]);
 
   return (

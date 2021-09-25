@@ -113,7 +113,11 @@ const FoodItemProvider = ({
     if (foodItemId) {
       // case [1], [4]
       data = getFoodItemById(foodItemId).getData();
-    } else if (journalEntryId && mealIndex !== undefined && consumedItemIndex) {
+    } else if (
+      journalEntryId &&
+      mealIndex !== undefined &&
+      consumedItemIndex !== undefined
+    ) {
       // case [2]
       const foodItem = getExistingFoodItemFromConsumedFoodItem(
         journalEntryId,

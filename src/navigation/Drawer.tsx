@@ -8,7 +8,6 @@ import {withScreenEnhancers} from 'navigation/Common';
 import * as NavConstants from 'navigation/Constants';
 import {DrawerParamList, DrawerNavigationProp} from 'navigation/RouteTypes';
 import FoodCrudNavigationProvider from 'providers/FoodCrudNavigationProvider';
-import DateSelectorScreen from 'screens/drawer/DateSelectorScreen';
 import FoodJournalScreen from 'screens/drawer/FoodJournalScreen';
 import FoodSelectorScreen from 'screens/drawer/FoodSelectorScreen';
 import ProfileScreen from 'screens/drawer/ProfileScreen';
@@ -35,18 +34,13 @@ const Drawer = () => {
         <DrawerNav.Screen
           key="journal"
           name={NavConstants.JOURNAL}
-          initialParams={{date: new Date().toDateString()}}
+          initialParams={{date: new Date().getTime()}}
           component={withScreenEnhancers(FoodJournalScreen)}
         />
         <DrawerNav.Screen
           key="food-editor"
           name={NavConstants.FOOD_EDITOR}
           component={withScreenEnhancers(FoodSelectorScreen)}
-        />
-        <DrawerNav.Screen
-          key="date-selector"
-          name={NavConstants.DATE_SELECTOR}
-          component={withScreenEnhancers(DateSelectorScreen)}
         />
         <DrawerNav.Screen
           key="profile"
