@@ -1,11 +1,8 @@
 import React from 'react';
 
-import {Text} from 'react-native';
-
 import CatastrophicErrorBoundary from 'components/errorBoundary/CatastrophicErrorBoundary';
 import RecoverableErrorBoundary from 'components/errorBoundary/RecoverableErrorBoundary';
-import {CatastrophicError, RecoverableError} from 'utils/Errors';
-import styles from 'styles';
+import {RecoverableError} from 'utils/Errors';
 
 type Props = React.PropsWithChildren<{}>;
 interface State {
@@ -33,21 +30,20 @@ class ErrorBoundary extends React.Component<Props, State> {
       return this.props.children;
     }
 
-    let Component;
-    if (error instanceof CatastrophicError) {
-      Component = CatastrophicErrorBoundary;
-    } else if (error instanceof RecoverableError) {
-      Component = RecoverableErrorBoundary;
-    }
-
-    if (Component) {
-      return <Component error={error}>{this.props.children}</Component>;
+    if (error instanceof RecoverableError) {
+      return (
+        <RecoverableErrorBoundary error={error}>
+          {this.props.children}
+        </RecoverableErrorBoundary>
+      );
     }
 
     return (
-      <>
-        <Text style={styles.error}>{error.message}</Text>
-      </>
+      <CatastrophicErrorBoundary
+        error={error}
+        onReset={() => this.setState({error: null})}>
+        {this.props.children}
+      </CatastrophicErrorBoundary>
     );
   }
 }

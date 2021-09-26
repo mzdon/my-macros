@@ -40,7 +40,7 @@ export const useThrowAsyncError = () => {
 
 export const useSafeAsyncCall = () => {
   const throwAsyncError = useThrowAsyncError();
-  return (func: () => Promise<any>) => {
+  return (func: () => Promise<any> | void) => {
     return async () => {
       try {
         return await func();

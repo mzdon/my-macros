@@ -5,17 +5,69 @@ import {Button, Text, View} from 'react-native';
 import BaseTextInput from 'components/BaseTextInput';
 import Spacer from 'components/Spacer';
 import {useAuthContext} from 'providers/AuthProvider';
-import {useSafeAsyncCall} from 'utils/Errors';
 import styles from 'styles';
+import {useSafeAsyncCall} from 'utils/Errors';
+import {
+  emailErrorMessage,
+  isValidEmail,
+  isValidPassword,
+  passwordErrorMessage,
+  useValidateFields,
+} from 'utils/Validators';
+
+const fieldValidators = {
+  email: {
+    isValid: isValidEmail,
+    message: emailErrorMessage,
+  },
+  password: {
+    isValid: isValidPassword,
+    message: passwordErrorMessage,
+  },
+};
 
 const WelcomeScreen = () => {
   const [email, setEmail] = React.useState('');
   const [password, setPassword] = React.useState('');
-  const safeAsyncCall = useSafeAsyncCall();
+  const values = React.useRef<{[key in 'email' | 'password']: string}>({
+    email,
+    password,
+  });
+  values.current.email = email;
+  values.current.password = password;
 
   const {signIn, signUp} = useAuthContext();
+  const safeAsyncCall = useSafeAsyncCall();
   const onSignIn = safeAsyncCall(() => signIn(email, password));
   const onSignUp = safeAsyncCall(() => signUp(email, password));
+
+  const validateBefore = React.useMemo(
+    () => ({
+      onSignUp,
+      onSignIn,
+    }),
+    [onSignIn, onSignUp],
+  );
+
+  const validateAfter = React.useMemo(
+    () => ({
+      setEmail,
+      setPassword,
+    }),
+    [],
+  );
+
+  const {
+    errors,
+    hasErrors,
+    validateAfter: afterCallbacks,
+    validateBefore: beforeCallbacks,
+  } = useValidateFields(
+    fieldValidators,
+    values.current,
+    validateBefore,
+    validateAfter,
+  );
 
   return (
     <View style={styles.screen}>
@@ -24,20 +76,22 @@ const WelcomeScreen = () => {
       <BaseTextInput
         placeholder="Email..."
         value={email}
-        onChangeText={setEmail}
+        onChangeText={!hasErrors ? setEmail : afterCallbacks?.setEmail}
         autoCapitalize="none"
+        error={errors.email}
       />
       <Spacer />
       <BaseTextInput
         placeholder="Password..."
         value={password}
-        onChangeText={setPassword}
+        onChangeText={!hasErrors ? setPassword : afterCallbacks?.setPassword}
         autoCapitalize="none"
         secureTextEntry
+        error={errors.password}
       />
       <Spacer />
-      <Button title="Sign Up" onPress={onSignUp} />
-      <Button title="Sign In" onPress={onSignIn} />
+      <Button title="Sign Up" onPress={beforeCallbacks?.onSignUp} />
+      <Button title="Sign In" onPress={beforeCallbacks?.onSignIn} />
     </View>
   );
 };
