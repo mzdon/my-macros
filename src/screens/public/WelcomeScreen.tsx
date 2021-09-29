@@ -6,7 +6,7 @@ import BaseTextInput from 'components/BaseTextInput';
 import Spacer from 'components/Spacer';
 import {useAuthContext} from 'providers/AuthProvider';
 import styles from 'styles';
-import {useSafeAsyncCall} from 'utils/Errors';
+import {RecoverableError, useSafeAsyncCall} from 'utils/Errors';
 import {
   emailErrorMessage,
   isValidEmail,
@@ -15,33 +15,34 @@ import {
   useValidateFields,
 } from 'utils/Validators';
 
-const fieldValidators = {
-  email: {
-    isValid: isValidEmail,
-    message: emailErrorMessage,
-  },
-  password: {
-    isValid: isValidPassword,
-    message: passwordErrorMessage,
-  },
-};
-
 const WelcomeScreen = () => {
   const [email, setEmail] = React.useState('');
   const [password, setPassword] = React.useState('');
-  const values = React.useRef<{[key in 'email' | 'password']: string}>({
-    email,
-    password,
-  });
-  values.current.email = email;
-  values.current.password = password;
 
   const {signIn, signUp} = useAuthContext();
-  const safeAsyncCall = useSafeAsyncCall();
+  const safeAsyncCall = useSafeAsyncCall<RecoverableError>(RecoverableError);
   const onSignIn = safeAsyncCall(() => signIn(email, password));
   const onSignUp = safeAsyncCall(() => signUp(email, password));
 
-  const validateBefore = React.useMemo(
+  const fieldValidators = React.useMemo(
+    () => ({
+      email: {
+        isValid: isValidEmail,
+        message: emailErrorMessage,
+        value: email,
+        onChange: setEmail,
+      },
+      password: {
+        isValid: isValidPassword,
+        message: passwordErrorMessage,
+        value: password,
+        onChange: setPassword,
+      },
+    }),
+    [email, password],
+  );
+
+  const before = React.useMemo(
     () => ({
       onSignUp,
       onSignIn,
@@ -49,24 +50,9 @@ const WelcomeScreen = () => {
     [onSignIn, onSignUp],
   );
 
-  const validateAfter = React.useMemo(
-    () => ({
-      setEmail,
-      setPassword,
-    }),
-    [],
-  );
-
-  const {
-    errors,
-    hasErrors,
-    validateAfter: afterCallbacks,
-    validateBefore: beforeCallbacks,
-  } = useValidateFields(
+  const {errors, onChange, validateBefore} = useValidateFields(
     fieldValidators,
-    values.current,
-    validateBefore,
-    validateAfter,
+    before,
   );
 
   return (
@@ -76,7 +62,7 @@ const WelcomeScreen = () => {
       <BaseTextInput
         placeholder="Email..."
         value={email}
-        onChangeText={!hasErrors ? setEmail : afterCallbacks?.setEmail}
+        onChangeText={onChange.email}
         autoCapitalize="none"
         error={errors.email}
       />
@@ -84,14 +70,14 @@ const WelcomeScreen = () => {
       <BaseTextInput
         placeholder="Password..."
         value={password}
-        onChangeText={!hasErrors ? setPassword : afterCallbacks?.setPassword}
+        onChangeText={onChange.password}
         autoCapitalize="none"
         secureTextEntry
         error={errors.password}
       />
       <Spacer />
-      <Button title="Sign Up" onPress={beforeCallbacks?.onSignUp} />
-      <Button title="Sign In" onPress={beforeCallbacks?.onSignIn} />
+      <Button title="Sign Up" onPress={validateBefore.onSignUp} />
+      <Button title="Sign In" onPress={validateBefore.onSignIn} />
     </View>
   );
 };

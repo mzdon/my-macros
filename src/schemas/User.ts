@@ -4,10 +4,9 @@ import Realm from 'realm';
 import FoodItem from 'schemas/FoodItem';
 import FoodItemGroup from 'schemas/FoodItemGroup';
 import Height from 'schemas/Height';
-import MacroDefinition from 'schemas/MacroDefinition';
+import MacroDefinition, {MacroData} from 'schemas/MacroDefinition';
 import WeighIn from 'schemas/WeighIn';
 import {MeasurementSystem} from 'types/MeasurementSystem';
-import {MacroDefinitionStrings} from 'types/MacroDefinition';
 
 function birthdayStringToDate(bday: string): Date | null {
   if (!bday) {
@@ -20,15 +19,13 @@ function birthdayStringToDate(bday: string): Date | null {
   return new Date(year, monthIdx, day);
 }
 
-const BDAY_REGEX = new RegExp('\\d{2}/\\d{2}/\\d{4}');
-
 export interface UserData {
   name: string;
   birthday: string;
   measurementSystem: MeasurementSystem | null;
   height: number;
   weight: number;
-  macroDefinition: MacroDefinitionStrings;
+  macroDefinition: MacroData;
 }
 
 interface ConstructorObject {
@@ -108,6 +105,9 @@ class User extends Realm.Object {
   }
 
   getCurrentMacros() {
+    if (!this.macroDefinitions.length) {
+      return null;
+    }
     return this.macroDefinitions.reduce((lastResult, def) => {
       // a macroDef with a null startDate is the first set of macroDefs defined
       // there should be only one
@@ -119,6 +119,21 @@ class User extends Realm.Object {
       }
       return lastResult;
     }, this.macroDefinitions[0]);
+  }
+
+  getCurrentMacroData(): MacroData {
+    const macros = this.getCurrentMacros();
+    if (!macros) {
+      return {
+        calories: 0,
+        carbs: 0,
+        protein: 0,
+        fat: 0,
+        sugar: null,
+        fiber: null,
+      };
+    }
+    return macros.getMacroData();
   }
 
   getCurrentWeight() {
@@ -141,7 +156,7 @@ class User extends Realm.Object {
       measurementSystem: this.measurementSystem,
       height: this.height?.height || 0,
       weight: this.getCurrentWeight()?.weight || 0,
-      macroDefinition: MacroDefinition.getMacroStrings(this.getCurrentMacros()),
+      macroDefinition: this.getCurrentMacroData(),
     };
   }
 
@@ -198,13 +213,15 @@ class User extends Realm.Object {
       }
     }
     // macroDefinitions
-    this.updateMacros(userData.macroDefinition);
+    userData.macroDefinition && this.updateMacros(userData.macroDefinition);
   }
 
-  updateMacros(macroDef: MacroDefinitionStrings) {
+  updateMacros(macroDef: MacroData) {
     const currentMacros = this.getCurrentMacros();
     if (!currentMacros) {
-      this.macroDefinitions = [new MacroDefinition(macroDef)];
+      this.macroDefinitions = [
+        new MacroDefinition({startDate: null, ...macroDef}),
+      ];
     } else if (!currentMacros.isEqualTo(macroDef)) {
       this.macroDefinitions.push(new MacroDefinition(macroDef));
     }
@@ -242,26 +259,6 @@ class User extends Realm.Object {
         ...this.foodItemGroups.slice(idx + 1),
       ];
     }
-  }
-
-  static isValidBirthdayString(bday: string): boolean {
-    if (!bday) {
-      return true;
-    }
-    if (!BDAY_REGEX.test(bday)) {
-      return false;
-    }
-    const parts = bday.split('/');
-    const year = +parts[2];
-    const monthIdx = +parts[0] - 1;
-    const day = +parts[1];
-    const date = new Date(year, monthIdx, day);
-    // date was create as it was entered with no wonky month over/under non-sense
-    return (
-      date.getFullYear() === year &&
-      date.getMonth() === monthIdx &&
-      date.getDate() === day
-    );
   }
 
   static schema = {

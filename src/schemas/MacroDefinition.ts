@@ -1,14 +1,17 @@
 import {MacroDefinitionStrings} from 'types/MacroDefinition';
 import {isStringValidNumber} from 'utils/Validators';
 
-interface ConstructorObject {
+export interface MacroData {
+  calories: number;
+  carbs: number;
+  protein: number;
+  fat: number;
+  sugar: number | null;
+  fiber: number | null;
+}
+
+interface ConstructorObject extends Partial<MacroData> {
   startDate?: Date | null;
-  calories?: string | number;
-  carbs?: string | number;
-  protein?: string | number;
-  fat?: string | number;
-  sugar?: string | number;
-  fiber?: string | number;
 }
 
 function determineOptionalNumber(value: string | number | null): number | null {
@@ -55,15 +58,10 @@ class MacroDefinition {
     }
   }
 
-  isEqualTo(macroDef: MacroDefinitionStrings): boolean {
-    const keys: Array<keyof MacroDefinition> = [
-      'calories',
-      'carbs',
-      'protein',
-      'fat',
-      'sugar',
-      'fiber',
-    ];
+  isEqualTo(macroDef: MacroData): boolean {
+    const keys: Array<
+      'calories' | 'carbs' | 'protein' | 'fat' | 'sugar' | 'fiber'
+    > = ['calories', 'carbs', 'protein', 'fat', 'sugar', 'fiber'];
     let eq = true;
     let i = 0;
     while (eq && i < keys.length) {
@@ -72,6 +70,17 @@ class MacroDefinition {
       eq = determineOptionalNumber(macroDef[key]) === this[key];
     }
     return eq;
+  }
+
+  getMacroData() {
+    return {
+      calories: this.calories,
+      carbs: this.carbs,
+      protein: this.protein,
+      fat: this.fat,
+      sugar: this.sugar,
+      fiber: this.fiber,
+    };
   }
 
   static getMacroStrings(

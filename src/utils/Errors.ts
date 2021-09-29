@@ -31,21 +31,26 @@ export const useCatastrophicError = () => {
 
 export const useThrowAsyncError = () => {
   const [, setError] = React.useState();
-  return (e: unknown) => {
+  return (e: Error) => {
     setError(() => {
       throw e;
     });
   };
 };
 
-export const useSafeAsyncCall = () => {
+export const useSafeAsyncCall = <E extends Error = Error>(
+  ErrorClass?: new (error: string) => E,
+) => {
+  const Constructor = ErrorClass || Error;
   const throwAsyncError = useThrowAsyncError();
   return (func: () => Promise<any> | void) => {
     return async () => {
       try {
         return await func();
       } catch (e) {
-        throwAsyncError(e);
+        // @ts-ignore
+        const message = e?.message || String(e);
+        throwAsyncError(new Constructor(message));
       }
     };
   };

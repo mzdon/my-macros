@@ -1,7 +1,7 @@
 import React from 'react';
 
 // TODO fix this regex to support 1 decimal place
-const numberRegex = new RegExp('^\\d{0,}(.\\d?)?$');
+const numberRegex = new RegExp('^\\d{0,}(\\.\\d?)?$');
 export const isStringValidNumber = (v: string): boolean => numberRegex.test(v);
 
 export const checkValidNumberFirst = (fn: (val: string) => void) => {
@@ -23,7 +23,7 @@ export function useCheckValidNumberFirst(fn: (val: string) => void) {
   );
 }
 
-const EMAIL_REGEX = new RegExp('.*@.*\\..*');
+const EMAIL_REGEX = new RegExp('.*@.*\\..{1,}');
 export const isValidEmail = (val: string) => {
   return EMAIL_REGEX.test(val);
 };
@@ -35,10 +35,27 @@ export const isValidPassword = (val: string) => {
 export const passwordErrorMessage =
   'Passwords must be between 6 and 128 characters';
 
+export const isValidRequiredString = (val: string) => !!val;
+export const requiredErrorMessage = (fieldName: string) =>
+  `${fieldName[0].toUpperCase() + fieldName.slice(1)} is required`;
+
+const BDAY_REGEX = new RegExp('\\d{2}/\\d{2}/\\d{4}');
+export const isValidBirthday = (val: string) => {
+  if (!val) {
+    return true;
+  }
+  return BDAY_REGEX.test(val);
+};
+export const birthdayErrorMessage = 'Please use MM/DD/YYYY format';
+
+export const isValidRequiredNumber = (val: number) => !!val;
+
 interface FieldValidators {
   [key: string]: {
     isValid: (value: any) => boolean;
     message: string;
+    value: any;
+    onChange: (value: any) => void;
   };
 }
 
@@ -60,42 +77,57 @@ type OutputMap<I> = {
   [Property in keyof I]: (...args: any) => any;
 };
 
-interface ValidationTools<V, B, A> {
-  validateFields: (values: V) => boolean;
+type OnChange<F> = {
+  [Property in keyof F]: (value: any) => void;
+};
+
+interface ValidationTools<F, B> {
+  validateFields: (values: Values<F>) => boolean;
   validateField: (field: string, value: any) => boolean;
   validateBefore: OutputMap<B>;
-  validateAfter: OutputMap<A>;
-  hasErrors: boolean;
-  errors: Errors<V>;
+  onChange: OnChange<F>;
+  numErrors: number;
+  errors: Errors<F>;
+}
+
+function getValuesFromValidators<F extends FieldValidators>(
+  validators: F,
+): Values<F> {
+  return Object.keys(validators).reduce((result, key) => {
+    return {
+      ...result,
+      [key]: validators[key].value,
+    };
+  }, {} as Values<F>);
 }
 
 export function useValidateFields<
   F extends FieldValidators = FieldValidators,
-  V extends Values<F> = Values<F>,
   B extends InputMap = InputMap,
-  A extends InputMap = InputMap,
->(
-  validators: F,
-  values: V,
-  validateBefore?: B,
-  validateAfter?: A,
-): ValidationTools<V, B, A> {
-  const errors = React.useRef<Errors<V>>({});
-  const [hasErrors, setHasErrors] = React.useState(false);
+>(validators: F, validateBefore?: B): ValidationTools<F, B> {
+  const errors = React.useRef<Errors<F>>({});
+  const [numErrors, setNumErrors] = React.useState(0);
 
-  const updateHasErrors = React.useCallback((passedErrorDetected?: boolean) => {
+  const values = React.useMemo(
+    () => getValuesFromValidators(validators),
+    [validators],
+  );
+
+  const updateHasErrors = React.useCallback((passedErrorDetected?: number) => {
     if (passedErrorDetected !== undefined) {
-      setHasErrors(passedErrorDetected);
+      setNumErrors(passedErrorDetected);
       return;
     }
     const keys = Object.keys(errors.current);
-    let errorDetected = false;
+    let errorDetected = 0;
     let i = 0;
-    while (!errorDetected && i < keys.length) {
+    while (i < keys.length) {
+      if (errors.current[keys[i]]) {
+        errorDetected += 1;
+      }
       i += 1;
-      errorDetected = !!errors.current[keys[i]];
     }
-    setHasErrors(errorDetected);
+    setNumErrors(errorDetected);
   }, []);
 
   const validateField = React.useCallback(
@@ -105,7 +137,7 @@ export function useValidateFields<
         const {isValid, message} = validator;
         if (!isValid(value)) {
           errors.current[field] = message;
-          updateHasErrors(true);
+          updateHasErrors();
           return false;
         }
       }
@@ -119,12 +151,12 @@ export function useValidateFields<
   const validateFields = React.useCallback(
     (passedValues: Record<keyof F, any>): boolean => {
       const fields: Array<keyof F> = Object.keys(validators);
-      let errorDetected = false;
+      let errorDetected = 0;
       fields.forEach(field => {
         const {isValid, message} = validators[field];
         if (!isValid(passedValues[field])) {
           errors.current[field] = message;
-          errorDetected = true;
+          errorDetected += 1;
         } else {
           delete errors.current[field];
         }
@@ -154,30 +186,25 @@ export function useValidateFields<
     return before;
   }, [validateBefore, validateFields, values]);
 
-  const internalValidateAfter = React.useMemo(() => {
-    const after = {} as OutputMap<A>;
-    if (validateAfter) {
-      const fnKeys = Object.keys(validateAfter);
-      return fnKeys.reduce((result, next) => {
-        return {
-          ...result,
-          [next]: (...args: any[]): any => {
-            const returnValue = validateAfter[next](...args);
-            validateFields(values);
-            return returnValue;
-          },
-        };
-      }, after);
-    }
-    return after;
-  }, [validateAfter, validateFields, values]);
+  const onChange = React.useMemo(() => {
+    const fnKeys = Object.keys(validators);
+    return fnKeys.reduce((result, next) => {
+      return {
+        ...result,
+        [next]: (value: any): void => {
+          validators[next].onChange(value);
+          !!numErrors && validateField(next, value);
+        },
+      };
+    }, {} as OnChange<F>);
+  }, [numErrors, validateField, validators]);
 
   return {
     validateFields,
     validateField,
-    hasErrors,
+    numErrors,
     errors: errors.current,
     validateBefore: internalValidateBefore,
-    validateAfter: internalValidateAfter,
+    onChange,
   };
 }

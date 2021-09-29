@@ -37,3 +37,16 @@ export function useUpdater<R = string>(
     [onUpdate, key],
   );
 }
+
+export function useStateUpdater<T>(updateState: (data: any) => void) {
+  const updater = React.useCallback(
+    (key: keyof T) => {
+      return (value: T[keyof T]) =>
+        updateState({
+          [key]: value,
+        });
+    },
+    [updateState],
+  );
+  return updater;
+}

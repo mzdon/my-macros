@@ -1,19 +1,18 @@
 import React from 'react';
 
 import BaseTextInput, {BaseTextInputProps} from 'components/BaseTextInput';
-import User from 'schemas/User';
 import styles from 'styles';
 import {isStringValidNumber} from 'utils/Validators';
 
 interface Props extends BaseTextInputProps {
   value: string;
+  error: string | undefined;
   onChangeText: (v: string) => void;
 }
 
 const BirthdayInput = (props: Props): React.ReactElement<Props> => {
   const {onChangeText, ...rest} = props;
-  const {value} = rest;
-  const isValid = User.isValidBirthdayString(value);
+  const {value, error} = rest;
   const onChangeBirthday = (v: string) => {
     if (v.length < value.length) {
       onChangeText(v);
@@ -36,9 +35,8 @@ const BirthdayInput = (props: Props): React.ReactElement<Props> => {
       {...rest}
       onChangeText={onChangeBirthday}
       label="Birthday (optional)"
-      style={!isValid && styles.inputError}
+      style={!!error && styles.inputError}
       placeholder="MM/DD/YYYY"
-      error={!isValid && 'Please use MM/DD/YYYY format'}
     />
   );
 };

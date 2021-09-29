@@ -24,6 +24,7 @@ const BaseNumberInput = React.forwardRef<TextInput, BaseNumberInputProps>(
       <BaseTextInput
         ref={ref}
         {...rest}
+        keyboardType='numeric'
         value={String(value)}
         onChangeText={validOnChangeText}
       />
