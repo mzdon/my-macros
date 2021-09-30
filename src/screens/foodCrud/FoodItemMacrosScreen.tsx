@@ -7,14 +7,17 @@ import BaseNumberInput from 'components/BaseNumberInput';
 import Spacer from 'components/Spacer';
 import {ITEM_CONSUMED} from 'navigation/Constants';
 import {FoodItemMacrosNavigationProp} from 'navigation/RouteTypes';
+import {useFoodCrudNavigationContext} from 'providers/FoodCrudNavigationProvider';
 import {useFoodItemContext} from 'providers/FoodItemProvider';
 import styles from 'styles';
 import {InitFoodItemData} from 'schemas/FoodItem';
 
 const FoodItemMacrosScreen = (): React.ReactElement => {
   const navigation = useNavigation<FoodItemMacrosNavigationProp>();
+  const foodCrudNavigation = useFoodCrudNavigationContext();
 
-  const {foodItemData, updateFoodItemData, saveFoodItem} = useFoodItemContext();
+  const {journalEntryId, foodItemData, updateFoodItemData, saveFoodItem} =
+    useFoodItemContext();
   const {
     carbs = 0,
     protein = 0,
@@ -31,14 +34,19 @@ const FoodItemMacrosScreen = (): React.ReactElement => {
 
   const onNext = React.useCallback(() => {
     saveFoodItem();
-    navigation.navigate(ITEM_CONSUMED);
-  }, [navigation, saveFoodItem]);
+    if (journalEntryId) {
+      navigation.navigate(ITEM_CONSUMED);
+    } else {
+      foodCrudNavigation.goBack();
+    }
+  }, [foodCrudNavigation, journalEntryId, navigation, saveFoodItem]);
 
   React.useLayoutEffect(() => {
+    const title = journalEntryId ? 'Next' : 'Save';
     navigation.setOptions({
-      headerRight: () => <Button title="Next" onPress={onNext} />,
+      headerRight: () => <Button title={title} onPress={onNext} />,
     });
-  }, [navigation, onNext]);
+  }, [journalEntryId, navigation, onNext]);
 
   const updateCarbs = updater<number>('carbs');
   const updateProtein = updater<number>('protein');

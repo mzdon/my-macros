@@ -19,6 +19,7 @@ type ConsumedFoodItemDataProvided = Pick<
 >;
 
 export interface FoodItemContextValue {
+  journalEntryId: string | undefined;
   foodItemData: InitFoodItemData | null;
   saveFoodItem: () => void;
   updateFoodItemData: (data: Partial<InitFoodItemData>) => void;
@@ -216,12 +217,14 @@ const FoodItemProvider = ({
 
   const contextValue = React.useMemo(() => {
     return {
+      journalEntryId,
       foodItemData,
       saveFoodItem,
       updateFoodItemData,
       saveConsumedFoodItem: internalSaveConsumedFoodItem,
     };
   }, [
+    journalEntryId,
     foodItemData,
     internalSaveConsumedFoodItem,
     saveFoodItem,
