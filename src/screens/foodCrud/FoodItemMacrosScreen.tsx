@@ -1,7 +1,7 @@
 import React from 'react';
 
 import {useNavigation} from '@react-navigation/core';
-import {Button, Text, View} from 'react-native';
+import {Alert, Button, Text, View} from 'react-native';
 
 import BaseNumberInput from 'components/BaseNumberInput';
 import Spacer from 'components/Spacer';
@@ -16,7 +16,7 @@ const FoodItemMacrosScreen = (): React.ReactElement => {
   const navigation = useNavigation<FoodItemMacrosNavigationProp>();
   const foodCrudNavigation = useFoodCrudNavigationContext();
 
-  const {journalEntryId, foodItemData, updateFoodItemData, saveFoodItem} =
+  const {newFoodItem, foodItemData, updateFoodItemData, saveFoodItem} =
     useFoodItemContext();
   const {
     carbs = 0,
@@ -32,21 +32,52 @@ const FoodItemMacrosScreen = (): React.ReactElement => {
     };
   }
 
+  const promptUserToUpdateExistingConsumedFoodItems = React.useCallback(() => {
+    Alert.alert(
+      'Update Existing Entries?',
+      'Would you like to update any existing journal entry containing this food item?',
+      [
+        {
+          text: 'No',
+          onPress: () => {
+            saveFoodItem();
+            foodCrudNavigation.goBack();
+          },
+          style: 'cancel',
+        },
+        {
+          text: 'Yes',
+          onPress: () => {
+            saveFoodItem(true);
+            foodCrudNavigation.goBack();
+          },
+          style: 'default',
+        },
+      ],
+      {cancelable: false},
+    );
+  }, [foodCrudNavigation, saveFoodItem]);
+
   const onNext = React.useCallback(() => {
-    saveFoodItem();
-    if (journalEntryId) {
+    if (newFoodItem) {
+      saveFoodItem();
       navigation.navigate(ITEM_CONSUMED);
     } else {
-      foodCrudNavigation.goBack();
+      promptUserToUpdateExistingConsumedFoodItems();
     }
-  }, [foodCrudNavigation, journalEntryId, navigation, saveFoodItem]);
+  }, [
+    navigation,
+    newFoodItem,
+    promptUserToUpdateExistingConsumedFoodItems,
+    saveFoodItem,
+  ]);
 
   React.useLayoutEffect(() => {
-    const title = journalEntryId ? 'Next' : 'Save';
+    const title = newFoodItem ? 'Next' : 'Save';
     navigation.setOptions({
       headerRight: () => <Button title={title} onPress={onNext} />,
     });
-  }, [journalEntryId, navigation, onNext]);
+  }, [newFoodItem, navigation, onNext]);
 
   const updateCarbs = updater<number>('carbs');
   const updateProtein = updater<number>('protein');

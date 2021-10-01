@@ -5,6 +5,7 @@ import {withRealm} from 'react-realm-context';
 import {UpdateMode} from 'realm';
 
 import {useFoodGroupContext} from 'providers/FoodGroupProvider';
+import {useJournalContext} from 'providers/JournalProvider';
 import {useUserContext} from 'providers/UserProvider';
 import {InitConsumedFoodItemData} from 'schemas/ConsumedFoodItem';
 import FoodItem, {InitFoodItemData} from 'schemas/FoodItem';
@@ -19,9 +20,9 @@ type ConsumedFoodItemDataProvided = Pick<
 >;
 
 export interface FoodItemContextValue {
-  journalEntryId: string | undefined;
+  newFoodItem: boolean;
   foodItemData: InitFoodItemData | null;
-  saveFoodItem: () => void;
+  saveFoodItem: (updateReferences?: boolean) => void;
   updateFoodItemData: (data: Partial<InitFoodItemData>) => void;
   saveConsumedFoodItem: (
     consumedFoodItemData: ConsumedFoodItemDataProvided,
@@ -60,7 +61,9 @@ const FoodItemProvider = ({
 }: Props): React.ReactElement<Props> => {
   const {user} = useUserContext();
   const getFoodItemById = useGetFoodItemById(realm);
-  const {saveConsumedFoodItem} = useFoodGroupContext();
+  const {updateEntriesWithFoodItem} = useJournalContext();
+  const {saveConsumedFoodItem, updateGroupsWithFoodItem} =
+    useFoodGroupContext();
 
   const [foodItemData, setFoodItemData] =
     React.useState<InitFoodItemData | null>(null);
@@ -174,21 +177,34 @@ const FoodItemProvider = ({
     [realm, user],
   );
 
-  const saveFoodItem = React.useCallback(() => {
-    if (!foodItemData) {
-      throw new RecoverableError('No food item data save');
-    }
-    if (foodItemId) {
-      const validItem = FoodItem.verifyInitFoodItemData(foodItemData);
-      if (!validItem) {
-        throw new RecoverableError(
-          'Some food item data appears to be missing in order to create a consumed food item',
-        );
+  const saveFoodItem = React.useCallback(
+    (updateReferences: boolean = false) => {
+      if (!foodItemData) {
+        throw new RecoverableError('No food item data save');
       }
-      // if we are editing an existing food item, save it to realm
-      writeFoodItemToRealm(validItem);
-    }
-  }, [foodItemData, foodItemId, writeFoodItemToRealm]);
+      if (foodItemId) {
+        const validItem = FoodItem.verifyInitFoodItemData(foodItemData);
+        if (!validItem) {
+          throw new RecoverableError(
+            'Some food item data appears to be missing in order to create a consumed food item',
+          );
+        }
+        // if we are editing an existing food item, save it to realm
+        writeFoodItemToRealm(validItem);
+        if (updateReferences) {
+          updateGroupsWithFoodItem(validItem);
+          updateEntriesWithFoodItem(validItem);
+        }
+      }
+    },
+    [
+      foodItemData,
+      foodItemId,
+      updateEntriesWithFoodItem,
+      updateGroupsWithFoodItem,
+      writeFoodItemToRealm,
+    ],
+  );
 
   const internalSaveConsumedFoodItem = React.useCallback(
     (data: ConsumedFoodItemDataProvided) => {
@@ -217,7 +233,7 @@ const FoodItemProvider = ({
 
   const contextValue = React.useMemo(() => {
     return {
-      journalEntryId,
+      newFoodItem: !!journalEntryId,
       foodItemData,
       saveFoodItem,
       updateFoodItemData,

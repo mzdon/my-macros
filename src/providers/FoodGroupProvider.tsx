@@ -5,10 +5,13 @@ import {withRealm} from 'react-realm-context';
 import {UpdateMode} from 'realm';
 
 import {useUserContext} from 'providers/UserProvider';
-import {InitConsumedFoodItemData} from 'schemas/ConsumedFoodItem';
+import ConsumedFoodItem, {
+  InitConsumedFoodItemData,
+} from 'schemas/ConsumedFoodItem';
 import FoodItemGroup from 'schemas/FoodItemGroup';
 import {RecoverableError} from 'utils/Errors';
 import {useGetFoodItemById, useGetFoodItemGroupById} from 'utils/Queries';
+import {InitFoodItemData} from 'schemas/FoodItem';
 
 type FoodGroupStateData = {
   _id?: UUID;
@@ -28,6 +31,7 @@ export interface FoodGroupContextValue {
   ) => void;
   removeFoodItemFromGroup: (itemIndex: number) => void;
   applyFoodItemGroup: (group: FoodItemGroup) => void;
+  updateGroupsWithFoodItem: (foodItemData: InitFoodItemData) => void;
 }
 
 const FoodGroupContext = React.createContext<FoodGroupContextValue | null>(
@@ -196,6 +200,48 @@ const FoodGroupProvider = ({
     [foodGroupData],
   );
 
+  const updateGroupsWithFoodItem = React.useCallback(
+    (foodItemData: InitFoodItemData) => {
+      if (foodItemData._id === undefined) {
+        throw new RecoverableError(
+          'No food item id found to search food groups with',
+        );
+      }
+      const foodItemId = foodItemData._id;
+      const groupIdToItemIdxMap: Record<string, number> = {};
+      const groups = realm.objects<FoodItemGroup>('FoodItemGroup').filter(
+        (g: FoodItemGroup) =>
+          !!g.foodItems.find((i, iIdx) => {
+            const idMatch = i.itemId.equals(foodItemId);
+            if (idMatch) {
+              groupIdToItemIdxMap[g._id.toHexString()] = iIdx;
+              return true;
+            }
+            return false;
+          }),
+      );
+      if (groups.length) {
+        realm.write(() => {
+          groups.forEach(group => {
+            const itemIdx = groupIdToItemIdxMap[group._id.toHexString()];
+            if (itemIdx !== undefined) {
+              const oldItem = group.foodItems[itemIdx];
+              const newConsumedFoodItemdData: InitConsumedFoodItemData = {
+                item: foodItemData,
+                quantity: oldItem.quantity,
+                unitOfMeasurement: oldItem.unitOfMeasurement,
+              };
+              group.foodItems[itemIdx] = ConsumedFoodItem.generate(
+                newConsumedFoodItemdData,
+              ) as ConsumedFoodItem;
+            }
+          });
+        });
+      }
+    },
+    [realm],
+  );
+
   const contextValue = React.useMemo(() => {
     return {
       foodGroupData,
@@ -206,6 +252,7 @@ const FoodGroupProvider = ({
         : saveConsumedFoodItem,
       removeFoodItemFromGroup,
       applyFoodItemGroup: internalApplyFoodItemGroup,
+      updateGroupsWithFoodItem,
     };
   }, [
     foodGroupData,
@@ -215,6 +262,7 @@ const FoodGroupProvider = ({
     saveConsumedFoodItemToGroup,
     saveFoodGroup,
     updateDescription,
+    updateGroupsWithFoodItem,
   ]);
 
   return (

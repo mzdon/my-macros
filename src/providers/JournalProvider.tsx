@@ -11,6 +11,7 @@ import ConsumedFoodItem, {
 } from 'schemas/ConsumedFoodItem';
 import JournalEntry from 'schemas/JournalEntry';
 import FoodItemGroup from 'schemas/FoodItemGroup';
+import {InitFoodItemData} from 'schemas/FoodItem';
 import Meal from 'schemas/Meal';
 import {isSameDay} from 'utils/Date';
 import {CatastrophicError, RecoverableError} from 'utils/Errors';
@@ -36,6 +37,7 @@ interface JournalContext {
     mealIndex: number,
     group: FoodItemGroup,
   ) => void;
+  updateEntriesWithFoodItem: (foodItemData: InitFoodItemData) => void;
 }
 
 const JournalContext = React.createContext<JournalContext | null>(null);
@@ -184,6 +186,52 @@ const JournalProvider = ({
     [hydrateConsumedFoodItem, saveConsumedFoodItem],
   );
 
+  const updateEntriesWithFoodItem = React.useCallback(
+    (foodItemData: InitFoodItemData) => {
+      if (foodItemData._id === undefined) {
+        throw new RecoverableError(
+          'No food item id found to search journal entries items with',
+        );
+      }
+      const foodItemId = foodItemData._id;
+      const journalIdToIndexMap: Record<string, [number, number]> = {};
+      const entries = realm.objects<JournalEntry>('JournalEntry').filter(
+        (e: JournalEntry) =>
+          !!e.meals.find((m, mIdx) =>
+            m.items.find((i, iIdx) => {
+              const idMatch = i.itemId.equals(foodItemId);
+              if (idMatch) {
+                journalIdToIndexMap[e._id.toHexString()] = [mIdx, iIdx];
+                return true;
+              }
+              return false;
+            }),
+          ),
+      );
+      if (entries.length) {
+        realm.write(() => {
+          entries.forEach(entry => {
+            const [mealIdx, itemIdx] =
+              journalIdToIndexMap[entry._id.toHexString()] || [];
+            if (mealIdx !== undefined && itemIdx !== undefined) {
+              const oldMeal = entry.meals[mealIdx];
+              const oldItem = oldMeal.items[itemIdx];
+              const newItemData: InitConsumedFoodItemData = {
+                item: foodItemData,
+                quantity: oldItem.quantity,
+                unitOfMeasurement: oldItem.unitOfMeasurement,
+              };
+              entry.meals[mealIdx].items[itemIdx] = ConsumedFoodItem.generate(
+                newItemData,
+              ) as ConsumedFoodItem;
+            }
+          });
+        });
+      }
+    },
+    [realm],
+  );
+
   const contextValue = React.useMemo(() => {
     return {
       entries: [...getEntries()],
@@ -192,6 +240,7 @@ const JournalProvider = ({
       saveConsumedFoodItem,
       deleteConsumedFoodItem,
       applyFoodItemGroup,
+      updateEntriesWithFoodItem,
     };
   }, [
     applyFoodItemGroup,
@@ -200,6 +249,7 @@ const JournalProvider = ({
     getEntries,
     saveConsumedFoodItem,
     saveMeal,
+    updateEntriesWithFoodItem,
   ]);
 
   return (
