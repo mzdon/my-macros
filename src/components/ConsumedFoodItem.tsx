@@ -3,11 +3,12 @@ import React from 'react';
 import {Text} from 'react-native';
 import ConsumedFoodItem, {
   InitConsumedFoodItemData,
+  StrandedConsumedFoodItemData,
 } from 'schemas/ConsumedFoodItem';
 
 type Props =
   | {
-      item: ConsumedFoodItem;
+      item: ConsumedFoodItem | StrandedConsumedFoodItemData;
       initItem?: never;
     }
   | {

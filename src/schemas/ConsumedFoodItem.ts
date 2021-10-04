@@ -13,13 +13,31 @@ export interface InitConsumedFoodItemData {
   unitOfMeasurement: UomOrServings;
 }
 
+export interface StrandedConsumedFoodItemData {
+  itemName: string;
+  quantity: number;
+  unitOfMeasurement: UnitOfMeasurement;
+  calories: number;
+  carbs: number;
+  protein: number;
+  fat: number;
+  fiber: number;
+  sugar: number;
+}
+
 export interface ReturnedConsumedFoodItemData {
   item: {
-    _id: UUID;
+    _id: UUID | null;
     name: string;
   };
   quantity: number;
   unitOfMeasurement: UnitOfMeasurement;
+  calories: number;
+  carbs: number;
+  protein: number;
+  fat: number;
+  fiber: number;
+  sugar: number;
 }
 
 function determineServingsConsumedAndUom(
@@ -68,7 +86,7 @@ function determineItemMacros(item: InitFoodItemData, servings: number) {
 }
 
 class ConsumedFoodItem extends Realm.Object {
-  itemId!: UUID;
+  itemId!: UUID | null;
   itemName!: string;
   calories!: number;
   carbs!: number;
@@ -95,6 +113,15 @@ class ConsumedFoodItem extends Realm.Object {
     };
   }
 
+  static generateFromReturnedData(obj: ReturnedConsumedFoodItemData) {
+    const {item} = obj;
+    return {
+      itemId: item._id,
+      itemName: item.name,
+      ...obj,
+    };
+  }
+
   getData(): ReturnedConsumedFoodItemData {
     return {
       quantity: this.quantity,
@@ -103,14 +130,35 @@ class ConsumedFoodItem extends Realm.Object {
         _id: this.itemId,
         name: this.itemName,
       },
+      calories: this.calories,
+      carbs: this.carbs,
+      protein: this.protein,
+      fat: this.fat,
+      sugar: this.sugar,
+      fiber: this.fiber,
     };
+  }
+
+  clone(): ConsumedFoodItem {
+    return {
+      itemId: this.itemId,
+      itemName: this.itemName,
+      calories: this.calories,
+      carbs: this.carbs,
+      protein: this.protein,
+      fat: this.fat,
+      sugar: this.sugar,
+      fiber: this.fiber,
+      quantity: this.quantity,
+      unitOfMeasurement: this.unitOfMeasurement,
+    } as ConsumedFoodItem;
   }
 
   static schema = {
     name: 'ConsumedFoodItem',
     embedded: true,
     properties: {
-      itemId: 'uuid',
+      itemId: 'uuid?',
       itemName: 'string',
       calories: 'int',
       carbs: 'double',

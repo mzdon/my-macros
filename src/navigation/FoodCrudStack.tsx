@@ -13,7 +13,6 @@ import {
 import FoodCrudNavigationProvider from 'providers/FoodCrudNavigationProvider';
 import FoodGroupProvider from 'providers/FoodGroupProvider';
 import FoodItemProvider from 'providers/FoodItemProvider';
-import {useJournalContext} from 'providers/JournalProvider';
 import FoodItemDescriptionScreen from 'screens/foodCrud/FoodItemDescriptionScreen';
 import FoodItemGroupScreen from 'screens/foodCrud/FoodItemGroupScreen';
 import FoodItemMacrosScreen from 'screens/foodCrud/FoodItemMacrosScreen';
@@ -69,16 +68,13 @@ const FoodCrudStack = () => {
   const route = useRoute<FoodCrudScreenRouteProp>();
   const {journalEntryId, mealIndex, foodGroupId, newFoodGroup} = route.params;
 
-  const {applyFoodItemGroup, saveConsumedFoodItem} = useJournalContext();
   return (
     <FoodCrudNavigationProvider navigation={navigation}>
       <FoodGroupProvider
         newFoodGroup={!!newFoodGroup}
         journalEntryId={journalEntryId}
         mealIndex={mealIndex}
-        foodGroupId={foodGroupId}
-        applyFoodItemGroup={applyFoodItemGroup}
-        saveConsumedFoodItem={saveConsumedFoodItem}>
+        foodGroupId={foodGroupId}>
         <InnerFoodCrudStack />
       </FoodGroupProvider>
     </FoodCrudNavigationProvider>

@@ -60,11 +60,6 @@ const ItemConsumed = (): React.ReactElement => {
     if (!foodGroupData) {
       foodCrudNavigation.goBack();
     } else {
-      // const navState = navigation.getState();
-      // const key =
-      //   navState.routes.find(route => route.name === FOOD_ITEM_GROUP)?.key ||
-      //   '';
-      // navigation.dispatch(CommonActions.navigate({name: FOOD_ITEM_GROUP, key}));
       foodCrudNavigation.navigate(FOOD_ITEM_GROUP);
     }
   }, [foodCrudNavigation, foodGroupData, saveConsumedFoodItem, state]);

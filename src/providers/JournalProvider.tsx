@@ -7,7 +7,6 @@ import {UpdateMode} from 'realm';
 import {useUserContext} from 'providers/UserProvider';
 import ConsumedFoodItem, {
   InitConsumedFoodItemData,
-  ReturnedConsumedFoodItemData,
 } from 'schemas/ConsumedFoodItem';
 import JournalEntry from 'schemas/JournalEntry';
 import FoodItemGroup from 'schemas/FoodItemGroup';
@@ -17,7 +16,7 @@ import {isSameDay} from 'utils/Date';
 import {CatastrophicError, RecoverableError} from 'utils/Errors';
 import {
   useDeleteItem,
-  useGetFoodItemById,
+  useGetJournalEntriesWithFoodItemId,
   useGetJournalEntryById,
 } from 'utils/Queries';
 
@@ -28,7 +27,7 @@ interface JournalContext {
   saveConsumedFoodItem: (
     entryId: string,
     mealIndex: number,
-    consumedFoodItem: InitConsumedFoodItemData | ReturnedConsumedFoodItemData,
+    consumedFoodItem: ConsumedFoodItem,
     itemIndex?: number,
   ) => void;
   deleteConsumedFoodItem: (item: ConsumedFoodItem) => void;
@@ -66,7 +65,8 @@ const JournalProvider = ({
   const userId = user._id;
 
   const getEntryById = useGetJournalEntryById(realm);
-  const getFoodItemById = useGetFoodItemById(realm);
+  const getJournalEntriesWithFoodItemId =
+    useGetJournalEntriesWithFoodItemId(realm);
 
   const getEntryForDate = React.useCallback(
     (date: Date) => {
@@ -120,45 +120,17 @@ const JournalProvider = ({
     (
       journalEntryId: string,
       mealIndex: number,
-      consumedFoodItemData:
-        | InitConsumedFoodItemData
-        | ReturnedConsumedFoodItemData,
+      consumedFoodItem: ConsumedFoodItem,
       itemIndex?: number,
     ) => {
       const entry = getEntryById(new UUID(journalEntryId));
       const existingMeal = getMealFromEntry(entry, mealIndex);
-      let newItems;
-      if (itemIndex === undefined) {
-        newItems = [...existingMeal.items, consumedFoodItemData];
-      } else {
-        newItems = [
-          ...existingMeal.items.slice(0, itemIndex),
-          consumedFoodItemData,
-          ...existingMeal.items.slice(itemIndex + 1),
-        ];
-      }
-      const newMeals = [
-        ...entry.meals.slice(0, mealIndex),
-        {
-          description: existingMeal.description,
-          items: newItems,
-        },
-        ...entry.meals.slice(mealIndex + 1),
-      ];
-      const entryData = {
-        id: entry._id,
-        userId: entry.userId,
-        date: entry.date,
-        meals: newMeals,
-      };
-
       realm.write(() => {
-        realm.create(
-          JournalEntry,
-          // @ts-ignore
-          JournalEntry.generate(entryData),
-          UpdateMode.Modified,
-        );
+        if (itemIndex !== undefined) {
+          existingMeal.items[itemIndex] = consumedFoodItem.clone();
+        } else {
+          existingMeal.items.push(consumedFoodItem.clone());
+        }
       });
     },
     [getEntryById, realm],
@@ -166,24 +138,13 @@ const JournalProvider = ({
 
   const deleteConsumedFoodItem = useDeleteItem<ConsumedFoodItem>(realm);
 
-  const hydrateConsumedFoodItem = React.useCallback(
-    (data: ReturnedConsumedFoodItemData): InitConsumedFoodItemData => {
-      return {
-        ...data,
-        item: getFoodItemById(data.item._id).getData(),
-      };
-    },
-    [getFoodItemById],
-  );
-
   const applyFoodItemGroup = React.useCallback(
     (entryId: string, mealIdx: number, group: FoodItemGroup) => {
       group.foodItems.forEach(foodItem => {
-        const consumedFoodItem = hydrateConsumedFoodItem(foodItem.getData());
-        saveConsumedFoodItem(entryId, mealIdx, consumedFoodItem);
+        saveConsumedFoodItem(entryId, mealIdx, foodItem);
       });
     },
-    [hydrateConsumedFoodItem, saveConsumedFoodItem],
+    [saveConsumedFoodItem],
   );
 
   const updateEntriesWithFoodItem = React.useCallback(
@@ -193,43 +154,32 @@ const JournalProvider = ({
           'No food item id found to search journal entries items with',
         );
       }
-      const foodItemId = foodItemData._id;
-      const journalIdToIndexMap: Record<string, [number, number]> = {};
-      const entries = realm.objects<JournalEntry>('JournalEntry').filter(
-        (e: JournalEntry) =>
-          !!e.meals.find((m, mIdx) =>
-            m.items.find((i, iIdx) => {
-              const idMatch = i.itemId.equals(foodItemId);
-              if (idMatch) {
-                journalIdToIndexMap[e._id.toHexString()] = [mIdx, iIdx];
-                return true;
-              }
-              return false;
-            }),
-          ),
+      const {entries, journalIdToPathMap} = getJournalEntriesWithFoodItemId(
+        foodItemData._id,
       );
       if (entries.length) {
         realm.write(() => {
           entries.forEach(entry => {
-            const [mealIdx, itemIdx] =
-              journalIdToIndexMap[entry._id.toHexString()] || [];
-            if (mealIdx !== undefined && itemIdx !== undefined) {
-              const oldMeal = entry.meals[mealIdx];
-              const oldItem = oldMeal.items[itemIdx];
-              const newItemData: InitConsumedFoodItemData = {
-                item: foodItemData,
-                quantity: oldItem.quantity,
-                unitOfMeasurement: oldItem.unitOfMeasurement,
-              };
-              entry.meals[mealIdx].items[itemIdx] = ConsumedFoodItem.generate(
-                newItemData,
-              ) as ConsumedFoodItem;
+            const paths = journalIdToPathMap[entry._id.toHexString()];
+            if (paths !== undefined) {
+              paths.forEach(([mealIdx, itemIdx]) => {
+                const oldMeal = entry.meals[mealIdx];
+                const oldItem = oldMeal.items[itemIdx];
+                const newItemData: InitConsumedFoodItemData = {
+                  item: foodItemData,
+                  quantity: oldItem.quantity,
+                  unitOfMeasurement: oldItem.unitOfMeasurement,
+                };
+                entry.meals[mealIdx].items[itemIdx] = ConsumedFoodItem.generate(
+                  newItemData,
+                ) as ConsumedFoodItem;
+              });
             }
           });
         });
       }
     },
-    [realm],
+    [getJournalEntriesWithFoodItemId, realm],
   );
 
   const contextValue = React.useMemo(() => {

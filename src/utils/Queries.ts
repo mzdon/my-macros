@@ -52,3 +52,53 @@ export const useDeleteItem = <T extends Realm.Object = Realm.Object>(
     [realm, before, after],
   );
 };
+
+export const useGetFoodItemGroupsWithFoodItemId = (realm: Realm) => {
+  return React.useCallback(
+    (foodItemId: UUID) => {
+      const groupIdToItemIndexesMap: Record<string, number[]> = {};
+      const groups = realm.objects<FoodItemGroup>('FoodItemGroup').filter(
+        (g: FoodItemGroup) =>
+          !!g.foodItems.find((i, iIdx) => {
+            const idMatch = i.itemId?.equals(foodItemId);
+            if (idMatch) {
+              const gId = g._id.toHexString();
+              const mappedArray = groupIdToItemIndexesMap[gId] || [];
+              mappedArray.push(iIdx);
+              groupIdToItemIndexesMap[gId] = mappedArray;
+              return true;
+            }
+            return false;
+          }),
+      );
+      return {groups, groupIdToItemIndexesMap};
+    },
+    [realm],
+  );
+};
+
+export const useGetJournalEntriesWithFoodItemId = (realm: Realm) => {
+  return React.useCallback(
+    (foodItemId: UUID) => {
+      const journalIdToPathMap: Record<string, [number, number][]> = {};
+      const entries = realm.objects<JournalEntry>('JournalEntry').filter(
+        (e: JournalEntry) =>
+          !!e.meals.find((m, mIdx) =>
+            m.items.find((i, iIdx) => {
+              const idMatch = i.itemId?.equals(foodItemId);
+              if (idMatch) {
+                const eId = e._id.toHexString();
+                const mappedArray = journalIdToPathMap[eId] || [];
+                mappedArray.push([mIdx, iIdx]);
+                journalIdToPathMap[eId] = mappedArray;
+                return true;
+              }
+              return false;
+            }),
+          ),
+      );
+      return {entries, journalIdToPathMap};
+    },
+    [realm],
+  );
+};

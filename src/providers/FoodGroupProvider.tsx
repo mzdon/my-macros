@@ -4,19 +4,26 @@ import {UUID} from 'bson';
 import {withRealm} from 'react-realm-context';
 import {UpdateMode} from 'realm';
 
+import {useJournalContext} from 'providers/JournalProvider';
 import {useUserContext} from 'providers/UserProvider';
 import ConsumedFoodItem, {
   InitConsumedFoodItemData,
+  StrandedConsumedFoodItemData,
 } from 'schemas/ConsumedFoodItem';
 import FoodItemGroup from 'schemas/FoodItemGroup';
 import {RecoverableError} from 'utils/Errors';
-import {useGetFoodItemById, useGetFoodItemGroupById} from 'utils/Queries';
+import {
+  useGetFoodItemById,
+  useGetFoodItemGroupById,
+  useGetFoodItemGroupsWithFoodItemId,
+} from 'utils/Queries';
 import {InitFoodItemData} from 'schemas/FoodItem';
 
 type FoodGroupStateData = {
   _id?: UUID;
   description: string;
-  foodItems: InitConsumedFoodItemData[];
+  foodItems: Array<InitConsumedFoodItemData & {index: number}>;
+  nonEditableFoodItems: Array<StrandedConsumedFoodItemData & {index: number}>;
 } | null;
 
 export interface FoodGroupContextValue {
@@ -44,17 +51,6 @@ type Props = React.PropsWithChildren<{
   mealIndex: number | undefined;
   foodGroupId: string | undefined;
   newFoodGroup: boolean;
-  saveConsumedFoodItem: (
-    journalEntryId: string,
-    mealIndex: number,
-    data: InitConsumedFoodItemData,
-    itemIndex?: number,
-  ) => void;
-  applyFoodItemGroup: (
-    entryId: string,
-    mealIdx: number,
-    group: FoodItemGroup,
-  ) => void;
 }>;
 
 /*
@@ -72,13 +68,14 @@ const FoodGroupProvider = ({
   mealIndex,
   foodGroupId,
   newFoodGroup,
-  applyFoodItemGroup,
-  saveConsumedFoodItem,
   children,
 }: Props) => {
   const {user} = useUserContext();
+  const {applyFoodItemGroup, saveConsumedFoodItem} = useJournalContext();
   const getFoodItemById = useGetFoodItemById(realm);
   const getFoodItemGroupById = useGetFoodItemGroupById(realm);
+  const getFoodItemGroupsWithFoodItemId =
+    useGetFoodItemGroupsWithFoodItemId(realm);
 
   const [foodGroupData, setFoodGroupData] =
     React.useState<FoodGroupStateData>(null);
@@ -101,18 +98,45 @@ const FoodGroupProvider = ({
       let data: FoodGroupStateData = null;
       if (foodGroupId) {
         const dehydratedData = getFoodItemGroupById(foodGroupId).getData();
+        const initResults: {
+          foodItems: Array<InitConsumedFoodItemData & {index: number}>;
+          nonEditableFoodItems: Array<
+            StrandedConsumedFoodItemData & {index: number}
+          >;
+        } = {foodItems: [], nonEditableFoodItems: []};
+        const {foodItems, nonEditableFoodItems} =
+          dehydratedData.foodItems.reduce((result, item, index) => {
+            const newFoodItems = [...result.foodItems];
+            const newNonEditabledFoodItems = [...result.nonEditableFoodItems];
+            if (item.item._id) {
+              newFoodItems.push({
+                ...item,
+                item: getFoodItemById(item.item._id).getData(),
+                index,
+              });
+            } else {
+              newNonEditabledFoodItems.push({
+                ...item,
+                itemName: item.item.name,
+                index,
+              });
+            }
+            return {
+              foodItems: newFoodItems,
+              nonEditableFoodItems: newNonEditabledFoodItems,
+            };
+          }, initResults);
         data = {
           _id: dehydratedData._id,
           description: dehydratedData.description,
-          foodItems: dehydratedData.foodItems.map(consumedItem => ({
-            ...consumedItem,
-            item: getFoodItemById(consumedItem.item._id),
-          })),
+          foodItems,
+          nonEditableFoodItems,
         };
       } else if (newFoodGroup) {
         data = {
           description: '',
           foodItems: [],
+          nonEditableFoodItems: [],
         };
       }
       setFoodGroupData(data);
@@ -172,16 +196,38 @@ const FoodGroupProvider = ({
         itemIndex !== undefined
           ? [
               ...foodGroupData.foodItems.slice(0, itemIndex),
-              foodItem,
+              {...foodItem, index: itemIndex},
               ...foodGroupData.foodItems.slice(itemIndex + 1),
             ]
-          : [...foodGroupData.foodItems, foodItem];
+          : [
+              ...foodGroupData.foodItems,
+              {...foodItem, index: foodGroupData.foodItems.length},
+            ];
       setFoodGroupData({
         ...foodGroupData,
         foodItems: newFoodItems,
       });
     },
     [foodGroupData],
+  );
+
+  const internalSaveConsumedFoodItem = React.useCallback(
+    (
+      entryId: string,
+      mealIdx: number,
+      foodItem: InitConsumedFoodItemData,
+      itemIdx?: number,
+    ) => {
+      if (foodGroupData) {
+        saveConsumedFoodItemToGroup(entryId, mealIdx, foodItem, itemIdx);
+      } else {
+        const consumedFoodItem = ConsumedFoodItem.generate(
+          foodItem,
+        ) as ConsumedFoodItem;
+        saveConsumedFoodItem(entryId, mealIdx, consumedFoodItem, itemIdx);
+      }
+    },
+    [foodGroupData, saveConsumedFoodItem, saveConsumedFoodItemToGroup],
   );
 
   const removeFoodItemFromGroup = React.useCallback(
@@ -208,38 +254,31 @@ const FoodGroupProvider = ({
         );
       }
       const foodItemId = foodItemData._id;
-      const groupIdToItemIdxMap: Record<string, number> = {};
-      const groups = realm.objects<FoodItemGroup>('FoodItemGroup').filter(
-        (g: FoodItemGroup) =>
-          !!g.foodItems.find((i, iIdx) => {
-            const idMatch = i.itemId.equals(foodItemId);
-            if (idMatch) {
-              groupIdToItemIdxMap[g._id.toHexString()] = iIdx;
-              return true;
-            }
-            return false;
-          }),
-      );
+      const {groups, groupIdToItemIndexesMap} =
+        getFoodItemGroupsWithFoodItemId(foodItemId);
       if (groups.length) {
         realm.write(() => {
           groups.forEach(group => {
-            const itemIdx = groupIdToItemIdxMap[group._id.toHexString()];
-            if (itemIdx !== undefined) {
-              const oldItem = group.foodItems[itemIdx];
-              const newConsumedFoodItemdData: InitConsumedFoodItemData = {
-                item: foodItemData,
-                quantity: oldItem.quantity,
-                unitOfMeasurement: oldItem.unitOfMeasurement,
-              };
-              group.foodItems[itemIdx] = ConsumedFoodItem.generate(
-                newConsumedFoodItemdData,
-              ) as ConsumedFoodItem;
+            const itemIndexes =
+              groupIdToItemIndexesMap[group._id.toHexString()];
+            if (itemIndexes !== undefined) {
+              itemIndexes.forEach(itemIdx => {
+                const oldItem = group.foodItems[itemIdx];
+                const newConsumedFoodItemdData: InitConsumedFoodItemData = {
+                  item: foodItemData,
+                  quantity: oldItem.quantity,
+                  unitOfMeasurement: oldItem.unitOfMeasurement,
+                };
+                group.foodItems[itemIdx] = ConsumedFoodItem.generate(
+                  newConsumedFoodItemdData,
+                ) as ConsumedFoodItem;
+              });
             }
           });
         });
       }
     },
-    [realm],
+    [getFoodItemGroupsWithFoodItemId, realm],
   );
 
   const contextValue = React.useMemo(() => {
@@ -247,9 +286,7 @@ const FoodGroupProvider = ({
       foodGroupData,
       updateDescription,
       saveFoodGroup,
-      saveConsumedFoodItem: foodGroupData
-        ? saveConsumedFoodItemToGroup
-        : saveConsumedFoodItem,
+      saveConsumedFoodItem: internalSaveConsumedFoodItem,
       removeFoodItemFromGroup,
       applyFoodItemGroup: internalApplyFoodItemGroup,
       updateGroupsWithFoodItem,
@@ -257,9 +294,8 @@ const FoodGroupProvider = ({
   }, [
     foodGroupData,
     internalApplyFoodItemGroup,
+    internalSaveConsumedFoodItem,
     removeFoodItemFromGroup,
-    saveConsumedFoodItem,
-    saveConsumedFoodItemToGroup,
     saveFoodGroup,
     updateDescription,
     updateGroupsWithFoodItem,

@@ -14,7 +14,11 @@ import {useUserContext} from 'providers/UserProvider';
 import FoodItem from 'schemas/FoodItem';
 import FoodItemGroup from 'schemas/FoodItemGroup';
 import styles from 'styles';
-import {useDeleteItem} from 'utils/Queries';
+import {
+  useDeleteItem,
+  useGetFoodItemGroupsWithFoodItemId,
+  useGetJournalEntriesWithFoodItemId,
+} from 'utils/Queries';
 
 const _styles = StyleSheet.create({
   header: {
@@ -83,13 +87,48 @@ const renderSectionHeader = ({section: {title}}: {section: Section}) => (
 
 const FoodSelectorScreen = ({realm}: Props): React.ReactElement<Props> => {
   const foodCrudNavigation = useFoodCrudNavigationContext();
+  const getFoodItemGroupsWithFoodItemId =
+    useGetFoodItemGroupsWithFoodItemId(realm);
+  const getJournalEntriesWithFoodItemId =
+    useGetJournalEntriesWithFoodItemId(realm);
 
   const {user} = useUserContext();
   const beforeDeleteFoodItem = React.useCallback(
     (foodItem: FoodItem) => {
       user.deleteFoodItem(foodItem);
+      const {groups, groupIdToItemIndexesMap} = getFoodItemGroupsWithFoodItemId(
+        foodItem._id,
+      );
+      if (groups.length) {
+        realm.write(() => {
+          groups.forEach(group => {
+            const indexes = groupIdToItemIndexesMap[group._id.toHexString()];
+            indexes.forEach(itemIdx => {
+              group.foodItems[itemIdx].itemId = null;
+            });
+          });
+        });
+      }
+      const {entries, journalIdToPathMap} = getJournalEntriesWithFoodItemId(
+        foodItem._id,
+      );
+      if (entries.length) {
+        realm.write(() => {
+          entries.forEach(entry => {
+            const paths = journalIdToPathMap[entry._id.toHexString()];
+            paths.forEach(([mealIdx, itemIdx]) => {
+              entry.meals[mealIdx].items[itemIdx].itemId = null;
+            });
+          });
+        });
+      }
     },
-    [user],
+    [
+      getFoodItemGroupsWithFoodItemId,
+      getJournalEntriesWithFoodItemId,
+      realm,
+      user,
+    ],
   );
   const deleteFoodItem = useDeleteItem<FoodItem>(realm, beforeDeleteFoodItem);
   const beforeDeleteFoodItemGroup = React.useCallback(

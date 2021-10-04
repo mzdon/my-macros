@@ -20,6 +20,7 @@ import styles from 'styles';
 import JournalEntry from 'schemas/JournalEntry';
 import {isSameDay} from 'utils/Date';
 import {useParentNavigation} from 'utils/Navigation';
+import {CatastrophicError} from 'utils/Errors';
 
 const _styles = StyleSheet.create({
   calendar: {
@@ -125,6 +126,10 @@ const FoodJournalScreen = () => {
   const markedDates = React.useMemo(() => {
     return entries.map(entry => ({date: entry.date, dots: [{color: 'blue'}]}));
   }, [entries]);
+
+  if (!macros) {
+    throw new CatastrophicError('No macros were found!');
+  }
 
   return (
     <View style={styles.screen}>

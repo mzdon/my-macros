@@ -16,14 +16,14 @@ export function useSimpleStateUpdater<S>(
     });
   };
 
-  function useStateUpdater(key: keyof S) {
+  function useInternalStateUpdater(key: keyof S) {
     const callback = (value: any) => {
       updateState(key, value);
     };
     return callback;
   }
 
-  return [state, useStateUpdater, setState];
+  return [state, useInternalStateUpdater, setState];
 }
 
 export function useUpdater<R = string>(

@@ -107,7 +107,7 @@ const FoodItemProvider = ({
         return null;
       }
       const consumedItem = entry.meals[mIdx]?.items[cIdx];
-      if (!consumedItem) {
+      if (!consumedItem || !consumedItem.itemId) {
         return null;
       }
       return getFoodItemById(consumedItem.itemId);
@@ -180,7 +180,7 @@ const FoodItemProvider = ({
   const saveFoodItem = React.useCallback(
     (updateReferences: boolean = false) => {
       if (!foodItemData) {
-        throw new RecoverableError('No food item data save');
+        throw new RecoverableError('No food item data to save');
       }
       if (foodItemId) {
         const validItem = FoodItem.verifyInitFoodItemData(foodItemData);
@@ -189,7 +189,6 @@ const FoodItemProvider = ({
             'Some food item data appears to be missing in order to create a consumed food item',
           );
         }
-        // if we are editing an existing food item, save it to realm
         writeFoodItemToRealm(validItem);
         if (updateReferences) {
           updateGroupsWithFoodItem(validItem);

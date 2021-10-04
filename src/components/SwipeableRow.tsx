@@ -170,20 +170,20 @@ interface UseEditAndDeleteActionCallbacks {
   onDeletePress: () => void;
 }
 
+export const getEditAction = (
+  onEditPress: UseEditAndDeleteActionCallbacks['onEditPress'],
+) => ({color: 'purple', label: 'Edit', onPress: onEditPress});
+
+export const getDeleteAction = (
+  onDeletePress: UseEditAndDeleteActionCallbacks['onDeletePress'],
+) => ({color: 'red', label: 'Delete', onPress: onDeletePress});
+
 export const getEditAndDeleteActions = ({
   onEditPress,
   onDeletePress,
 }: UseEditAndDeleteActionCallbacks): Action[] => [
-  {
-    color: 'purple',
-    label: 'Edit',
-    onPress: onEditPress,
-  },
-  {
-    color: 'red',
-    label: 'Delete',
-    onPress: onDeletePress,
-  },
+  getEditAction(onEditPress),
+  getDeleteAction(onDeletePress),
 ];
 
 export const useEditAndDeleteActions = (

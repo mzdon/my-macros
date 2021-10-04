@@ -7,7 +7,10 @@ import BaseTextInput from 'components/BaseTextInput';
 import ConsumedFoodItem from 'components/ConsumedFoodItem';
 import LookupFoodItem from 'components/LookupFoodItem';
 import Spacer from 'components/Spacer';
-import SwipeableRow, {getEditAndDeleteActions} from 'components/SwipeableRow';
+import SwipeableRow, {
+  getDeleteAction,
+  getEditAndDeleteActions,
+} from 'components/SwipeableRow';
 import {FOOD_ITEM_DESCRIPTION, ITEM_CONSUMED} from 'navigation/Constants';
 import {FoodItemGroupNavigationProp} from 'navigation/RouteTypes';
 import {useFoodCrudNavigationContext} from 'providers/FoodCrudNavigationProvider';
@@ -27,7 +30,11 @@ const FoodItemGroupScreen = () => {
     removeFoodItemFromGroup,
   } = useFoodGroupContext();
 
-  const {description = '', foodItems = []} = foodGroupData || {};
+  const {
+    description = '',
+    foodItems = [],
+    nonEditableFoodItems = [],
+  } = foodGroupData || {};
   const onUpdateDescription = React.useCallback(
     (val: string) => updateDescription(val),
     [updateDescription],
@@ -70,18 +77,32 @@ const FoodItemGroupScreen = () => {
   }, [navigation, onSave]);
 
   const renderItem = React.useCallback(
-    ({item, index}: {item: InitConsumedFoodItemData; index: number}) => {
+    ({item}) => {
       return (
         <SwipeableRow
           rightActions={getEditAndDeleteActions({
-            onEditPress: () => editFoodItem(item, index),
-            onDeletePress: () => removeFoodItemFromGroup(index),
+            onEditPress: () => editFoodItem(item, item.index),
+            onDeletePress: () => removeFoodItemFromGroup(item.index),
           })}>
           <ConsumedFoodItem initItem={item} />
         </SwipeableRow>
       );
     },
     [editFoodItem, removeFoodItemFromGroup],
+  );
+
+  const renderNonEditableItem = React.useCallback(
+    ({item}) => {
+      return (
+        <SwipeableRow
+          rightActions={[
+            getDeleteAction(() => removeFoodItemFromGroup(item.index)),
+          ]}>
+          <ConsumedFoodItem item={item} />
+        </SwipeableRow>
+      );
+    },
+    [removeFoodItemFromGroup],
   );
 
   return (
@@ -105,6 +126,14 @@ const FoodItemGroupScreen = () => {
         renderItem={renderItem}
         keyExtractor={(_item, idx) => `consumedItem-${idx}`}
       />
+      {!!nonEditableFoodItems.length && (
+        <FlatList
+          data={nonEditableFoodItems}
+          ListHeaderComponent={<Text>Non-Editable Food Items</Text>}
+          renderItem={renderNonEditableItem}
+          keyExtractor={(_item, idx) => `nonEditableConsumedItem-${idx}`}
+        />
+      )}
     </View>
   );
 };
