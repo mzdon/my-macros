@@ -8,20 +8,23 @@ import {useFoodGroupContext} from 'providers/FoodGroupProvider';
 import {useJournalContext} from 'providers/JournalProvider';
 import {useUserContext} from 'providers/UserProvider';
 import {InitConsumedFoodItemData} from 'schemas/ConsumedFoodItem';
-import FoodItem, {InitFoodItemData} from 'schemas/FoodItem';
-import JournalEntry from 'schemas/JournalEntry';
+import FoodItem, {InitFoodItemData, FoodItemData} from 'schemas/FoodItem';
 import {UnitOfMeasurement} from 'types/UnitOfMeasurement';
 import {RecoverableError} from 'utils/Errors';
-import {useGetFoodItemById} from 'utils/Queries';
+import {useGetFoodItemById, useGetJournalEntryById} from 'utils/Queries';
 
 type ConsumedFoodItemDataProvided = Pick<
   InitConsumedFoodItemData,
   'quantity' | 'unitOfMeasurement'
 >;
 
+interface FoodDataState extends InitFoodItemData {
+  newFoodItem: boolean;
+}
+
 export interface FoodItemContextValue {
   newFoodItem: boolean;
-  foodItemData: InitFoodItemData | null;
+  foodItemData: FoodDataState | null;
   saveFoodItem: (updateReferences?: boolean) => void;
   updateFoodItemData: (data: Partial<InitFoodItemData>) => void;
   saveConsumedFoodItem: (
@@ -60,13 +63,15 @@ const FoodItemProvider = ({
   children,
 }: Props): React.ReactElement<Props> => {
   const {user} = useUserContext();
+  const getJournalEntryById = useGetJournalEntryById(realm);
   const getFoodItemById = useGetFoodItemById(realm);
   const {updateEntriesWithFoodItem} = useJournalContext();
-  const {saveConsumedFoodItem, updateGroupsWithFoodItem} =
+  const {foodGroupData, saveConsumedFoodItem, updateGroupsWithFoodItem} =
     useFoodGroupContext();
 
-  const [foodItemData, setFoodItemData] =
-    React.useState<InitFoodItemData | null>(null);
+  const [foodItemData, setFoodItemData] = React.useState<FoodDataState | null>(
+    null,
+  );
 
   const updateFoodItemData = React.useCallback(
     (data: Partial<InitFoodItemData>) => {
@@ -99,41 +104,37 @@ const FoodItemProvider = ({
       mIdx: number,
       cIdx: number,
     ) => {
-      const entry = realm.objectForPrimaryKey<JournalEntry>(
-        'JournalEntry',
-        new UUID(jeId),
-      );
-      if (!entry) {
-        return null;
-      }
+      const entry = getJournalEntryById(jeId);
       const consumedItem = entry.meals[mIdx]?.items[cIdx];
       if (!consumedItem || !consumedItem.itemId) {
-        return null;
+        return consumedItem.getData();
       }
-      return getFoodItemById(consumedItem.itemId);
+      return getFoodItemById(consumedItem.itemId).getData();
     };
 
-    let data: InitFoodItemData;
+    let data: FoodDataState;
     if (foodItemId) {
       // case [1], [4]
-      data = getFoodItemById(foodItemId).getData();
+      data = {...getFoodItemById(foodItemId).getData(), newFoodItem: false};
     } else if (
       journalEntryId &&
       mealIndex !== undefined &&
       consumedItemIndex !== undefined
     ) {
       // case [2]
-      const foodItem = getExistingFoodItemFromConsumedFoodItem(
-        journalEntryId,
-        mealIndex,
-        consumedItemIndex,
-      );
-      if (!foodItem) {
-        throw new RecoverableError(
-          `No food item found using journalEntryId: ${journalEntryId}, mealIndex: ${mealIndex}, consumedItemIndex: ${consumedItemIndex}`,
-        );
-      }
-      data = foodItem.getData();
+      data = {
+        ...getExistingFoodItemFromConsumedFoodItem(
+          journalEntryId,
+          mealIndex,
+          consumedItemIndex,
+        ),
+        newFoodItem: false,
+      };
+    } else if (consumedItemIndex !== undefined && foodGroupData) {
+      data = {
+        ...foodGroupData.foodItems[consumedItemIndex],
+        newFoodItem: false,
+      };
     } else {
       // case [3]
       data = {
@@ -147,14 +148,17 @@ const FoodItemProvider = ({
         servingSize: 0,
         servingUnitOfMeasurement: UnitOfMeasurement.Grams,
         servingSizeNote: '',
+        newFoodItem: true,
       };
     }
 
     setFoodItemData(data);
   }, [
     consumedItemIndex,
+    foodGroupData,
     foodItemId,
     getFoodItemById,
+    getJournalEntryById,
     journalEntryId,
     mealIndex,
     realm,
@@ -183,12 +187,16 @@ const FoodItemProvider = ({
         throw new RecoverableError('No food item data to save');
       }
       if (foodItemId) {
-        const validItem = FoodItem.verifyInitFoodItemData(foodItemData);
-        if (!validItem) {
+        const validItemData = FoodItem.verifyInitFoodItemData(foodItemData);
+        if (!validItemData) {
           throw new RecoverableError(
             'Some food item data appears to be missing in order to create a consumed food item',
           );
         }
+        const validItem: FoodItemData = {
+          ...validItemData,
+          _id: new UUID(foodItemId),
+        };
         writeFoodItemToRealm(validItem);
         if (updateReferences) {
           updateGroupsWithFoodItem(validItem);
@@ -212,18 +220,20 @@ const FoodItemProvider = ({
           'No food item data save to consumed food item',
         );
       }
-      const validItem = FoodItem.verifyInitFoodItemData(foodItemData);
+      const {newFoodItem, ...rest} = foodItemData;
+      const validItem = FoodItem.verifyInitFoodItemData(rest);
       if (!validItem) {
         throw new RecoverableError(
           'Some food item data appears to be missing in order to create a consumed food item',
         );
       }
-      let payload = {
-        item: validItem,
+      let payload: InitConsumedFoodItemData = {
+        itemData: validItem,
         ...data,
       };
-      if (!payload.item._id) {
-        payload.item = writeFoodItemToRealm(payload.item);
+      if (newFoodItem) {
+        const foodItem = writeFoodItemToRealm(payload.itemData);
+        payload.itemId = foodItem._id;
       }
       onSaveConsumedFoodItem(payload);
     },

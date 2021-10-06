@@ -7,10 +7,11 @@ import {UpdateMode} from 'realm';
 import {useUserContext} from 'providers/UserProvider';
 import ConsumedFoodItem, {
   InitConsumedFoodItemData,
+  ConsumedFoodItemData,
 } from 'schemas/ConsumedFoodItem';
 import JournalEntry from 'schemas/JournalEntry';
 import FoodItemGroup from 'schemas/FoodItemGroup';
-import {InitFoodItemData} from 'schemas/FoodItem';
+import {FoodItemData} from 'schemas/FoodItem';
 import Meal from 'schemas/Meal';
 import {isSameDay} from 'utils/Date';
 import {CatastrophicError, RecoverableError} from 'utils/Errors';
@@ -27,7 +28,7 @@ interface JournalContext {
   saveConsumedFoodItem: (
     entryId: string,
     mealIndex: number,
-    consumedFoodItem: ConsumedFoodItem,
+    consumedFoodItem: ConsumedFoodItemData,
     itemIndex?: number,
   ) => void;
   deleteConsumedFoodItem: (item: ConsumedFoodItem) => void;
@@ -36,7 +37,7 @@ interface JournalContext {
     mealIndex: number,
     group: FoodItemGroup,
   ) => void;
-  updateEntriesWithFoodItem: (foodItemData: InitFoodItemData) => void;
+  updateEntriesWithFoodItem: (foodItemData: FoodItemData) => void;
 }
 
 const JournalContext = React.createContext<JournalContext | null>(null);
@@ -120,16 +121,17 @@ const JournalProvider = ({
     (
       journalEntryId: string,
       mealIndex: number,
-      consumedFoodItem: ConsumedFoodItem,
+      consumedFoodItem: ConsumedFoodItemData,
       itemIndex?: number,
     ) => {
       const entry = getEntryById(new UUID(journalEntryId));
       const existingMeal = getMealFromEntry(entry, mealIndex);
+
       realm.write(() => {
         if (itemIndex !== undefined) {
-          existingMeal.items[itemIndex] = consumedFoodItem.clone();
+          existingMeal.items[itemIndex] = consumedFoodItem as ConsumedFoodItem;
         } else {
-          existingMeal.items.push(consumedFoodItem.clone());
+          existingMeal.items.push(consumedFoodItem as ConsumedFoodItem);
         }
       });
     },
@@ -141,14 +143,14 @@ const JournalProvider = ({
   const applyFoodItemGroup = React.useCallback(
     (entryId: string, mealIdx: number, group: FoodItemGroup) => {
       group.foodItems.forEach(foodItem => {
-        saveConsumedFoodItem(entryId, mealIdx, foodItem);
+        saveConsumedFoodItem(entryId, mealIdx, foodItem.getData());
       });
     },
     [saveConsumedFoodItem],
   );
 
   const updateEntriesWithFoodItem = React.useCallback(
-    (foodItemData: InitFoodItemData) => {
+    (foodItemData: FoodItemData) => {
       if (foodItemData._id === undefined) {
         throw new RecoverableError(
           'No food item id found to search journal entries items with',
@@ -166,7 +168,8 @@ const JournalProvider = ({
                 const oldMeal = entry.meals[mealIdx];
                 const oldItem = oldMeal.items[itemIdx];
                 const newItemData: InitConsumedFoodItemData = {
-                  item: foodItemData,
+                  itemData: foodItemData,
+                  itemId: foodItemData._id,
                   quantity: oldItem.quantity,
                   unitOfMeasurement: oldItem.unitOfMeasurement,
                 };

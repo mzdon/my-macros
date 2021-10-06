@@ -17,7 +17,7 @@ class Meal extends Realm.Object {
     const {description, items = []} = obj;
     const mappedItems = items.map(item => {
       if (item instanceof ConsumedFoodItem) {
-        return item;
+        return item.getData();
       }
       return ConsumedFoodItem.generate(item);
     });

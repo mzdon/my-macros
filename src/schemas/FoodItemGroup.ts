@@ -2,14 +2,13 @@ import {UUID} from 'bson';
 import Realm from 'realm';
 
 import ConsumedFoodItem, {
-  InitConsumedFoodItemData,
   ReturnedConsumedFoodItemData,
 } from 'schemas/ConsumedFoodItem';
 
 export interface InitFoodItemGroupData {
   _id?: UUID;
   description: string;
-  foodItems: InitConsumedFoodItemData[];
+  foodItems: ReturnedConsumedFoodItemData[];
 }
 
 export interface ReturnedFoodItemGroupData {
@@ -28,7 +27,7 @@ class FoodItemGroup extends Realm.Object {
     return {
       _id,
       description,
-      foodItems: foodItems.map(item => ConsumedFoodItem.generate(item)),
+      foodItems,
     };
   }
 

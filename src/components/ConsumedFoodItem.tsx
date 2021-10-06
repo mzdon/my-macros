@@ -2,13 +2,13 @@ import React from 'react';
 
 import {Text} from 'react-native';
 import ConsumedFoodItem, {
+  ConsumedFoodItemData,
   InitConsumedFoodItemData,
-  StrandedConsumedFoodItemData,
 } from 'schemas/ConsumedFoodItem';
 
 type Props =
   | {
-      item: ConsumedFoodItem | StrandedConsumedFoodItemData;
+      item: ConsumedFoodItem | ConsumedFoodItemData;
       initItem?: never;
     }
   | {
@@ -20,16 +20,16 @@ const ConsumedFoodItemComponent = ({
   item,
   initItem,
 }: Props): React.ReactElement<Props> => {
-  const itemName = item?.itemName ?? initItem?.item.description;
+  const description = item?.description ?? initItem?.itemData.description;
   const quantity = item?.quantity ?? initItem?.quantity;
   const uom = item?.unitOfMeasurement ?? initItem?.unitOfMeasurement;
-  const calories = item?.calories || initItem?.item.calories;
-  const carb = item?.carbs ?? initItem?.item.carbs;
-  const protein = item?.protein ?? initItem?.item.protein;
-  const fat = item?.fat ?? initItem?.item.fat;
+  const calories = item?.calories || initItem?.itemData.calories;
+  const carb = item?.carbs ?? initItem?.itemData.carbs;
+  const protein = item?.protein ?? initItem?.itemData.protein;
+  const fat = item?.fat ?? initItem?.itemData.fat;
   return (
     <>
-      <Text>{`${itemName} - ${quantity}${uom}`}</Text>
+      <Text>{`${description} - ${quantity}${uom}`}</Text>
       <Text>{`${calories}cal ${carb}c ${protein}p ${fat}f`}</Text>
     </>
   );

@@ -8,7 +8,7 @@ import {useJournalContext} from 'providers/JournalProvider';
 import {useUserContext} from 'providers/UserProvider';
 import ConsumedFoodItem, {
   InitConsumedFoodItemData,
-  StrandedConsumedFoodItemData,
+  ConsumedFoodItemData,
 } from 'schemas/ConsumedFoodItem';
 import FoodItemGroup from 'schemas/FoodItemGroup';
 import {RecoverableError} from 'utils/Errors';
@@ -17,13 +17,12 @@ import {
   useGetFoodItemGroupById,
   useGetFoodItemGroupsWithFoodItemId,
 } from 'utils/Queries';
-import {InitFoodItemData} from 'schemas/FoodItem';
+import {FoodItemData} from 'schemas/FoodItem';
 
 type FoodGroupStateData = {
   _id?: UUID;
   description: string;
-  foodItems: Array<InitConsumedFoodItemData & {index: number}>;
-  nonEditableFoodItems: Array<StrandedConsumedFoodItemData & {index: number}>;
+  foodItems: ConsumedFoodItemData[];
 } | null;
 
 export interface FoodGroupContextValue {
@@ -38,7 +37,7 @@ export interface FoodGroupContextValue {
   ) => void;
   removeFoodItemFromGroup: (itemIndex: number) => void;
   applyFoodItemGroup: (group: FoodItemGroup) => void;
-  updateGroupsWithFoodItem: (foodItemData: InitFoodItemData) => void;
+  updateGroupsWithFoodItem: (foodItemData: FoodItemData) => void;
 }
 
 const FoodGroupContext = React.createContext<FoodGroupContextValue | null>(
@@ -97,46 +96,11 @@ const FoodGroupProvider = ({
     if (!foodGroupData) {
       let data: FoodGroupStateData = null;
       if (foodGroupId) {
-        const dehydratedData = getFoodItemGroupById(foodGroupId).getData();
-        const initResults: {
-          foodItems: Array<InitConsumedFoodItemData & {index: number}>;
-          nonEditableFoodItems: Array<
-            StrandedConsumedFoodItemData & {index: number}
-          >;
-        } = {foodItems: [], nonEditableFoodItems: []};
-        const {foodItems, nonEditableFoodItems} =
-          dehydratedData.foodItems.reduce((result, item, index) => {
-            const newFoodItems = [...result.foodItems];
-            const newNonEditabledFoodItems = [...result.nonEditableFoodItems];
-            if (item.item._id) {
-              newFoodItems.push({
-                ...item,
-                item: getFoodItemById(item.item._id).getData(),
-                index,
-              });
-            } else {
-              newNonEditabledFoodItems.push({
-                ...item,
-                itemName: item.item.name,
-                index,
-              });
-            }
-            return {
-              foodItems: newFoodItems,
-              nonEditableFoodItems: newNonEditabledFoodItems,
-            };
-          }, initResults);
-        data = {
-          _id: dehydratedData._id,
-          description: dehydratedData.description,
-          foodItems,
-          nonEditableFoodItems,
-        };
+        data = getFoodItemGroupById(foodGroupId).getData();
       } else if (newFoodGroup) {
         data = {
           description: '',
           foodItems: [],
-          nonEditableFoodItems: [],
         };
       }
       setFoodGroupData(data);
@@ -170,8 +134,7 @@ const FoodGroupProvider = ({
     realm.write(() => {
       result = realm.create<FoodItemGroup>(
         FoodItemGroup,
-        // @ts-ignore TODO
-        FoodItemGroup.generate(foodGroupData),
+        FoodItemGroup.generate(foodGroupData) as FoodItemGroup,
         UpdateMode.Modified,
       );
       user.addFoodItemGroup(result);
@@ -196,13 +159,10 @@ const FoodGroupProvider = ({
         itemIndex !== undefined
           ? [
               ...foodGroupData.foodItems.slice(0, itemIndex),
-              {...foodItem, index: itemIndex},
+              ConsumedFoodItem.generate(foodItem),
               ...foodGroupData.foodItems.slice(itemIndex + 1),
             ]
-          : [
-              ...foodGroupData.foodItems,
-              {...foodItem, index: foodGroupData.foodItems.length},
-            ];
+          : [...foodGroupData.foodItems, ConsumedFoodItem.generate(foodItem)];
       setFoodGroupData({
         ...foodGroupData,
         foodItems: newFoodItems,
@@ -221,9 +181,7 @@ const FoodGroupProvider = ({
       if (foodGroupData) {
         saveConsumedFoodItemToGroup(entryId, mealIdx, foodItem, itemIdx);
       } else {
-        const consumedFoodItem = ConsumedFoodItem.generate(
-          foodItem,
-        ) as ConsumedFoodItem;
+        const consumedFoodItem = ConsumedFoodItem.generate(foodItem);
         saveConsumedFoodItem(entryId, mealIdx, consumedFoodItem, itemIdx);
       }
     },
@@ -247,7 +205,7 @@ const FoodGroupProvider = ({
   );
 
   const updateGroupsWithFoodItem = React.useCallback(
-    (foodItemData: InitFoodItemData) => {
+    (foodItemData: FoodItemData) => {
       if (foodItemData._id === undefined) {
         throw new RecoverableError(
           'No food item id found to search food groups with',
@@ -265,7 +223,8 @@ const FoodGroupProvider = ({
               itemIndexes.forEach(itemIdx => {
                 const oldItem = group.foodItems[itemIdx];
                 const newConsumedFoodItemdData: InitConsumedFoodItemData = {
-                  item: foodItemData,
+                  itemData: foodItemData,
+                  itemId: foodItemData._id,
                   quantity: oldItem.quantity,
                   unitOfMeasurement: oldItem.unitOfMeasurement,
                 };

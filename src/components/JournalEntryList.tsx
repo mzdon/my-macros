@@ -5,10 +5,7 @@ import {Button, SectionList, StyleSheet, View} from 'react-native';
 import ConsumedFoodItem from 'components/ConsumedFoodItem';
 import MealHeader from 'components/MealHeader';
 import Spacer from 'components/Spacer';
-import SwipeableRow, {
-  getDeleteAction,
-  getEditAndDeleteActions,
-} from 'components/SwipeableRow';
+import SwipeableRow, {getEditAndDeleteActions} from 'components/SwipeableRow';
 import ConsumedFoodItemSchema from 'schemas/ConsumedFoodItem';
 import JournalEntry from 'schemas/JournalEntry';
 import Meal from 'schemas/Meal';
@@ -86,16 +83,13 @@ const JouranlEntryList = (props: Props): React.ReactElement<Props> => {
       index: number;
     }) => {
       const {journalEntry, mealIndex} = section;
-      const onDeletePress = () => onDeleteConsumedFoodItem(item);
-      const actions = item.itemId
-        ? getEditAndDeleteActions({
+      return (
+        <SwipeableRow
+          rightActions={getEditAndDeleteActions({
             onEditPress: () =>
               onEditConsumedFoodItem(journalEntry._id, mealIndex, index),
-            onDeletePress,
-          })
-        : [getDeleteAction(onDeletePress)];
-      return (
-        <SwipeableRow rightActions={actions}>
+            onDeletePress: () => onDeleteConsumedFoodItem(item),
+          })}>
           <View style={_styles.titleContainer}>
             <ConsumedFoodItem item={item} />
           </View>

@@ -62,7 +62,7 @@ const FoodItemDescriptionScreen = () => {
 
   return (
     <View style={styles.screen}>
-      <Text>{`${foodItemData?._id ? 'Edit' : 'New'} Item`}</Text>
+      <Text>{`${foodItemData?.newFoodItem ? 'New' : 'Edit'} Item`}</Text>
       <Spacer />
       <BaseTextInput
         label="Description"

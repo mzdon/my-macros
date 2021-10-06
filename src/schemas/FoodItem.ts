@@ -31,7 +31,7 @@ const REQUIRED_INIT_KEYS: Array<keyof InitFoodItemData> = [
   'servingSizeNote',
 ];
 
-export type ReturnedFoodItemData = Omit<InitFoodItemData, '_id'> & {_id: UUID};
+export type FoodItemData = Omit<InitFoodItemData, '_id'> & {_id: UUID};
 
 class FoodItem extends Realm.Object {
   _id!: UUID;
@@ -46,7 +46,7 @@ class FoodItem extends Realm.Object {
   servingUnitOfMeasurement!: UnitOfMeasurement;
   servingSizeNote!: string;
 
-  static generate(obj: InitFoodItemData): ReturnedFoodItemData {
+  static generate(obj: InitFoodItemData): FoodItemData {
     const {
       _id = new UUID(),
       description,
@@ -90,7 +90,7 @@ class FoodItem extends Realm.Object {
     return obj as InitFoodItemData;
   }
 
-  getData(): ReturnedFoodItemData {
+  getData(): FoodItemData {
     return {
       _id: this._id,
       description: this.description,

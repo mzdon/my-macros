@@ -8,6 +8,7 @@ import {useAuthContext} from 'providers/AuthProvider';
 import {useUserContext} from 'providers/UserProvider';
 import styles from 'styles';
 import {useParentNavigation} from 'utils/Navigation';
+import {CatastrophicError} from 'utils/Errors';
 
 const ProfileScreen = () => {
   const navigation = useParentNavigation();
@@ -15,6 +16,10 @@ const ProfileScreen = () => {
   const {signOut} = useAuthContext();
 
   const macros = user.getCurrentMacros();
+  if (!macros) {
+    throw new CatastrophicError('There is no current macro definition');
+  }
+
   const birthday = user.getBirthdayString();
   const height = user.getHeightString();
   const weight = user.getWeightString();

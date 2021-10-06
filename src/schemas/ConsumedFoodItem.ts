@@ -1,43 +1,23 @@
 import {UUID} from 'bson';
 import Realm from 'realm';
 
-import {InitFoodItemData} from 'schemas/FoodItem';
+import {InitFoodItemData, FoodItemData} from 'schemas/FoodItem';
 import {Servings, UnitOfMeasurement} from 'types/UnitOfMeasurement';
 import {convert} from 'utils/UnitOfMeasurement';
 
 type UomOrServings = UnitOfMeasurement | typeof Servings;
 
 export interface InitConsumedFoodItemData {
-  item: InitFoodItemData;
+  itemData: InitFoodItemData;
+  itemId?: UUID | null;
   quantity: number;
   unitOfMeasurement: UomOrServings;
 }
 
-export interface StrandedConsumedFoodItemData {
-  itemName: string;
+export interface ConsumedFoodItemData extends Omit<FoodItemData, '_id'> {
+  itemId: UUID | null;
   quantity: number;
   unitOfMeasurement: UnitOfMeasurement;
-  calories: number;
-  carbs: number;
-  protein: number;
-  fat: number;
-  fiber: number;
-  sugar: number;
-}
-
-export interface ReturnedConsumedFoodItemData {
-  item: {
-    _id: UUID | null;
-    name: string;
-  };
-  quantity: number;
-  unitOfMeasurement: UnitOfMeasurement;
-  calories: number;
-  carbs: number;
-  protein: number;
-  fat: number;
-  fiber: number;
-  sugar: number;
 }
 
 function determineServingsConsumedAndUom(
@@ -87,7 +67,7 @@ function determineItemMacros(item: InitFoodItemData, servings: number) {
 
 class ConsumedFoodItem extends Realm.Object {
   itemId!: UUID | null;
-  itemName!: string;
+  description!: string;
   calories!: number;
   carbs!: number;
   protein!: number;
@@ -96,53 +76,32 @@ class ConsumedFoodItem extends Realm.Object {
   sugar!: number;
   quantity!: number;
   unitOfMeasurement!: UnitOfMeasurement;
+  servingSize!: number;
+  servingUnitOfMeasurement!: UnitOfMeasurement;
+  servingSizeNote!: string;
 
-  static generate(obj: InitConsumedFoodItemData) {
-    const {item, quantity, unitOfMeasurement} = obj;
+  static generate(obj: InitConsumedFoodItemData): ConsumedFoodItemData {
+    const {itemData, itemId = null, quantity, unitOfMeasurement} = obj;
     const {servings, realQuantity, uom} = determineServingsConsumedAndUom(
-      item,
+      itemData,
       quantity,
-      unitOfMeasurement || item.servingUnitOfMeasurement,
+      unitOfMeasurement || itemData.servingUnitOfMeasurement,
     );
+    const {description, ...rest} = itemData;
     return {
-      itemId: item._id,
-      itemName: item.description,
+      itemId,
+      description,
       quantity: realQuantity,
       unitOfMeasurement: uom,
-      ...determineItemMacros(item, servings),
+      ...rest,
+      ...determineItemMacros(itemData, servings),
     };
   }
 
-  static generateFromReturnedData(obj: ReturnedConsumedFoodItemData) {
-    const {item} = obj;
-    return {
-      itemId: item._id,
-      itemName: item.name,
-      ...obj,
-    };
-  }
-
-  getData(): ReturnedConsumedFoodItemData {
-    return {
-      quantity: this.quantity,
-      unitOfMeasurement: this.unitOfMeasurement,
-      item: {
-        _id: this.itemId,
-        name: this.itemName,
-      },
-      calories: this.calories,
-      carbs: this.carbs,
-      protein: this.protein,
-      fat: this.fat,
-      sugar: this.sugar,
-      fiber: this.fiber,
-    };
-  }
-
-  clone(): ConsumedFoodItem {
+  getData(): ConsumedFoodItemData {
     return {
       itemId: this.itemId,
-      itemName: this.itemName,
+      description: this.description,
       calories: this.calories,
       carbs: this.carbs,
       protein: this.protein,
@@ -151,7 +110,10 @@ class ConsumedFoodItem extends Realm.Object {
       fiber: this.fiber,
       quantity: this.quantity,
       unitOfMeasurement: this.unitOfMeasurement,
-    } as ConsumedFoodItem;
+      servingSize: this.servingSize,
+      servingUnitOfMeasurement: this.servingUnitOfMeasurement,
+      servingSizeNote: this.servingSizeNote,
+    };
   }
 
   static schema = {
@@ -159,7 +121,7 @@ class ConsumedFoodItem extends Realm.Object {
     embedded: true,
     properties: {
       itemId: 'uuid?',
-      itemName: 'string',
+      description: 'string',
       calories: 'int',
       carbs: 'double',
       protein: 'double',
@@ -168,6 +130,9 @@ class ConsumedFoodItem extends Realm.Object {
       fiber: 'double',
       quantity: 'double',
       unitOfMeasurement: 'string',
+      servingSize: 'double',
+      servingUnitOfMeasurement: 'string',
+      servingSizeNote: 'string',
     },
   };
 }

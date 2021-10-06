@@ -85,6 +85,14 @@ const renderSectionHeader = ({section: {title}}: {section: Section}) => (
   <Text style={_styles.header}>{title}</Text>
 );
 
+const renderSectionFooter = ({section}: {section: Section}) => {
+  if (section.data.length === 0) {
+    const isGroups = section.title.toLowerCase().includes('group');
+    return <Text>{`No ${isGroups ? 'Groups' : 'Items'}`}</Text>;
+  }
+  return null;
+};
+
 const FoodSelectorScreen = ({realm}: Props): React.ReactElement<Props> => {
   const foodCrudNavigation = useFoodCrudNavigationContext();
   const getFoodItemGroupsWithFoodItemId =
@@ -100,12 +108,10 @@ const FoodSelectorScreen = ({realm}: Props): React.ReactElement<Props> => {
         foodItem._id,
       );
       if (groups.length) {
-        realm.write(() => {
-          groups.forEach(group => {
-            const indexes = groupIdToItemIndexesMap[group._id.toHexString()];
-            indexes.forEach(itemIdx => {
-              group.foodItems[itemIdx].itemId = null;
-            });
+        groups.forEach(group => {
+          const indexes = groupIdToItemIndexesMap[group._id.toHexString()];
+          indexes.forEach(itemIdx => {
+            group.foodItems[itemIdx].itemId = null;
           });
         });
       }
@@ -113,22 +119,15 @@ const FoodSelectorScreen = ({realm}: Props): React.ReactElement<Props> => {
         foodItem._id,
       );
       if (entries.length) {
-        realm.write(() => {
-          entries.forEach(entry => {
-            const paths = journalIdToPathMap[entry._id.toHexString()];
-            paths.forEach(([mealIdx, itemIdx]) => {
-              entry.meals[mealIdx].items[itemIdx].itemId = null;
-            });
+        entries.forEach(entry => {
+          const paths = journalIdToPathMap[entry._id.toHexString()];
+          paths.forEach(([mealIdx, itemIdx]) => {
+            entry.meals[mealIdx].items[itemIdx].itemId = null;
           });
         });
       }
     },
-    [
-      getFoodItemGroupsWithFoodItemId,
-      getJournalEntriesWithFoodItemId,
-      realm,
-      user,
-    ],
+    [getFoodItemGroupsWithFoodItemId, getJournalEntriesWithFoodItemId, user],
   );
   const deleteFoodItem = useDeleteItem<FoodItem>(realm, beforeDeleteFoodItem);
   const beforeDeleteFoodItemGroup = React.useCallback(
@@ -174,6 +173,7 @@ const FoodSelectorScreen = ({realm}: Props): React.ReactElement<Props> => {
       <SectionList
         sections={getSections(realm)}
         renderSectionHeader={renderSectionHeader}
+        renderSectionFooter={renderSectionFooter}
         renderItem={renderItem}
         keyExtractor={item => item.data._objectId()}
         initialNumToRender={40}
