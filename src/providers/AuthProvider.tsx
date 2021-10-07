@@ -38,7 +38,7 @@ const AuthProvider = ({children}: Props): React.ReactElement<Props> => {
   const signUp = async (email: string, password: string): Promise<void> => {
     try {
       await app.emailPasswordAuth.registerUser(email, password);
-      setRealmUser(app.currentUser);
+      signIn(email, password);
     } catch (e) {
       console.log('signUp');
       if (e instanceof Error) {

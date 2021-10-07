@@ -53,6 +53,8 @@ type Props = React.PropsWithChildren<{
  *    - journalEntryId, mealIndex
  * [4] Edit an existing food item and prompt the user on whether or not this impacts all previous consumed food items
  *    - foodItemId
+ * [5] Update a consumed food item on a food item group
+ *    - counsumedItemIndex, foodGroupData
  */
 const FoodItemProvider = ({
   realm,
@@ -115,7 +117,11 @@ const FoodItemProvider = ({
     let data: FoodDataState;
     if (foodItemId) {
       // case [1], [4]
-      data = {...getFoodItemById(foodItemId).getData(), newFoodItem: false};
+      data = {
+        ...getFoodItemById(foodItemId).getData(),
+        newFoodItem: false,
+        userId: user._id,
+      };
     } else if (
       journalEntryId &&
       mealIndex !== undefined &&
@@ -129,11 +135,14 @@ const FoodItemProvider = ({
           consumedItemIndex,
         ),
         newFoodItem: false,
+        userId: user._id,
       };
     } else if (consumedItemIndex !== undefined && foodGroupData) {
+      // case [5]
       data = {
         ...foodGroupData.foodItems[consumedItemIndex],
         newFoodItem: false,
+        userId: user._id,
       };
     } else {
       // case [3]
@@ -149,6 +158,7 @@ const FoodItemProvider = ({
         servingUnitOfMeasurement: UnitOfMeasurement.Grams,
         servingSizeNote: '',
         newFoodItem: true,
+        userId: user._id,
       };
     }
 
@@ -162,6 +172,7 @@ const FoodItemProvider = ({
     journalEntryId,
     mealIndex,
     realm,
+    user,
   ]);
 
   const writeFoodItemToRealm = React.useCallback(

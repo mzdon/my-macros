@@ -42,7 +42,7 @@ const Result = ({
 };
 
 interface Props<T> {
-  items: Results<T>;
+  items: Results<T> | null;
   onPress: (item: T) => void;
 }
 

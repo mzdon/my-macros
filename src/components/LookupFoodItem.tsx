@@ -1,25 +1,40 @@
 import React from 'react';
 
 import {Button} from 'react-native';
-import {RealmQuery} from 'react-realm-context';
+import {withRealm} from 'react-realm-context';
+import {Results} from 'realm';
 
 import BaseTextInput from 'components/BaseTextInput';
 import SearchResults from 'components/SearchResults';
 import Spacer from 'components/Spacer';
+import {useUserContext} from 'providers/UserProvider';
 import FoodItem from 'schemas/FoodItem';
 
 interface Props {
+  realm: Realm;
   addNewFoodItem: () => void;
   selectFoodItem: (foodItem: FoodItem) => void;
 }
 
 const LookupFoodItem = ({
+  realm,
   addNewFoodItem,
   selectFoodItem,
 }: Props): React.ReactElement<Props> => {
+  const {user} = useUserContext();
   const [search, setSearch] = React.useState('');
+  const [results, setResults] = React.useState<Results<FoodItem> | null>(null);
 
-  const foodFilter = `description CONTAINS[c] "${search}"`;
+  React.useEffect(() => {
+    if (!search) {
+      setResults(null);
+    }
+    const qResult = realm
+      .objects<FoodItem>('FoodItem')
+      .filtered('userId == $0 && description CONTAINS[c] $1', user._id, search)
+      .sorted('description');
+    setResults(qResult);
+  }, [realm, search, user]);
 
   return (
     <>
@@ -28,17 +43,11 @@ const LookupFoodItem = ({
         value={search}
         onChangeText={setSearch}
       />
-      {!!search && (
-        <RealmQuery type="FoodItem" filter={foodFilter} sort="description">
-          {({results}) => (
-            <SearchResults items={results} onPress={selectFoodItem} />
-          )}
-        </RealmQuery>
-      )}
+      {!!search && <SearchResults items={results} onPress={selectFoodItem} />}
       <Spacer />
       <Button title="New Food Item" onPress={addNewFoodItem} />
     </>
   );
 };
 
-export default LookupFoodItem;
+export default withRealm(LookupFoodItem);

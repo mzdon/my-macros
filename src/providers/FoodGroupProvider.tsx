@@ -132,9 +132,13 @@ const FoodGroupProvider = ({
     }
     let result;
     realm.write(() => {
+      const data: unknown = FoodItemGroup.generate({
+        ...foodGroupData,
+        userId: user._id,
+      });
       result = realm.create<FoodItemGroup>(
         FoodItemGroup,
-        FoodItemGroup.generate(foodGroupData) as FoodItemGroup,
+        data as FoodItemGroup,
         UpdateMode.Modified,
       );
       user.addFoodItemGroup(result);

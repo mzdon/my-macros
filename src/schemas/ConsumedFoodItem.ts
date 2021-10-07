@@ -14,7 +14,8 @@ export interface InitConsumedFoodItemData {
   unitOfMeasurement: UomOrServings;
 }
 
-export interface ConsumedFoodItemData extends Omit<FoodItemData, '_id'> {
+export interface ConsumedFoodItemData
+  extends Omit<FoodItemData, '_id' | 'userId'> {
   itemId: UUID | null;
   quantity: number;
   unitOfMeasurement: UnitOfMeasurement;

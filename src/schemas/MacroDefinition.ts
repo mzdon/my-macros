@@ -37,25 +37,25 @@ class MacroDefinition {
   sugar!: number | null;
   fiber!: number | null;
 
-  constructor(obj?: ConstructorObject) {
-    if (obj) {
-      const {
-        startDate = new Date(),
-        calories = 0,
-        carbs = 0,
-        protein = 0,
-        fat = 0,
-        sugar = null,
-        fiber = null,
-      } = obj;
-      this.startDate = startDate;
-      this.calories = Number(calories);
-      this.carbs = Number(carbs);
-      this.protein = Number(protein);
-      this.fat = Number(fat);
-      this.sugar = determineOptionalNumber(sugar);
-      this.fiber = determineOptionalNumber(fiber);
-    }
+  static generate(obj: ConstructorObject) {
+    const {
+      startDate = new Date(),
+      calories = 0,
+      carbs = 0,
+      protein = 0,
+      fat = 0,
+      sugar = null,
+      fiber = null,
+    } = obj;
+    return {
+      startDate,
+      calories,
+      carbs,
+      protein,
+      fat,
+      sugar: determineOptionalNumber(sugar),
+      fiber: determineOptionalNumber(fiber),
+    };
   }
 
   isEqualTo(macroDef: MacroData): boolean {

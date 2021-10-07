@@ -74,15 +74,19 @@ const JournalProvider = ({
       return (
         realm
           .objects<JournalEntry>('JournalEntry')
+          .filtered('userId == $0', userId)
           .find(entry => isSameDay(entry.date, date)) || null
       );
     },
-    [realm],
+    [realm, userId],
   );
 
   const getEntries = React.useCallback(() => {
-    return realm.objects<JournalEntry>('JournalEntry').sorted('date');
-  }, [realm]);
+    return realm
+      .objects<JournalEntry>('JournalEntry')
+      .filtered('userId == $0', userId)
+      .sorted('date');
+  }, [realm, userId]);
 
   const saveMeal = React.useCallback(
     (date: Date, description: string, mealIndex?: number) => {

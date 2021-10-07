@@ -1,5 +1,6 @@
 import React from 'react';
 
+import {UUID} from 'bson';
 import {SectionList, StyleSheet, Text, View} from 'react-native';
 import {withRealm} from 'react-realm-context';
 import Realm from 'realm';
@@ -52,10 +53,14 @@ interface Section {
   data: Array<FoodItemData | FoodItemGroupData>;
 }
 
-const getSections = (realm: Realm): Section[] => {
-  const foodItems = realm.objects<FoodItem>('FoodItem').sorted('description');
+const getSections = (realm: Realm, userId: UUID): Section[] => {
+  const foodItems = realm
+    .objects<FoodItem>('FoodItem')
+    .filtered('userId == $0', userId)
+    .sorted('description');
   const foodItemGroups = realm
     .objects<FoodItemGroup>('FoodItemGroup')
+    .filtered('userId == $0', userId)
     .sorted('description');
   return [
     {
@@ -171,7 +176,7 @@ const FoodSelectorScreen = ({realm}: Props): React.ReactElement<Props> => {
   return (
     <View style={styles.screen}>
       <SectionList
-        sections={getSections(realm)}
+        sections={getSections(realm, user._id)}
         renderSectionHeader={renderSectionHeader}
         renderSectionFooter={renderSectionFooter}
         renderItem={renderItem}

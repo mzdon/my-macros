@@ -26,14 +26,25 @@ const UserProvider = ({children}: Props): React.ReactElement<Props> => {
   return (
     <RealmConsumer updateOnChange={true}>
       {({realm}) => {
-        function getUser() {
-          const user = realm
+        const queryUser = () =>
+          realm
             .objects<User>('User')
             .find((u: User) => u.realmUserId === realmUserId);
+
+        function getUser() {
+          let user = queryUser();
+          if (!user) {
+            realm.write(() => {
+              realm.create(User, User.generate({realmUserId}));
+            });
+            user = queryUser();
+          }
+
           if (!user) {
             signOut();
             throw new Error(`'User<${realmUserId}> not found in realm!`);
           }
+
           return user;
         }
 

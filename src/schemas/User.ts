@@ -108,17 +108,23 @@ class User extends Realm.Object {
     if (!this.macroDefinitions.length) {
       return null;
     }
-    return this.macroDefinitions.reduce((lastResult, def) => {
-      // a macroDef with a null startDate is the first set of macroDefs defined
-      // there should be only one
-      if (lastResult.startDate === null) {
-        return def;
-      }
-      if (def.startDate && def.startDate > lastResult.startDate) {
-        return def;
-      }
-      return lastResult;
-    }, this.macroDefinitions[0]);
+    return this.macroDefinitions.reduce(
+      (lastResult: MacroDefinition | null, def) => {
+        if (!lastResult) {
+          return def;
+        }
+        // a macroDef with a null startDate is the first set of macroDefs defined
+        // there should be only one
+        if (lastResult.startDate === null) {
+          return def;
+        }
+        if (def.startDate && def.startDate > lastResult.startDate) {
+          return def;
+        }
+        return lastResult;
+      },
+      null,
+    );
   }
 
   getCurrentMacroData(): MacroData {
@@ -220,10 +226,15 @@ class User extends Realm.Object {
     const currentMacros = this.getCurrentMacros();
     if (!currentMacros) {
       this.macroDefinitions = [
-        new MacroDefinition({startDate: null, ...macroDef}),
+        MacroDefinition.generate({
+          startDate: null,
+          ...macroDef,
+        }) as MacroDefinition,
       ];
     } else if (!currentMacros.isEqualTo(macroDef)) {
-      this.macroDefinitions.push(new MacroDefinition(macroDef));
+      this.macroDefinitions.push(
+        MacroDefinition.generate(macroDef) as MacroDefinition,
+      );
     }
   }
 
