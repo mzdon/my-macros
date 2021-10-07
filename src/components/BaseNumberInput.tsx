@@ -17,7 +17,16 @@ const BaseNumberInput = React.forwardRef<TextInput, BaseNumberInputProps>(
     ref,
   ): React.ReactElement<BaseNumberInputProps> => {
     const {value, onChangeText, ...rest} = props;
+    const [internalValue, setInternalValue] = React.useState<string>(
+      String(value),
+    );
+    React.useEffect(() => {
+      if (Number(value) !== Number(internalValue)) {
+        setInternalValue(String(value));
+      }
+    }, [internalValue, value]);
     const validOnChangeText = useCheckValidNumberFirst((v: string) => {
+      setInternalValue(v);
       onChangeText(Number(v));
     });
     return (
@@ -25,7 +34,7 @@ const BaseNumberInput = React.forwardRef<TextInput, BaseNumberInputProps>(
         ref={ref}
         {...rest}
         keyboardType="numeric"
-        value={String(value)}
+        value={internalValue}
         onChangeText={validOnChangeText}
       />
     );

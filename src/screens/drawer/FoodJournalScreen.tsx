@@ -11,6 +11,7 @@ import Stats from 'components/Stats';
 import {ADD_MEAL, ITEM_CONSUMED, LOOKUP_OR_ADD} from 'navigation/Constants';
 import {
   FoodCrudScreenNavigationProp,
+  JournalScreenNavigationProp,
   JournalScreenRouteProp,
 } from 'navigation/RouteTypes';
 import {useFoodCrudNavigationContext} from 'providers/FoodCrudNavigationProvider';
@@ -19,7 +20,10 @@ import {useUserContext} from 'providers/UserProvider';
 import styles from 'styles';
 import JournalEntry from 'schemas/JournalEntry';
 import {isSameDay} from 'utils/Date';
-import {useParentNavigation} from 'utils/Navigation';
+import {
+  useParentNavigation,
+  useSetFoodCrudNavigationOptions,
+} from 'utils/Navigation';
 import {CatastrophicError} from 'utils/Errors';
 
 const _styles = StyleSheet.create({
@@ -51,7 +55,8 @@ const FoodJournalScreen = () => {
   } = useRoute<JournalScreenRouteProp>();
   const {user} = useUserContext();
   const {entries, deleteMeal, deleteConsumedFoodItem} = useJournalContext();
-  const navigation = useParentNavigation();
+  const navigation = useNavigation<JournalScreenNavigationProp>();
+  const parentNavigation = useParentNavigation();
   const foodCrudNavigation = useFoodCrudNavigationContext();
 
   const [date, setDate] = React.useState(new Date(initialDate));
@@ -65,11 +70,11 @@ const FoodJournalScreen = () => {
     setShowCalendarStrip(!showCalendarStrip);
   }, [showCalendarStrip]);
 
+  // header options
   const AddMealButtonFunction = React.useCallback(
     () => <AddMealButton date={date} />,
     [date],
   );
-
   const DateHeaderTitle = React.useCallback(() => {
     const icon = showCalendarStrip ? '\u25B2' : '\u25BC';
     return (
@@ -79,13 +84,18 @@ const FoodJournalScreen = () => {
       />
     );
   }, [date, showCalendarStrip, toggleCalendarStrip]);
-
-  React.useLayoutEffect(() => {
-    foodCrudNavigation.setOptions({
+  const headerOptions = React.useMemo(
+    () => ({
       headerTitle: DateHeaderTitle,
       headerRight: AddMealButtonFunction,
-    });
-  }, [AddMealButtonFunction, foodCrudNavigation, DateHeaderTitle]);
+    }),
+    [AddMealButtonFunction, DateHeaderTitle],
+  );
+  useSetFoodCrudNavigationOptions(
+    navigation,
+    foodCrudNavigation,
+    headerOptions,
+  );
 
   const addItem = React.useCallback(
     (journalEntryId: JournalEntry['_id'], mealIndex: number) =>
@@ -98,11 +108,11 @@ const FoodJournalScreen = () => {
 
   const editMeal = React.useCallback(
     (journalEntryDate: Date, mealIndex: number) =>
-      navigation?.navigate(ADD_MEAL, {
+      parentNavigation?.navigate(ADD_MEAL, {
         date: journalEntryDate.getTime(),
         mealIndex,
       }),
-    [navigation],
+    [parentNavigation],
   );
 
   const editConsumedFoodItem = React.useCallback(

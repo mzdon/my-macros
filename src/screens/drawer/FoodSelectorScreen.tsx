@@ -1,5 +1,6 @@
 import React from 'react';
 
+import {useNavigation} from '@react-navigation/native';
 import {UUID} from 'bson';
 import {SectionList, StyleSheet, Text, View} from 'react-native';
 import {withRealm} from 'react-realm-context';
@@ -7,6 +8,7 @@ import Realm from 'realm';
 
 import SwipeableRow, {getEditAndDeleteActions} from 'components/SwipeableRow';
 import {FOOD_ITEM_DESCRIPTION, FOOD_ITEM_GROUP} from 'navigation/Constants';
+import {FoodEditorScreenNavigationProp} from 'navigation/RouteTypes';
 import {
   Screen,
   useFoodCrudNavigationContext,
@@ -20,6 +22,7 @@ import {
   useGetFoodItemGroupsWithFoodItemId,
   useGetJournalEntriesWithFoodItemId,
 } from 'utils/Queries';
+import {useSetFoodCrudNavigationOptions} from 'utils/Navigation';
 
 const _styles = StyleSheet.create({
   header: {
@@ -98,12 +101,23 @@ const renderSectionFooter = ({section}: {section: Section}) => {
   return null;
 };
 
+const headerOptions = {
+  headerTitle: 'Food Editor',
+};
+
 const FoodSelectorScreen = ({realm}: Props): React.ReactElement<Props> => {
+  const navigation = useNavigation<FoodEditorScreenNavigationProp>();
   const foodCrudNavigation = useFoodCrudNavigationContext();
   const getFoodItemGroupsWithFoodItemId =
     useGetFoodItemGroupsWithFoodItemId(realm);
   const getJournalEntriesWithFoodItemId =
     useGetJournalEntriesWithFoodItemId(realm);
+
+  useSetFoodCrudNavigationOptions(
+    navigation,
+    foodCrudNavigation,
+    headerOptions,
+  );
 
   const {user} = useUserContext();
   const beforeDeleteFoodItem = React.useCallback(

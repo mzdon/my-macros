@@ -68,6 +68,16 @@ export type ProfileScreenNavigationProp = StackNavigationProp<
 
 export type ProfileScreenRouteProp = RouteProp<DrawerParamList, 'Profile'>;
 
+export type FoodEditorScreenNavigationProp = StackNavigationProp<
+  DrawerParamList,
+  'FoodEditor'
+>;
+
+export type FoodEditorScreenRouteProp = RouteProp<
+  DrawerParamList,
+  'FoodEditor'
+>;
+
 export type AddMealScreenNavigationProp = StackNavigationProp<
   PrivateStackParamList,
   'AddMeal'

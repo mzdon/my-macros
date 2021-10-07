@@ -3,6 +3,7 @@ import Realm from 'realm';
 
 import {InitFoodItemData, FoodItemData} from 'schemas/FoodItem';
 import {Servings, UnitOfMeasurement} from 'types/UnitOfMeasurement';
+import {round} from 'utils/Math';
 import {convert} from 'utils/UnitOfMeasurement';
 
 type UomOrServings = UnitOfMeasurement | typeof Servings;
@@ -30,7 +31,7 @@ function determineServingsConsumedAndUom(
     // we consumed n servings
     return {
       servings: quantity,
-      realQuantity: quantity * item.servingSize,
+      realQuantity: round(quantity * item.servingSize),
       uom: item.servingUnitOfMeasurement,
     };
   }
@@ -42,7 +43,7 @@ function determineServingsConsumedAndUom(
       item.servingUnitOfMeasurement,
     );
     return {
-      servings: quantityAsServingUom / item.servingSize,
+      servings: round(quantityAsServingUom / item.servingSize),
       realQuantity: quantity,
       uom: unitOfMeasurement,
     };
@@ -57,12 +58,12 @@ function determineServingsConsumedAndUom(
 
 function determineItemMacros(item: InitFoodItemData, servings: number) {
   return {
-    calories: item.calories * servings,
-    carbs: item.carbs * servings,
-    protein: item.protein * servings,
-    fat: item.fat * servings,
-    sugar: item.sugar * servings,
-    fiber: item.fiber * servings,
+    calories: round(item.calories * servings),
+    carbs: round(item.carbs * servings),
+    protein: round(item.protein * servings),
+    fat: round(item.fat * servings),
+    sugar: round(item.sugar * servings),
+    fiber: round(item.fiber * servings),
   };
 }
 
