@@ -216,7 +216,7 @@ const JournalProvider = ({
   );
 };
 
-export default withRealm(JournalProvider);
+export default withRealm(JournalProvider, 'realm', {updateOnChange: true});
 
 export const useJournalContext = () => {
   const journalContext = React.useContext(JournalContext);

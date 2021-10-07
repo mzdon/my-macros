@@ -1,6 +1,6 @@
 import React from 'react';
 
-import {RealmConsumer} from 'react-realm-context';
+import {withRealm} from 'react-realm-context';
 
 import {useAuthContext} from 'providers/AuthProvider';
 import User, {UserData} from 'schemas/User';
@@ -12,9 +12,11 @@ interface UserContextValue {
 
 const UserContext = React.createContext<UserContextValue | null>(null);
 
-type Props = React.PropsWithChildren<{}>;
+type Props = React.PropsWithChildren<{
+  realm: Realm;
+}>;
 
-const UserProvider = ({children}: Props): React.ReactElement<Props> => {
+const UserProvider = ({realm, children}: Props): React.ReactElement<Props> => {
   const {realmUser, signOut} = useAuthContext();
 
   if (!realmUser) {
@@ -23,54 +25,54 @@ const UserProvider = ({children}: Props): React.ReactElement<Props> => {
 
   const realmUserId = realmUser.id;
 
+  const queryUser = React.useCallback(
+    () =>
+      realm
+        .objects<User>('User')
+        .find((u: User) => u.realmUserId === realmUserId),
+    [realm, realmUserId],
+  );
+
+  const getUser = React.useCallback(() => {
+    let user = queryUser();
+    if (!user) {
+      realm.write(() => {
+        realm.create(User, User.generate({realmUserId}));
+      });
+      user = queryUser();
+    }
+
+    if (!user) {
+      signOut();
+      throw new Error(`'User<${realmUserId}> not found in realm!`);
+    }
+
+    return user;
+  }, [queryUser, realm, realmUserId, signOut]);
+
+  const updateUser = React.useCallback(
+    (userData: UserData) => {
+      const user = getUser();
+      realm.write(() => {
+        user.updateData(userData);
+      });
+      return getUser();
+    },
+    [getUser, realm],
+  );
+
+  const userContextValue = {
+    user: getUser(),
+    updateUser,
+  };
   return (
-    <RealmConsumer updateOnChange={true}>
-      {({realm}) => {
-        const queryUser = () =>
-          realm
-            .objects<User>('User')
-            .find((u: User) => u.realmUserId === realmUserId);
-
-        function getUser() {
-          let user = queryUser();
-          if (!user) {
-            realm.write(() => {
-              realm.create(User, User.generate({realmUserId}));
-            });
-            user = queryUser();
-          }
-
-          if (!user) {
-            signOut();
-            throw new Error(`'User<${realmUserId}> not found in realm!`);
-          }
-
-          return user;
-        }
-
-        const updateUser = (userData: UserData) => {
-          const user = getUser();
-          realm.write(() => {
-            user.updateData(userData);
-          });
-          return getUser();
-        };
-
-        const userContextValue = {
-          user: getUser(),
-          updateUser,
-        };
-        return (
-          <UserContext.Provider value={userContextValue}>
-            {children}
-          </UserContext.Provider>
-        );
-      }}
-    </RealmConsumer>
+    <UserContext.Provider value={userContextValue}>
+      {children}
+    </UserContext.Provider>
   );
 };
 
-export default UserProvider;
+export default withRealm(UserProvider);
 
 export const useUserContext = (): UserContextValue => {
   const userContextValue = React.useContext(UserContext);
