@@ -7,6 +7,7 @@ import JournalEntry from 'schemas/JournalEntry';
 import FoodItem from 'schemas/FoodItem';
 import FoodItemGroup from 'schemas/FoodItemGroup';
 import {RecoverableError} from 'utils/Errors';
+import {useUserContext} from 'providers/UserProvider';
 
 function getUUID(id: UUID | string): UUID {
   return id instanceof UUID ? id : new UUID(id);
@@ -35,6 +36,21 @@ export const useGetFoodItemById = (realm: Realm) =>
 
 export const useGetFoodItemGroupById = (realm: Realm) =>
   useGetTypeById<FoodItemGroup>(realm, 'FoodItemGroup');
+
+const useGetTypeForUser = <T extends Realm.Object>(
+  realm: Realm,
+  type: string,
+) => {
+  const {user} = useUserContext();
+  return React.useCallback(() => {
+    return realm.objects<T>(type).filtered('userId == $0', user._id);
+  }, [realm, type, user._id]);
+};
+
+export const useGetFoodItems = (realm: Realm) =>
+  useGetTypeForUser<FoodItem>(realm, 'FoodItem');
+export const useGetFoodItemGroups = (realm: Realm) =>
+  useGetTypeForUser<FoodItemGroup>(realm, 'FoodItemGroup');
 
 export const useDeleteItem = <T extends Realm.Object = Realm.Object>(
   realm: Realm,

@@ -1,10 +1,9 @@
 import React from 'react';
 
 import {useNavigation} from '@react-navigation/native';
-import {UUID} from 'bson';
 import {SectionList, StyleSheet, Text, View} from 'react-native';
 import {withRealm} from 'react-realm-context';
-import Realm from 'realm';
+import Realm, {Results} from 'realm';
 
 import SwipeableRow, {getEditAndDeleteActions} from 'components/SwipeableRow';
 import {FOOD_ITEM_DESCRIPTION, FOOD_ITEM_GROUP} from 'navigation/Constants';
@@ -19,7 +18,9 @@ import FoodItemGroup from 'schemas/FoodItemGroup';
 import styles from 'styles';
 import {
   useDeleteItem,
+  useGetFoodItemGroups,
   useGetFoodItemGroupsWithFoodItemId,
+  useGetFoodItems,
   useGetJournalEntriesWithFoodItemId,
 } from 'utils/Queries';
 import {useSetFoodCrudNavigationOptions} from 'utils/Navigation';
@@ -56,15 +57,10 @@ interface Section {
   data: Array<FoodItemData | FoodItemGroupData>;
 }
 
-const getSections = (realm: Realm, userId: UUID): Section[] => {
-  const foodItems = realm
-    .objects<FoodItem>('FoodItem')
-    .filtered('userId == $0', userId)
-    .sorted('description');
-  const foodItemGroups = realm
-    .objects<FoodItemGroup>('FoodItemGroup')
-    .filtered('userId == $0', userId)
-    .sorted('description');
+const getSections = (
+  foodItems: Results<FoodItem>,
+  foodItemGroups: Results<FoodItemGroup>,
+): Section[] => {
   return [
     {
       title: 'Food Items',
@@ -108,6 +104,8 @@ const headerOptions = {
 const FoodSelectorScreen = ({realm}: Props): React.ReactElement<Props> => {
   const navigation = useNavigation<FoodEditorScreenNavigationProp>();
   const foodCrudNavigation = useFoodCrudNavigationContext();
+  const getFoodItems = useGetFoodItems(realm);
+  const getFoodItemGroups = useGetFoodItemGroups(realm);
   const getFoodItemGroupsWithFoodItemId =
     useGetFoodItemGroupsWithFoodItemId(realm);
   const getJournalEntriesWithFoodItemId =
@@ -187,10 +185,14 @@ const FoodSelectorScreen = ({realm}: Props): React.ReactElement<Props> => {
     [deleteFoodItem, deleteFoodItemGroup, foodCrudNavigation],
   );
 
+  const foodItems = getFoodItems().sorted('description');
+  const foodItemGroups = getFoodItemGroups().sorted('description');
+  const sections = getSections(foodItems, foodItemGroups);
+
   return (
     <View style={styles.screen}>
       <SectionList
-        sections={getSections(realm, user._id)}
+        sections={sections}
         renderSectionHeader={renderSectionHeader}
         renderSectionFooter={renderSectionFooter}
         renderItem={renderItem}

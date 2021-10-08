@@ -10,8 +10,12 @@ import {useUserContext} from 'providers/UserProvider';
 import {InitConsumedFoodItemData} from 'schemas/ConsumedFoodItem';
 import FoodItem, {InitFoodItemData, FoodItemData} from 'schemas/FoodItem';
 import {UnitOfMeasurement} from 'types/UnitOfMeasurement';
-import {RecoverableError} from 'utils/Errors';
-import {useGetFoodItemById, useGetJournalEntryById} from 'utils/Queries';
+import {NameExistsError, RecoverableError} from 'utils/Errors';
+import {
+  useGetFoodItemById,
+  useGetFoodItems,
+  useGetJournalEntryById,
+} from 'utils/Queries';
 
 type ConsumedFoodItemDataProvided = Pick<
   InitConsumedFoodItemData,
@@ -31,6 +35,7 @@ export interface FoodItemContextValue {
     consumedFoodItemData: ConsumedFoodItemDataProvided,
     foodItemId?: string,
   ) => void;
+  checkForExistingFoodItemDescription: (data: InitFoodItemData | null) => void;
 }
 
 const FoodItemContext = React.createContext<FoodItemContextValue | null>(null);
@@ -67,6 +72,7 @@ const FoodItemProvider = ({
   const {user} = useUserContext();
   const getJournalEntryById = useGetJournalEntryById(realm);
   const getFoodItemById = useGetFoodItemById(realm);
+  const getFoodItems = useGetFoodItems(realm);
   const {updateEntriesWithFoodItem} = useJournalContext();
   const {foodGroupData, saveConsumedFoodItem, updateGroupsWithFoodItem} =
     useFoodGroupContext();
@@ -80,10 +86,11 @@ const FoodItemProvider = ({
       if (!foodItemData) {
         throw new RecoverableError('Food item data state not initialized yet');
       }
-      setFoodItemData({
+      const nextData = {
         ...foodItemData,
         ...data,
-      });
+      };
+      setFoodItemData(nextData);
     },
     [foodItemData],
   );
@@ -175,8 +182,26 @@ const FoodItemProvider = ({
     user,
   ]);
 
+  const checkForExistingFoodItemDescription = React.useCallback(
+    (data: InitFoodItemData | null) => {
+      if (!data || !data.description) {
+        return;
+      }
+      const existing = getFoodItems().filtered(
+        'description == $0 && _id != $1',
+        data.description,
+        data._id,
+      );
+      if (existing.length > 0) {
+        throw new NameExistsError();
+      }
+    },
+    [getFoodItems],
+  );
+
   const writeFoodItemToRealm = React.useCallback(
     (data: InitFoodItemData): FoodItem => {
+      checkForExistingFoodItemDescription(data);
       let result;
       realm.write(() => {
         result = realm.create<FoodItem>(
@@ -189,7 +214,7 @@ const FoodItemProvider = ({
       // @ts-ignore
       return result;
     },
-    [realm, user],
+    [checkForExistingFoodItemDescription, realm, user],
   );
 
   const saveFoodItem = React.useCallback(
@@ -258,6 +283,7 @@ const FoodItemProvider = ({
       saveFoodItem,
       updateFoodItemData,
       saveConsumedFoodItem: internalSaveConsumedFoodItem,
+      checkForExistingFoodItemDescription,
     };
   }, [
     journalEntryId,
@@ -265,6 +291,7 @@ const FoodItemProvider = ({
     internalSaveConsumedFoodItem,
     saveFoodItem,
     updateFoodItemData,
+    checkForExistingFoodItemDescription,
   ]);
 
   return (

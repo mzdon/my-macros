@@ -15,6 +15,11 @@ import {useFoodGroupContext} from 'providers/FoodGroupProvider';
 import {ConsumedFoodItemData} from 'schemas/ConsumedFoodItem';
 import FoodItem from 'schemas/FoodItem';
 import styles from 'styles';
+import {
+  isValidRequiredString,
+  requiredErrorMessage,
+  useValidateFields,
+} from 'utils/Validators';
 
 const FoodItemGroupScreen = () => {
   const navigation = useNavigation<FoodItemGroupNavigationProp>();
@@ -33,13 +38,16 @@ const FoodItemGroupScreen = () => {
     [updateDescription],
   );
 
-  const addNewFoodItem = React.useCallback(
-    () =>
-      foodCrudNavigation.navigate(FOOD_ITEM_DESCRIPTION, {
-        foodItemId: undefined,
-      }),
-    [foodCrudNavigation],
-  );
+  const [internalError, setInternalError] = React.useState('');
+
+  const addNewFoodItem = React.useCallback(() => {
+    if (internalError) {
+      setInternalError('');
+    }
+    foodCrudNavigation.navigate(FOOD_ITEM_DESCRIPTION, {
+      foodItemId: undefined,
+    });
+  }, [foodCrudNavigation, internalError]);
   const selectFoodItem = React.useCallback(
     (foodItem: FoodItem) => {
       foodCrudNavigation.navigate(ITEM_CONSUMED, {
@@ -58,15 +66,45 @@ const FoodItemGroupScreen = () => {
   );
 
   const onSave = React.useCallback(() => {
+    if (!foodGroupData?.foodItems.length) {
+      setInternalError('Please add some food items first!');
+      return;
+    }
     saveFoodGroup();
     foodCrudNavigation.goBack();
-  }, [foodCrudNavigation, saveFoodGroup]);
+  }, [foodCrudNavigation, foodGroupData?.foodItems.length, saveFoodGroup]);
+
+  const fieldValidators = React.useMemo(
+    () => ({
+      description: {
+        isValid: isValidRequiredString,
+        message: requiredErrorMessage('Description'),
+        value: description,
+        onChange: onUpdateDescription,
+      },
+    }),
+    [description, onUpdateDescription],
+  );
+
+  const before = React.useMemo(
+    () => ({
+      onSave,
+    }),
+    [onSave],
+  );
+
+  const {errors, onChange, validateBefore} = useValidateFields(
+    fieldValidators,
+    before,
+  );
 
   React.useLayoutEffect(() => {
     navigation.setOptions({
-      headerRight: () => <Button title="Save" onPress={onSave} />,
+      headerRight: () => (
+        <Button title="Save" onPress={validateBefore.onSave} />
+      ),
     });
-  }, [navigation, onSave]);
+  }, [navigation, validateBefore.onSave]);
 
   const renderItem = React.useCallback(
     ({item, index}: {item: ConsumedFoodItemData; index: number}) => {
@@ -91,7 +129,8 @@ const FoodItemGroupScreen = () => {
         label="Description"
         placeholder="Group description..."
         value={description}
-        onChangeText={onUpdateDescription}
+        onChangeText={onChange.description}
+        error={errors.description}
       />
       <Spacer />
       <LookupFoodItem
@@ -104,6 +143,8 @@ const FoodItemGroupScreen = () => {
         renderItem={renderItem}
         keyExtractor={(_item, idx) => `consumedItem-${idx}`}
       />
+      <Spacer />
+      {!!internalError && <Text style={styles.error}>{internalError}</Text>}
     </View>
   );
 };

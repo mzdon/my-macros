@@ -13,6 +13,13 @@ import {UnitOfMeasurement} from 'types/UnitOfMeasurement';
 import {useFoodItemContext} from 'providers/FoodItemProvider';
 import styles from 'styles';
 import {InitFoodItemData} from 'schemas/FoodItem';
+import {Errors, NameExistsError} from 'utils/Errors';
+import {
+  isValidRequiredNumber,
+  isValidRequiredString,
+  requiredErrorMessage,
+  useValidateFields,
+} from 'utils/Validators';
 
 const SERVING_UMO_VALUES = [
   UnitOfMeasurement.Grams,
@@ -23,7 +30,11 @@ const SERVING_UMO_VALUES = [
 
 const FoodItemDescriptionScreen = () => {
   const navigation = useNavigation<FoodItemDescriptionNavigationProp>();
-  const {foodItemData, updateFoodItemData} = useFoodItemContext();
+  const {
+    foodItemData,
+    updateFoodItemData,
+    checkForExistingFoodItemDescription,
+  } = useFoodItemContext();
   const {
     description = '',
     servingSize = 0,
@@ -32,15 +43,9 @@ const FoodItemDescriptionScreen = () => {
     calories = 0,
   } = foodItemData || {};
 
-  const onNext = React.useCallback(() => {
-    navigation.navigate(FOOD_ITEM_MACROS);
-  }, [navigation]);
-
-  React.useLayoutEffect(() => {
-    navigation.setOptions({
-      headerRight: () => <Button title="Next" onPress={onNext} />,
-    });
-  }, [navigation, onNext]);
+  const [internalFieldErrors, setInternalFieldErrors] = React.useState<
+    Errors<InitFoodItemData>
+  >({});
 
   function updater<T>(fieldName: keyof InitFoodItemData) {
     return (value: T) => {
@@ -48,8 +53,18 @@ const FoodItemDescriptionScreen = () => {
     };
   }
 
-  // TODO: Warn if a food item exists with the same description
-  const updateDescription = updater('description');
+  const onUpdateDescription = updater('description');
+  const updateDescription = React.useCallback(
+    (val: string) => {
+      if (internalFieldErrors.description) {
+        const newState = {...internalFieldErrors};
+        delete newState.description;
+        setInternalFieldErrors(newState);
+      }
+      onUpdateDescription(val);
+    },
+    [internalFieldErrors, onUpdateDescription],
+  );
   const updateServingSize = updater<number>('servingSize');
   const onUpdateUnitOfMeasurement = updater<UnitOfMeasurement>(
     'servingUnitOfMeasurement',
@@ -60,6 +75,76 @@ const FoodItemDescriptionScreen = () => {
   const updateServingNote = updater('servingSizeNote');
   const updateCalories = updater<number>('calories');
 
+  const fieldValidators = React.useMemo(
+    () => ({
+      description: {
+        isValid: isValidRequiredString,
+        message: requiredErrorMessage('Description'),
+        value: description,
+        onChange: updateDescription,
+      },
+      servingSize: {
+        isValid: isValidRequiredNumber,
+        message: requiredErrorMessage('Serving Size'),
+        value: servingSize,
+        onChange: updateServingSize,
+      },
+      calories: {
+        isValid: isValidRequiredNumber,
+        message: requiredErrorMessage('Calories'),
+        value: calories,
+        onChange: updateCalories,
+      },
+    }),
+    [
+      calories,
+      description,
+      servingSize,
+      updateCalories,
+      updateDescription,
+      updateServingSize,
+    ],
+  );
+
+  const onNext = React.useCallback(() => {
+    try {
+      checkForExistingFoodItemDescription(foodItemData);
+      navigation.navigate(FOOD_ITEM_MACROS);
+    } catch (e) {
+      if (e instanceof NameExistsError) {
+        setInternalFieldErrors({
+          ...internalFieldErrors,
+          description: e.message,
+        });
+      }
+    }
+  }, [
+    checkForExistingFoodItemDescription,
+    internalFieldErrors,
+    foodItemData,
+    navigation,
+  ]);
+
+  const before = React.useMemo(
+    () => ({
+      onNext,
+    }),
+    [onNext],
+  );
+
+  const {errors, onChange, validateBefore} = useValidateFields(
+    fieldValidators,
+    before,
+  );
+
+  React.useLayoutEffect(() => {
+    navigation.setOptions({
+      headerRight: () => (
+        <Button title="Next" onPress={validateBefore.onNext} />
+      ),
+    });
+  }, [navigation, validateBefore.onNext]);
+
   return (
     <View style={styles.screen}>
       <Text>{`${foodItemData?.newFoodItem ? 'New' : 'Edit'} Item`}</Text>
@@ -68,14 +153,16 @@ const FoodItemDescriptionScreen = () => {
         label="Description"
         placeholder="New item description..."
         value={description}
-        onChangeText={updateDescription}
+        onChangeText={onChange.description}
+        error={internalFieldErrors.description || errors.description}
       />
       <Spacer />
       <BaseNumberInput
         label="Serving Size"
         placeholder="What's the serving size?"
         value={servingSize}
-        onChangeText={updateServingSize}
+        onChangeText={onChange.servingSize}
+        error={errors.servingSize}
       />
       <Spacer />
       <RadioButtons
@@ -95,7 +182,8 @@ const FoodItemDescriptionScreen = () => {
         label="Calories"
         placeholder="Calories"
         value={calories}
-        onChangeText={updateCalories}
+        onChangeText={onChange.calories}
+        error={errors.calories}
       />
       <Spacer />
     </View>

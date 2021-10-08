@@ -26,8 +26,15 @@ const BaseNumberInput = React.forwardRef<TextInput, BaseNumberInputProps>(
       }
     }, [internalValue, value]);
     const validOnChangeText = useCheckValidNumberFirst((v: string) => {
-      setInternalValue(v);
-      onChangeText(Number(v));
+      let cleanVal = v;
+      // remove leading 0 if the next character is not a decimal point
+      if (cleanVal[0] === '0' && cleanVal[1] !== '.') {
+        cleanVal = cleanVal.substr(1);
+      } else if (cleanVal.length === 0) {
+        cleanVal = '0';
+      }
+      setInternalValue(cleanVal);
+      onChangeText(Number(cleanVal));
     });
     return (
       <BaseTextInput

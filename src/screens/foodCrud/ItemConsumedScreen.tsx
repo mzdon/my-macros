@@ -18,6 +18,11 @@ import {FoodItemType, isFoodOrDrink} from 'utils/FoodItem';
 import styles from 'styles';
 import {useFoodGroupContext} from 'providers/FoodGroupProvider';
 import {useFoodCrudNavigationContext} from 'providers/FoodCrudNavigationProvider';
+import {
+  isValidRequiredNumber,
+  requiredErrorMessage,
+  useValidateFields,
+} from 'utils/Validators';
 
 const UOM_VALUES = {
   [FoodItemType.Food]: [
@@ -55,6 +60,25 @@ const ItemConsumed = (): React.ReactElement => {
     setState(getInitialState(foodItemData));
   }, [foodItemData, setState]);
 
+  const updateQuantity = updater<number>('quantity');
+  const onUpdateUnitOfMeasurement =
+    updater<UnitOfMeasurement>('unitOfMeasurement');
+  const updateUnitOfMeasurement = (value: string | null) => {
+    onUpdateUnitOfMeasurement(value as UnitOfMeasurement);
+  };
+
+  const fieldValidators = React.useMemo(
+    () => ({
+      quantity: {
+        isValid: isValidRequiredNumber,
+        message: requiredErrorMessage('Quantity'),
+        value: state.quantity,
+        onChange: updateQuantity,
+      },
+    }),
+    [state.quantity, updateQuantity],
+  );
+
   const onSave = React.useCallback(() => {
     saveConsumedFoodItem(state);
     if (!foodGroupData) {
@@ -64,18 +88,25 @@ const ItemConsumed = (): React.ReactElement => {
     }
   }, [foodCrudNavigation, foodGroupData, saveConsumedFoodItem, state]);
 
+  const before = React.useMemo(
+    () => ({
+      onSave,
+    }),
+    [onSave],
+  );
+
+  const {errors, onChange, validateBefore} = useValidateFields(
+    fieldValidators,
+    before,
+  );
+
   React.useLayoutEffect(() => {
     navigation.setOptions({
-      headerRight: () => <Button title="Save" onPress={onSave} />,
+      headerRight: () => (
+        <Button title="Save" onPress={validateBefore.onSave} />
+      ),
     });
-  }, [navigation, onSave]);
-
-  const updateQuantity = updater<number>('quantity');
-  const onUpdateUnitOfMeasurement =
-    updater<UnitOfMeasurement>('unitOfMeasurement');
-  const updateUnitOfMeasurement = (value: string | null) => {
-    onUpdateUnitOfMeasurement(value as UnitOfMeasurement);
-  };
+  }, [navigation, validateBefore.onSave]);
 
   const uomValues =
     UOM_VALUES[
@@ -98,7 +129,8 @@ const ItemConsumed = (): React.ReactElement => {
         label={quantityLabel}
         placeholder="Quantity"
         value={state.quantity}
-        onChangeText={updateQuantity}
+        onChangeText={onChange.quantity}
+        error={errors.quantity}
       />
       <Spacer />
       <RadioButtons

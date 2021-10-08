@@ -1,6 +1,7 @@
 import React from 'react';
 
-// TODO fix this regex to support 1 decimal place
+import {Errors} from 'utils/Errors';
+
 const numberRegex = new RegExp('^\\d{0,}(\\.\\d?)?$');
 export const isStringValidNumber = (v: string): boolean => numberRegex.test(v);
 
@@ -58,10 +59,6 @@ interface FieldValidators {
     onChange: (value: any) => void;
   };
 }
-
-type Errors<T> = {
-  [Property in keyof T]?: string;
-};
 
 type GenericFunction = (...args: any[]) => any;
 
