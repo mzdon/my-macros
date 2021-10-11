@@ -1,22 +1,31 @@
 // https://github.com/realm/realm-js/issues/370#issuecomment-270849466
-export default class Realm {
+class Realm {
   constructor(params) {
     this.schema = {};
     this.callbackList = [];
     this.data = {};
     this.schemaCallbackList = {};
     params.schema.forEach(schema => {
-      this.data[schema.name] = {};
+      const name = schema.name || schema.schema.name;
+      this.data[name] = {};
     });
     params.schema.forEach(schema => {
-      this.schema[schema.name] = schema;
+      const name = schema.name || schema.schema.name;
+      this.schema[name] = schema;
     });
     this.lastLookedUpModel = null;
   }
 
+  _createClassInstance(Model, data) {
+    var obj = Object.create(Model.prototype);
+    return Object.assign(obj, data);
+  }
+
   objects(schemaName) {
     this.lastLookedUpModel = schemaName;
-    const objects = Object.values(this.data[schemaName]);
+    const objects = Object.values(this.data[schemaName]).map(data => {
+      return this._createClassInstance(this.schema[schemaName], data);
+    });
     objects.values = () => objects;
     objects.sorted = () =>
       this.compareFunc ? objects.sort(this.compareFunc) : objects.sort();
@@ -40,28 +49,12 @@ export default class Realm {
     this.writing = false;
   }
 
-  create(schemaName, object) {
+  create(SchemaClass, object) {
+    const schemaName = SchemaClass.schema.name;
     const modelObject = object;
     const properties = this.schema[schemaName].schema.properties;
     Object.keys(properties).forEach(key => {
-      if (modelObject[key] && modelObject[key].model) {
-        this.data[modelObject[key].model][modelObject[key].id] = this.create(
-          modelObject[key].model,
-          modelObject[key],
-        );
-      } else if (
-        modelObject[key] &&
-        modelObject[key].length &&
-        modelObject[key][0].model
-      ) {
-        modelObject[key].forEach(obj => {
-          this.data[modelObject[key][0].model][obj.id] = obj;
-        });
-        modelObject[key].filtered = this.filtered
-          ? this.filtered
-          : () => modelObject[key];
-        modelObject[key].sorted = () => modelObject[key].sort();
-      } else if (modelObject[key] === undefined) {
+      if (modelObject[key] === undefined) {
         if (typeof properties[key] === 'object' && properties[key].optional) {
           modelObject[key] = null;
         }
@@ -91,12 +84,12 @@ export default class Realm {
         cb();
       });
     }
-    return modelObject;
+    return this._createClassInstance(SchemaClass, modelObject);
   }
 
   objectForPrimaryKey(model, id) {
     this.lastLookedUpModel = model;
-    return this.data[model][id];
+    return this._createClassInstance(this.schema[model], this.data[model][id]);
   }
 
   delete(object) {
@@ -175,3 +168,5 @@ Realm.App = class App {
     this.currentUser = null;
   }
 };
+
+module.exports = Realm;

@@ -1,7 +1,3 @@
-/**
- * @format
- */
-
 import React from 'react';
 
 import {render} from '@testing-library/react-native';
@@ -9,12 +5,13 @@ import 'react-native';
 import Config from 'react-native-config';
 
 import App from 'App';
-import {resetRealmApp} from 'useRealmApp';
+import {resetRealmApp, useRealmApp} from 'useRealmApp';
 
 const originalRealmAppId = Config.REALM_APP_ID;
 
-function setup() {
+function setup(seedRealmApp?: () => void) {
   resetRealmApp();
+  seedRealmApp && seedRealmApp();
   return render(<App />);
 }
 
@@ -55,6 +52,28 @@ describe('rendering the root level App component', () => {
         expect(renderer.getAllByText('Sign Up')).toHaveLength(1);
         // the sign in button
         expect(renderer.getAllByText('Sign In')).toHaveLength(1);
+      });
+    });
+
+    describe('where there is a current user', () => {
+      describe('who is missing a name or macro definition', () => {
+        it('should render the user info flow', () => {
+          const seedRealmApp = () => {
+            // eslint-disable-next-line react-hooks/rules-of-hooks
+            const app = useRealmApp();
+            // @ts-ignore
+            app.currentUser = {id: 'realm-user-id'};
+          };
+          const renderer = setup(seedRealmApp);
+          expect(renderer.getAllByText('Name')).toHaveLength(1);
+          expect(renderer.getAllByText('Birthday (optional)')).toHaveLength(1);
+        });
+      });
+
+      describe('who has a name and at least one macro definition defined', () => {
+        it('should render the journal screen', () => {
+          // how do I seed Realm data?
+        });
       });
     });
   });
