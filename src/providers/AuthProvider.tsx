@@ -2,10 +2,8 @@ import React from 'react';
 
 import Realm from 'realm';
 
-import {getRealmApp} from 'getRealmApp';
+import {useRealmApp} from 'useRealmApp';
 import {CatastrophicError, RecoverableError} from 'utils/Errors';
-
-const app = getRealmApp();
 
 interface AuthContextValue {
   signIn: (email: string, password: string) => Promise<void>;
@@ -19,6 +17,7 @@ const AuthContext = React.createContext<AuthContextValue | null>(null);
 type Props = React.PropsWithChildren<{}>;
 
 const AuthProvider = ({children}: Props): React.ReactElement<Props> => {
+  const app = useRealmApp();
   const [realmUser, setRealmUser] = React.useState(app.currentUser);
 
   const signIn = async (email: string, password: string): Promise<void> => {

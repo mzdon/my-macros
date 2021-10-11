@@ -1,6 +1,6 @@
 import React from 'react';
 
-import {useNavigation, useRoute} from '@react-navigation/core';
+import {useNavigation, useRoute} from '@react-navigation/native';
 import {createStackNavigator} from '@react-navigation/stack';
 
 import {withScreenEnhancers} from 'navigation/Common';
