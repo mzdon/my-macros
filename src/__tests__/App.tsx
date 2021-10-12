@@ -3,9 +3,11 @@ import React from 'react';
 import {render} from '@testing-library/react-native';
 import 'react-native';
 import Config from 'react-native-config';
+import Realm from 'realm';
 
 import App from 'App';
 import {resetRealmApp, useRealmApp} from 'useRealmApp';
+import {UserModelFactory} from 'schemas/User';
 
 const originalRealmAppId = Config.REALM_APP_ID;
 
@@ -73,6 +75,24 @@ describe('rendering the root level App component', () => {
       describe('who has a name and at least one macro definition defined', () => {
         it('should render the journal screen', () => {
           // how do I seed Realm data?
+          const user = UserModelFactory.build();
+          // @ts-ignore
+          Realm.seededData = {
+            User: {
+              [user._id.toHexString()]: user,
+            },
+          };
+          const seedRealmApp = () => {
+            // eslint-disable-next-line react-hooks/rules-of-hooks
+            const app = useRealmApp();
+            // @ts-ignore
+            app.currentUser = {id: user.realmUserId};
+          };
+          const renderer = setup(seedRealmApp);
+          // tab nav
+          expect(renderer.getAllByText('Journal')).toHaveLength(1);
+          expect(renderer.getAllByText('FoodEditor')).toHaveLength(1);
+          expect(renderer.getAllByText('Profile')).toHaveLength(1);
         });
       });
     });

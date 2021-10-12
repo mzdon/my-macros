@@ -49,3 +49,9 @@ class WeighIn {
 }
 
 export default WeighIn;
+
+export interface WeighInModel {
+  date: Date;
+  weight: number;
+  unitOfMeasurement: UnitOfMeasurement;
+}

@@ -1,11 +1,16 @@
 import {UUID} from 'bson';
 import Realm from 'realm';
+import {Factory} from 'rosie';
 
 import FoodItem from 'schemas/FoodItem';
 import FoodItemGroup from 'schemas/FoodItemGroup';
-import Height from 'schemas/Height';
-import MacroDefinition, {MacroData} from 'schemas/MacroDefinition';
-import WeighIn from 'schemas/WeighIn';
+import Height, {HeightModel} from 'schemas/Height';
+import MacroDefinition, {
+  MacroData,
+  MacroDefinitionFactory,
+  MacroDefinitionModel,
+} from 'schemas/MacroDefinition';
+import WeighIn, {WeighInModel} from 'schemas/WeighIn';
 import {MeasurementSystem} from 'types/MeasurementSystem';
 
 function birthdayStringToDate(bday: string): Date | null {
@@ -291,3 +296,29 @@ class User extends Realm.Object {
 }
 
 export default User;
+
+export interface UserModel {
+  _id: UUID;
+  realmUserId: string;
+  name: string;
+  birthday: string | null;
+  measurementSystem: MeasurementSystem | null;
+  height: HeightModel | null;
+  weighIns: WeighInModel[];
+  macroDefinitions: MacroDefinitionModel[];
+  foodItems: UUID[];
+  foodItemGroups: UUID[];
+}
+
+export const UserModelFactory = Factory.define<UserModel>('UserModel').attrs({
+  _id: () => new UUID(),
+  realmUserId: 'realm-user-id',
+  name: 'Louie',
+  birthday: null,
+  height: null,
+  weighIns: [],
+  measurementSystem: null,
+  macroDefinitions: () => [MacroDefinitionFactory.build()],
+  foodItems: [],
+  foodItemGroups: [],
+});

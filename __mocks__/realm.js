@@ -1,5 +1,7 @@
 // https://github.com/realm/realm-js/issues/370#issuecomment-270849466
 class Realm {
+  static seededData = {};
+
   constructor(params) {
     this.schema = {};
     this.callbackList = [];
@@ -7,7 +9,7 @@ class Realm {
     this.schemaCallbackList = {};
     params.schema.forEach(schema => {
       const name = schema.name || schema.schema.name;
-      this.data[name] = {};
+      this.data[name] = Realm.seededData[name] || {};
     });
     params.schema.forEach(schema => {
       const name = schema.name || schema.schema.name;
@@ -69,7 +71,10 @@ class Realm {
       }
     });
 
-    this.data[schemaName][modelObject.id] = modelObject;
+    const modelId = modelObject._id.toHexString
+      ? modelObject._id.toHexString()
+      : modelObject._id;
+    this.data[schemaName][modelId] = modelObject;
     if (this.writing) {
       if (this.schemaCallbackList[schemaName]) {
         this.schemaCallbackList[schemaName].forEach(cb =>
@@ -89,7 +94,11 @@ class Realm {
 
   objectForPrimaryKey(model, id) {
     this.lastLookedUpModel = model;
-    return this._createClassInstance(this.schema[model], this.data[model][id]);
+    const idStr = id.toHexString ? id.toHexString() : id;
+    return this._createClassInstance(
+      this.schema[model],
+      this.data[model][idStr],
+    );
   }
 
   delete(object) {

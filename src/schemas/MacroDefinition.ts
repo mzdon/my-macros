@@ -1,3 +1,5 @@
+import {Factory} from 'rosie';
+
 import {MacroDefinitionStrings} from 'types/MacroDefinition';
 import {isStringValidNumber} from 'utils/Validators';
 
@@ -137,3 +139,25 @@ class MacroDefinition {
 }
 
 export default MacroDefinition;
+
+export interface MacroDefinitionModel {
+  startDate: Date | null;
+  calories: number;
+  carbs: number;
+  protein: number;
+  fat: number;
+  sugar: number | null;
+  fiber: number | null;
+}
+
+export const MacroDefinitionFactory = Factory.define<MacroDefinitionModel>(
+  'MacroDefinitionModel',
+).attrs({
+  startDate: null,
+  calories: 2440,
+  carbs: 250,
+  protein: 180,
+  fat: 80,
+  fiber: null,
+  sugar: null,
+});

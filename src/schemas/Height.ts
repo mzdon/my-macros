@@ -46,3 +46,8 @@ class Height {
 }
 
 export default Height;
+
+export interface HeightModel {
+  height: number;
+  unitOfMeasurement: UnitOfMeasurement;
+}
