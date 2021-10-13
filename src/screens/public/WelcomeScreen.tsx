@@ -4,6 +4,7 @@ import {Button, Text, View} from 'react-native';
 
 import BaseTextInput from 'components/BaseTextInput';
 import Spacer from 'components/Spacer';
+import MarbledBackground from 'components/MarbledBackground';
 import {useAuthContext} from 'providers/AuthProvider';
 import styles from 'styles';
 import {RecoverableError, useSafeAsyncCall} from 'utils/Errors';
@@ -56,29 +57,31 @@ const WelcomeScreen = () => {
   );
 
   return (
-    <View style={styles.screen}>
-      <Text>Welcome to MyMacros</Text>
-      <Spacer />
-      <BaseTextInput
-        placeholder="Email..."
-        value={email}
-        onChangeText={onChange.email}
-        autoCapitalize="none"
-        error={errors.email}
-      />
-      <Spacer />
-      <BaseTextInput
-        placeholder="Password..."
-        value={password}
-        onChangeText={onChange.password}
-        autoCapitalize="none"
-        secureTextEntry
-        error={errors.password}
-      />
-      <Spacer />
-      <Button title="Sign Up" onPress={validateBefore.onSignUp} />
-      <Button title="Sign In" onPress={validateBefore.onSignIn} />
-    </View>
+    <MarbledBackground>
+      <View style={styles.screen}>
+        <Text>Welcome to MyMacros</Text>
+        <Spacer />
+        <BaseTextInput
+          placeholder="Email..."
+          value={email}
+          onChangeText={onChange.email}
+          autoCapitalize="none"
+          error={errors.email}
+        />
+        <Spacer />
+        <BaseTextInput
+          placeholder="Password..."
+          value={password}
+          onChangeText={onChange.password}
+          autoCapitalize="none"
+          secureTextEntry
+          error={errors.password}
+        />
+        <Spacer />
+        <Button title="Sign Up" onPress={validateBefore.onSignUp} />
+        <Button title="Sign In" onPress={validateBefore.onSignIn} />
+      </View>
+    </MarbledBackground>
   );
 };
 
