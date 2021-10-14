@@ -56,6 +56,7 @@ const LookupOrAddScreen = (): React.ReactElement => {
 
   return (
     <ScreenWrapper>
+      <Spacer />
       <LookupFoodItem
         addNewFoodItem={addNewFoodItem}
         selectFoodItem={selectFoodItem}

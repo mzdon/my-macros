@@ -82,7 +82,7 @@ function SearchResults<T extends FoodItem | FoodItemGroup>({
         style={_styles.innerContainer}
         data={items}
         renderItem={renderItem}
-        ListEmptyComponent={<Text>No Results...</Text>}
+        ListEmptyComponent={<Text style={_styles.item}>No Results...</Text>}
         ItemSeparatorComponent={() => <View style={_styles.divider} />}
         keyExtractor={(item: T) => item._id.toHexString()}
       />
