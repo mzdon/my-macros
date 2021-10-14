@@ -1,12 +1,13 @@
 import React from 'react';
 
 import {useNavigation} from '@react-navigation/native';
-import {Button, View} from 'react-native';
+import {Button} from 'react-native';
 
-import BaseTextInput from 'components/BaseTextInput';
 import BirthdayInput from 'components/BirthdayInput';
 import HeightInput from 'components/HeightInput';
+import PageTextInput from 'components/input/PageTextInput';
 import RadioButtons from 'components/RadioButtons';
+import ScreenWrapper from 'components/ScreenWrapper';
 import Spacer from 'components/Spacer';
 import WeightInput from 'components/WeightInput';
 import {USER_INFO_STEP_2} from 'navigation/Constants';
@@ -14,7 +15,6 @@ import {UserInfoStep1NavigationProp} from 'navigation/RouteTypes';
 import {useUserInfoContext} from 'providers/UserInfoProvider';
 import {MeasurementSystem} from 'types/MeasurementSystem';
 import {UserData} from 'schemas/User';
-import styles from 'styles';
 import {useStateUpdater} from 'utils/State';
 import {
   birthdayErrorMessage,
@@ -79,6 +79,7 @@ const UserInfoStep1Screen = (): React.ReactElement => {
 
   React.useLayoutEffect(() => {
     navigation.setOptions({
+      headerTitle: 'User Info',
       headerRight: () => (
         <Button title="Next" onPress={validateBefore.onNext} />
       ),
@@ -86,8 +87,8 @@ const UserInfoStep1Screen = (): React.ReactElement => {
   });
 
   return (
-    <View style={styles.screen}>
-      <BaseTextInput
+    <ScreenWrapper>
+      <PageTextInput
         label="Name"
         value={name}
         placeholder="Name"
@@ -119,7 +120,7 @@ const UserInfoStep1Screen = (): React.ReactElement => {
         measurementSystem={measurementSystem}
         onChangeText={updateWeight}
       />
-    </View>
+    </ScreenWrapper>
   );
 };
 

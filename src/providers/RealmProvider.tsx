@@ -13,6 +13,7 @@ import MacroDefinition from 'schemas/MacroDefinition';
 import Meal from 'schemas/Meal';
 import User from 'schemas/User';
 import WeighIn from 'schemas/WeighIn';
+import {JustChildrenProps} from 'types/Common';
 
 const Schema = [
   ConsumedFoodItem,
@@ -26,9 +27,9 @@ const Schema = [
   WeighIn,
 ];
 
-type Props = React.PropsWithChildren<{}>;
-
-const RlmProvider = ({children}: Props): React.ReactElement<Props> => {
+const RlmProvider = ({
+  children,
+}: JustChildrenProps): React.ReactElement<JustChildrenProps> => {
   const {realmUser} = useAuthContext();
 
   if (!realmUser) {

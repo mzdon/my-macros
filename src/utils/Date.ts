@@ -1,3 +1,8 @@
+export const today = () => {
+  const d = new Date();
+  return new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
+};
+
 export const getDateWithoutTime = (date: Date | string = new Date()) => {
   const d = date instanceof Date ? date : new Date(date);
   return new Date(

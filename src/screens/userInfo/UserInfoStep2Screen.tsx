@@ -1,16 +1,16 @@
 import React from 'react';
 
 import {useNavigation} from '@react-navigation/native';
-import {Button, View} from 'react-native';
+import {Button} from 'react-native';
 
-import BaseNumberInput from 'components/BaseNumberInput';
+import PageNumberInput from 'components/input/PageNumberInput';
+import ScreenWrapper from 'components/ScreenWrapper';
 import Spacer from 'components/Spacer';
 import {
   UserInfoNavigationProp,
   UserInfoStep2NavigationProp,
 } from 'navigation/RouteTypes';
 import {useUserInfoContext} from 'providers/UserInfoProvider';
-import styles from 'styles';
 import {DRAWER} from 'navigation/Constants';
 import {
   isValidRequiredNumber,
@@ -105,6 +105,7 @@ const UserInfoStep2Screen = (): React.ReactElement => {
 
   React.useLayoutEffect(() => {
     navigation.setOptions({
+      headerTitle: 'Macros',
       headerRight: () => (
         <Button title="Save" onPress={validateBefore.onSave} />
       ),
@@ -112,8 +113,8 @@ const UserInfoStep2Screen = (): React.ReactElement => {
   }, [navigation, validateBefore.onSave]);
 
   return (
-    <View style={styles.screen}>
-      <BaseNumberInput
+    <ScreenWrapper>
+      <PageNumberInput
         label="Calories (grams)"
         placeholder="Calories"
         value={calories}
@@ -121,7 +122,7 @@ const UserInfoStep2Screen = (): React.ReactElement => {
         error={errors.calories}
       />
       <Spacer />
-      <BaseNumberInput
+      <PageNumberInput
         label="Carbohydrates (grams)"
         placeholder="Carbohydrates"
         value={carbs}
@@ -129,7 +130,7 @@ const UserInfoStep2Screen = (): React.ReactElement => {
         error={errors.carbs}
       />
       <Spacer />
-      <BaseNumberInput
+      <PageNumberInput
         label="Protein (grams)"
         placeholder="Protein"
         value={protein}
@@ -137,7 +138,7 @@ const UserInfoStep2Screen = (): React.ReactElement => {
         error={errors.protein}
       />
       <Spacer />
-      <BaseNumberInput
+      <PageNumberInput
         label="Fats (grams)"
         placeholder="Fats"
         value={fat}
@@ -145,21 +146,21 @@ const UserInfoStep2Screen = (): React.ReactElement => {
         error={errors.fat}
       />
       <Spacer />
-      <BaseNumberInput
+      <PageNumberInput
         label="Sugar (grams/optional)"
         placeholder="Sugar"
         value={sugar || 0}
         onChangeText={updateSugar}
       />
       <Spacer />
-      <BaseNumberInput
+      <PageNumberInput
         label="Fiber (grams/optional)"
         placeholder="Fiber"
         value={fiber || 0}
         onChangeText={updateFiber}
       />
       <Spacer />
-    </View>
+    </ScreenWrapper>
   );
 };
 

@@ -16,6 +16,7 @@ const PublicStack = () => {
         key="welcome"
         name={WELCOME}
         component={withScreenEnhancers(WelcomeScreen)}
+        options={{headerShown: false}}
       />
     </Stack.Navigator>
   );

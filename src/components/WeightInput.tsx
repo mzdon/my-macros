@@ -2,16 +2,19 @@ import React from 'react';
 
 import {StyleSheet, Text, TextInput, View} from 'react-native';
 
-import BaseNumberInput, {
-  BaseNumberInputProps,
-} from 'components/BaseNumberInput';
+import {BaseNumberInputProps} from 'components/BaseNumberInput';
 import DisabledOverlay from 'components/DisabledOverlay';
+import PageNumberInput from 'components/input/PageNumberInput';
 import Spacer from 'components/Spacer';
 import {MeasurementSystem} from 'types/MeasurementSystem';
 import styles from 'styles';
 
 const _styles = StyleSheet.create({
-  innerContainer: {flexDirection: 'row', justifyContent: 'space-between'},
+  innerContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-end',
+  },
   stretchInput: {flexGrow: 1},
   stretchLabel: {width: 40, paddingLeft: 8},
 });
@@ -38,7 +41,7 @@ const WeightInput = (props: Props): React.ReactElement<Props> | null => {
     <View>
       <Text style={styles.inputLabel}>{'Weight (optional)'}</Text>
       <View style={_styles.innerContainer}>
-        <BaseNumberInput
+        <PageNumberInput
           ref={inputRef}
           {...rest}
           style={_styles.stretchInput}

@@ -1,12 +1,14 @@
 import React from 'react';
 
-import {Button, Text, View} from 'react-native';
+import {Button, StyleSheet, View} from 'react-native';
 
-import BaseTextInput from 'components/BaseTextInput';
+import CoverBackground from 'components/CoverBackground';
+import CoverContent from 'components/CoverContent';
+import CoverTextInput from 'components/input/CoverTextInput';
+import ScreenWrapper from 'components/ScreenWrapper';
 import Spacer from 'components/Spacer';
-import MarbledBackground from 'components/MarbledBackground';
+import CoverHeader from 'components/text/CoverHeader';
 import {useAuthContext} from 'providers/AuthProvider';
-import styles from 'styles';
 import {RecoverableError, useSafeAsyncCall} from 'utils/Errors';
 import {
   emailErrorMessage,
@@ -15,6 +17,19 @@ import {
   passwordErrorMessage,
   useValidateFields,
 } from 'utils/Validators';
+import {defaultPadding} from 'styles';
+
+const _styles = StyleSheet.create({
+  contentSpacing: {
+    marginHorizontal: defaultPadding * 3,
+    marginTop: defaultPadding * 5,
+  },
+  header: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    textAlign: 'center',
+  },
+});
 
 const WelcomeScreen = () => {
   const [email, setEmail] = React.useState('');
@@ -57,31 +72,35 @@ const WelcomeScreen = () => {
   );
 
   return (
-    <MarbledBackground>
-      <View style={styles.screen}>
-        <Text>Welcome to MyMacros</Text>
-        <Spacer />
-        <BaseTextInput
-          placeholder="Email..."
-          value={email}
-          onChangeText={onChange.email}
-          autoCapitalize="none"
-          error={errors.email}
-        />
-        <Spacer />
-        <BaseTextInput
-          placeholder="Password..."
-          value={password}
-          onChangeText={onChange.password}
-          autoCapitalize="none"
-          secureTextEntry
-          error={errors.password}
-        />
-        <Spacer />
-        <Button title="Sign Up" onPress={validateBefore.onSignUp} />
-        <Button title="Sign In" onPress={validateBefore.onSignIn} />
-      </View>
-    </MarbledBackground>
+    <CoverBackground>
+      <ScreenWrapper>
+        <View style={_styles.contentSpacing}>
+          <CoverContent>
+            <CoverHeader>MY MACROS</CoverHeader>
+            <Spacer />
+            <CoverTextInput
+              placeholder="Email..."
+              value={email}
+              onChangeText={onChange.email}
+              autoCapitalize="none"
+              error={errors.email}
+            />
+            <Spacer />
+            <CoverTextInput
+              placeholder="Password..."
+              value={password}
+              onChangeText={onChange.password}
+              autoCapitalize="none"
+              secureTextEntry
+              error={errors.password}
+            />
+            <Spacer />
+            <Button title="Sign Up" onPress={validateBefore.onSignUp} />
+            <Button title="Sign In" onPress={validateBefore.onSignIn} />
+          </CoverContent>
+        </View>
+      </ScreenWrapper>
+    </CoverBackground>
   );
 };
 

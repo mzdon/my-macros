@@ -1,6 +1,7 @@
 import React from 'react';
 
-import BaseTextInput, {BaseTextInputProps} from 'components/BaseTextInput';
+import {BaseTextInputProps} from 'components/BaseTextInput';
+import PageTextInput from 'components/input/PageTextInput';
 import styles from 'styles';
 import {isStringValidNumber} from 'utils/Validators';
 
@@ -31,7 +32,7 @@ const BirthdayInput = (props: Props): React.ReactElement<Props> => {
     }
   };
   return (
-    <BaseTextInput
+    <PageTextInput
       {...rest}
       onChangeText={onChangeBirthday}
       label="Birthday (optional)"

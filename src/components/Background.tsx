@@ -1,6 +1,6 @@
 import React from 'react';
 
-import {Image, StyleSheet, View} from 'react-native';
+import {Image, ImageSourcePropType, StyleSheet, View} from 'react-native';
 
 import {screenHeight, screenWidth} from 'styles';
 
@@ -22,9 +22,9 @@ const _styles = StyleSheet.create({
   },
 });
 
-type Props = React.PropsWithChildren<{}>;
+type Props = React.PropsWithChildren<{asset: ImageSourcePropType}>;
 
-const MarbledBackground = ({children}: Props): React.ReactElement<Props> => {
+const Background = ({asset, children}: Props): React.ReactElement<Props> => {
   const imageMatrix = React.useMemo(() => {
     const imgWidth = 360;
     const imgHeight = 360;
@@ -34,19 +34,12 @@ const MarbledBackground = ({children}: Props): React.ReactElement<Props> => {
     for (var i = 0; i < verticalCount; i++) {
       const row = [];
       for (var j = 0; j < horizontalCount; j++) {
-        row.push(
-          <Image
-            key={`bg-${i}-${j}`}
-            source={require('images/background.jpeg')}
-          />,
-        );
+        row.push(<Image key={`bg-${i}-${j}`} source={asset} />);
       }
       matrix.push(row);
     }
     return matrix;
-  }, []);
-
-  console.log(imageMatrix);
+  }, [asset]);
 
   return (
     <View style={_styles.container}>
@@ -60,4 +53,4 @@ const MarbledBackground = ({children}: Props): React.ReactElement<Props> => {
   );
 };
 
-export default MarbledBackground;
+export default Background;

@@ -2,16 +2,19 @@ import React from 'react';
 
 import {StyleSheet, Text, TextInput, View} from 'react-native';
 
-import BaseNumberInput, {
-  BaseNumberInputProps,
-} from 'components/BaseNumberInput';
+import {BaseNumberInputProps} from 'components/BaseNumberInput';
 import DisabledOverlay from 'components/DisabledOverlay';
+import PageNumberInput from 'components/input/PageNumberInput';
 import Spacer from 'components/Spacer';
 import {MeasurementSystem} from 'types/MeasurementSystem';
 import styles from 'styles';
 
 const _styles = StyleSheet.create({
-  innerContainer: {flexDirection: 'row', justifyContent: 'space-between'},
+  innerContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-end',
+  },
   stretchInput: {flexGrow: 1},
   stretchLabel: {width: 40, paddingLeft: 8},
 });
@@ -60,7 +63,7 @@ const ImperialWeightInput = (
 
   return (
     <>
-      <BaseNumberInput
+      <PageNumberInput
         ref={ftRef}
         value={feet}
         onChangeText={onChangeFeet}
@@ -68,7 +71,7 @@ const ImperialWeightInput = (
         style={_styles.stretchInput}
       />
       <Text style={_styles.stretchLabel}>{'ft'}</Text>
-      <BaseNumberInput
+      <PageNumberInput
         ref={inRef}
         value={inches}
         onChangeText={onChangeInches}
@@ -93,7 +96,7 @@ const MetricWeightInput = (
 
   return (
     <>
-      <BaseNumberInput ref={cmRef} {...rest} style={_styles.stretchInput} />
+      <PageNumberInput ref={cmRef} {...rest} style={_styles.stretchInput} />
       <Text style={_styles.stretchLabel}>{'cm'}</Text>
     </>
   );

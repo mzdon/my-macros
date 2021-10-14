@@ -2,14 +2,14 @@ import React from 'react';
 
 import CatastrophicErrorBoundary from 'components/errorBoundary/CatastrophicErrorBoundary';
 import RecoverableErrorBoundary from 'components/errorBoundary/RecoverableErrorBoundary';
+import {JustChildrenProps} from 'types/Common';
 import {RecoverableError} from 'utils/Errors';
 
-type Props = React.PropsWithChildren<{}>;
 interface State {
   error: Error | null;
 }
 
-class ErrorBoundary extends React.Component<Props, State> {
+class ErrorBoundary extends React.Component<JustChildrenProps, State> {
   state: State = {
     error: null,
   };

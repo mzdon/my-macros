@@ -2,6 +2,7 @@ import React from 'react';
 
 import Realm from 'realm';
 
+import {JustChildrenProps} from 'types/Common';
 import {useRealmApp} from 'useRealmApp';
 import {CatastrophicError, RecoverableError} from 'utils/Errors';
 
@@ -14,9 +15,9 @@ interface AuthContextValue {
 
 const AuthContext = React.createContext<AuthContextValue | null>(null);
 
-type Props = React.PropsWithChildren<{}>;
-
-const AuthProvider = ({children}: Props): React.ReactElement<Props> => {
+const AuthProvider = ({
+  children,
+}: JustChildrenProps): React.ReactElement<JustChildrenProps> => {
   const app = useRealmApp();
   const [realmUser, setRealmUser] = React.useState(app.currentUser);
 

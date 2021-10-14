@@ -2,6 +2,7 @@ import React from 'react';
 
 import {useUserContext} from 'providers/UserProvider';
 import {UserData} from 'schemas/User';
+import {JustChildrenProps} from 'types/Common';
 
 interface UserInfoContextValue {
   userData: UserData;
@@ -11,9 +12,9 @@ interface UserInfoContextValue {
 
 const UserInfoContext = React.createContext<UserInfoContextValue | null>(null);
 
-type Props = React.PropsWithChildren<{}>;
-
-const UserInfoProvider = ({children}: Props): React.ReactElement<Props> => {
+const UserInfoProvider = ({
+  children,
+}: JustChildrenProps): React.ReactElement<JustChildrenProps> => {
   const {user, updateUser} = useUserContext();
 
   const [userData, setUserData] = React.useState(user.getUserData());

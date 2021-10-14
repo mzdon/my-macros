@@ -2,6 +2,7 @@ import {UUID} from 'bson';
 import Realm from 'realm';
 
 import Meal, {InitMealData} from 'schemas/Meal';
+import {today} from 'utils/Date';
 
 interface InitJournalEntryData {
   id?: UUID;
@@ -17,12 +18,7 @@ class JournalEntry extends Realm.Object {
   meals!: Meal[];
 
   static generate(obj: InitJournalEntryData) {
-    const {
-      id = new UUID(),
-      userId,
-      date = new Date(new Date().toDateString()),
-      meals = [],
-    } = obj;
+    const {id = new UUID(), userId, date = today(), meals = []} = obj;
     return {
       _id: id,
       userId,

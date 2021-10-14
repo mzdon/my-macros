@@ -2,7 +2,7 @@ import React from 'react';
 
 import {createStackNavigator} from '@react-navigation/stack';
 
-import {withScreenEnhancers} from 'navigation/Common';
+import {pageHeaderStyle, withScreenEnhancers} from 'navigation/Common';
 import * as NavConstants from 'navigation/Constants';
 import {UserInfoStackParamList} from 'navigation/RouteTypes';
 import UserInfoProvider from 'providers/UserInfoProvider';
@@ -13,7 +13,7 @@ const Stack = createStackNavigator<UserInfoStackParamList>();
 
 const UserInfoStack = () => (
   <UserInfoProvider>
-    <Stack.Navigator>
+    <Stack.Navigator screenOptions={{headerStyle: pageHeaderStyle}}>
       <Stack.Screen
         key="user-info-step-1"
         name={NavConstants.USER_INFO_STEP_1}
