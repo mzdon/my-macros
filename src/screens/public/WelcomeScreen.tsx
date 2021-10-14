@@ -7,7 +7,7 @@ import CoverContent from 'components/CoverContent';
 import CoverTextInput from 'components/input/CoverTextInput';
 import ScreenWrapper from 'components/ScreenWrapper';
 import Spacer from 'components/Spacer';
-import CoverHeader from 'components/text/CoverHeader';
+import Text from 'components/Text';
 import {useAuthContext} from 'providers/AuthProvider';
 import {RecoverableError, useSafeAsyncCall} from 'utils/Errors';
 import {
@@ -76,7 +76,7 @@ const WelcomeScreen = () => {
       <ScreenWrapper>
         <View style={_styles.contentSpacing}>
           <CoverContent>
-            <CoverHeader>MY MACROS</CoverHeader>
+            <Text.CoverHeader>MY MACROS</Text.CoverHeader>
             <Spacer />
             <CoverTextInput
               placeholder="Email..."

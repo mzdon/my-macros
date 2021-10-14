@@ -1,6 +1,6 @@
 import React from 'react';
 
-import {Text} from 'react-native';
+import Text from 'components/Text';
 import ConsumedFoodItem, {
   ConsumedFoodItemData,
   InitConsumedFoodItemData,
@@ -29,7 +29,7 @@ const ConsumedFoodItemComponent = ({
   const fat = item?.fat ?? initItem?.itemData.fat;
   return (
     <>
-      <Text>{`${description} - ${quantity}${uom}`}</Text>
+      <Text.SubHeader>{`${description} - ${quantity}${uom}`}</Text.SubHeader>
       <Text>{`${calories}cal ${carb}c ${protein}p ${fat}f`}</Text>
     </>
   );

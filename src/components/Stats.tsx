@@ -1,14 +1,14 @@
 import React from 'react';
 
-import {StyleSheet, Text, View} from 'react-native';
+import {StyleSheet, View} from 'react-native';
 
+import Text from 'components/Text';
 import Meal from 'schemas/Meal';
 import MacroDefinition from 'schemas/MacroDefinition';
 
 const _styles = StyleSheet.create({
   container: {flexDirection: 'row'},
   inner: {flex: 1},
-  header: {fontWeight: 'bold', fontSize: 16},
 });
 
 interface Props {
@@ -89,7 +89,7 @@ const Stats = ({macros, meals}: Props): React.ReactElement<Props> => {
   return (
     <View style={_styles.container}>
       <View style={_styles.inner}>
-        <Text style={_styles.header}>Consumed</Text>
+        <Text.SubHeader>Consumed</Text.SubHeader>
         <Text>{`Calories: ${consumed.calories}`}</Text>
         <Text>{`Carbs: ${consumed.carbs}g`}</Text>
         <Text>{`Protein: ${consumed.protein}g`}</Text>
@@ -98,7 +98,7 @@ const Stats = ({macros, meals}: Props): React.ReactElement<Props> => {
         <Text>{`Fiber ${consumed.fiber}g`}</Text>
       </View>
       <View style={_styles.inner}>
-        <Text style={_styles.header}>Remaining</Text>
+        <Text.SubHeader>Remaining</Text.SubHeader>
         <Text>{`Calories: ${remaining.calories}`}</Text>
         <Text>{`Carbs: ${remaining.carbs}g`}</Text>
         <Text>{`Protein: ${remaining.protein}g`}</Text>

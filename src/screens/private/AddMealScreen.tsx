@@ -1,16 +1,32 @@
 import React from 'react';
 
 import {useNavigation, useRoute} from '@react-navigation/native';
-import {Button, Text} from 'react-native';
+import moment from 'moment';
+import {Button, StyleSheet, View} from 'react-native';
 
-import BaseTextInput from 'components/BaseTextInput';
+import PageTextInput from 'components/input/PageTextInput';
 import ScreenWrapper from 'components/ScreenWrapper';
+import Text from 'components/Text';
 import {
   AddMealScreenNavigationProp,
   AddMealScreenRouteProp,
 } from 'navigation/RouteTypes';
 import {useJournalContext} from 'providers/JournalProvider';
-import moment from 'moment';
+import {
+  isValidRequiredString,
+  requiredErrorMessage,
+  useValidateFields,
+} from 'utils/Validators';
+
+const _styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    alignItems: 'flex-start',
+  },
+  stretchInput: {
+    alignSelf: 'stretch',
+  },
+});
 
 const AddMealScreen = () => {
   const navigation = useNavigation<AddMealScreenNavigationProp>();
@@ -48,21 +64,58 @@ const AddMealScreen = () => {
     [onAddMeal, description],
   );
 
+  const fieldValidators = React.useMemo(
+    () => ({
+      description: {
+        isValid: isValidRequiredString,
+        message: requiredErrorMessage('Description'),
+        value: description,
+        onChange: setDescription,
+      },
+    }),
+    [description],
+  );
+
+  const before = React.useMemo(
+    () => ({
+      onAddCustom,
+    }),
+    [onAddCustom],
+  );
+
+  const {errors, onChange, validateBefore} = useValidateFields(
+    fieldValidators,
+    before,
+  );
+
   React.useLayoutEffect(() => {
     navigation.setOptions({
-      headerBackTitle: '',
-      headerRight: () => <Button title="Save" onPress={onAddCustom} />,
+      headerBackTitleVisible: false,
+      headerTitle: 'Add Meal',
+      headerRight: () => (
+        <Button title="Save" onPress={validateBefore.onAddCustom} />
+      ),
     });
-  }, [navigation, onAddCustom]);
+  }, [navigation, onAddCustom, validateBefore.onAddCustom]);
 
   return (
     <ScreenWrapper>
-      <Text>{`Add Meal on ${moment(date).format('ddd MM DD YYYY')}`}</Text>
-      <Button title="Breakfast" onPress={onAddBreakfast} />
-      <Button title="Lunch" onPress={onAddLunch} />
-      <Button title="Dinner" onPress={onAddDinner} />
-      <Button title="Snack" onPress={onAddSnack} />
-      <BaseTextInput value={description} onChangeText={setDescription} />
+      <View style={_styles.container}>
+        <Text.PageHeader>{`Add Meal on ${moment(date).format(
+          'ddd MM DD YYYY',
+        )}`}</Text.PageHeader>
+        <Button title="Breakfast" onPress={onAddBreakfast} />
+        <Button title="Lunch" onPress={onAddLunch} />
+        <Button title="Dinner" onPress={onAddDinner} />
+        <Button title="Snack" onPress={onAddSnack} />
+        <PageTextInput
+          placeholder="Custom meal description..."
+          value={description}
+          onChangeText={onChange.description}
+          error={errors.description}
+          style={_styles.stretchInput}
+        />
+      </View>
     </ScreenWrapper>
   );
 };

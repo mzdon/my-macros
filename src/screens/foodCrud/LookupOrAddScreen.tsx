@@ -47,6 +47,13 @@ const LookupOrAddScreen = (): React.ReactElement => {
     [applyFoodItemGroup, navigation],
   );
 
+  React.useLayoutEffect(() => {
+    navigation.setOptions({
+      headerBackTitleVisible: false,
+      headerTitle: 'Lookup Or Add',
+    });
+  });
+
   return (
     <ScreenWrapper>
       <LookupFoodItem
