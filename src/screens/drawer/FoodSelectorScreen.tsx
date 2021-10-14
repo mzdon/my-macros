@@ -1,10 +1,11 @@
 import React from 'react';
 
 import {useNavigation} from '@react-navigation/native';
-import {SectionList, StyleSheet, Text, View} from 'react-native';
+import {SectionList, StyleSheet, Text} from 'react-native';
 import {withRealm} from 'react-realm-context';
 import Realm, {Results} from 'realm';
 
+import ScreenWrapper from 'components/ScreenWrapper';
 import SwipeableRow, {getEditAndDeleteActions} from 'components/SwipeableRow';
 import {FOOD_ITEM_DESCRIPTION, FOOD_ITEM_GROUP} from 'navigation/Constants';
 import {FoodEditorScreenNavigationProp} from 'navigation/RouteTypes';
@@ -15,7 +16,6 @@ import {
 import {useUserContext} from 'providers/UserProvider';
 import FoodItem from 'schemas/FoodItem';
 import FoodItemGroup from 'schemas/FoodItemGroup';
-import styles from 'styles';
 import {
   useDeleteItem,
   useGetFoodItemGroups,
@@ -190,7 +190,7 @@ const FoodSelectorScreen = ({realm}: Props): React.ReactElement<Props> => {
   const sections = getSections(foodItems, foodItemGroups);
 
   return (
-    <View style={styles.screen}>
+    <ScreenWrapper>
       <SectionList
         sections={sections}
         renderSectionHeader={renderSectionHeader}
@@ -199,7 +199,7 @@ const FoodSelectorScreen = ({realm}: Props): React.ReactElement<Props> => {
         keyExtractor={item => item.data._objectId()}
         initialNumToRender={40}
       />
-    </View>
+    </ScreenWrapper>
   );
 };
 

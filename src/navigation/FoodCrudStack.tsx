@@ -3,7 +3,7 @@ import React from 'react';
 import {useNavigation, useRoute} from '@react-navigation/native';
 import {createStackNavigator} from '@react-navigation/stack';
 
-import {withScreenEnhancers} from 'navigation/Common';
+import {pageHeaderStyle, withScreenEnhancers} from 'navigation/Common';
 import * as NavConstants from 'navigation/Constants';
 import {
   FoodCrudScreenRouteProp,
@@ -32,7 +32,7 @@ const InnerFoodCrudStack = () => {
       mealIndex={mealIndex}
       consumedItemIndex={consumedItemIndex}
       foodItemId={foodItemId}>
-      <Stack.Navigator>
+      <Stack.Navigator screenOptions={{headerStyle: pageHeaderStyle}}>
         <Stack.Screen
           key="lookup-or-add"
           name={NavConstants.LOOKUP_OR_ADD}

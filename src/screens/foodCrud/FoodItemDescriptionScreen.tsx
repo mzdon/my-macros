@@ -1,17 +1,17 @@
 import React from 'react';
 
 import {useNavigation} from '@react-navigation/native';
-import {Button, Text, View} from 'react-native';
+import {Button, Text} from 'react-native';
 
 import BaseNumberInput from 'components/BaseNumberInput';
 import BaseTextInput from 'components/BaseTextInput';
 import RadioButtons from 'components/RadioButtons';
+import ScreenWrapper from 'components/ScreenWrapper';
 import Spacer from 'components/Spacer';
 import {FOOD_ITEM_MACROS} from 'navigation/Constants';
 import {FoodItemDescriptionNavigationProp} from 'navigation/RouteTypes';
 import {UnitOfMeasurement} from 'types/UnitOfMeasurement';
 import {useFoodItemContext} from 'providers/FoodItemProvider';
-import styles from 'styles';
 import {InitFoodItemData} from 'schemas/FoodItem';
 import {Errors, NameExistsError} from 'utils/Errors';
 import {
@@ -146,7 +146,7 @@ const FoodItemDescriptionScreen = () => {
   }, [navigation, validateBefore.onNext]);
 
   return (
-    <View style={styles.screen}>
+    <ScreenWrapper>
       <Text>{`${foodItemData?.newFoodItem ? 'New' : 'Edit'} Item`}</Text>
       <Spacer />
       <BaseTextInput
@@ -186,7 +186,7 @@ const FoodItemDescriptionScreen = () => {
         error={errors.calories}
       />
       <Spacer />
-    </View>
+    </ScreenWrapper>
   );
 };
 

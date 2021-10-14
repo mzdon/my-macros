@@ -2,7 +2,7 @@ import React from 'react';
 
 import {createStackNavigator} from '@react-navigation/stack';
 
-import {withScreenEnhancers} from 'navigation/Common';
+import {pageHeaderStyle, withScreenEnhancers} from 'navigation/Common';
 import * as NavConstants from 'navigation/Constants';
 import Drawer from 'navigation/Drawer';
 import FoodCrudStack from 'navigation/FoodCrudStack';
@@ -25,7 +25,9 @@ const Stack = createStackNavigator<PrivateStackParamList>();
 const PrivateStack = () => {
   const {user} = useUserContext();
   return (
-    <Stack.Navigator initialRouteName={getInitialRouteName(user)}>
+    <Stack.Navigator
+      initialRouteName={getInitialRouteName(user)}
+      screenOptions={{headerStyle: pageHeaderStyle}}>
       <Stack.Group>
         <Stack.Screen
           key="drawer"

@@ -1,15 +1,15 @@
 import React from 'react';
 
 import {useNavigation} from '@react-navigation/native';
-import {Alert, Button, Text, View} from 'react-native';
+import {Alert, Button, Text} from 'react-native';
 
 import BaseNumberInput from 'components/BaseNumberInput';
+import ScreenWrapper from 'components/ScreenWrapper';
 import Spacer from 'components/Spacer';
 import {ITEM_CONSUMED} from 'navigation/Constants';
 import {FoodItemMacrosNavigationProp} from 'navigation/RouteTypes';
 import {useFoodCrudNavigationContext} from 'providers/FoodCrudNavigationProvider';
 import {useFoodItemContext} from 'providers/FoodItemProvider';
-import styles from 'styles';
 import {InitFoodItemData} from 'schemas/FoodItem';
 import {
   isValidRequiredNumber,
@@ -129,7 +129,7 @@ const FoodItemMacrosScreen = (): React.ReactElement => {
   }, [newFoodItem, navigation, validateBefore.onNext]);
 
   return (
-    <View style={styles.screen}>
+    <ScreenWrapper>
       <Text>{`New ${foodItemData?.description}`}</Text>
       <Spacer />
       <BaseNumberInput
@@ -170,7 +170,7 @@ const FoodItemMacrosScreen = (): React.ReactElement => {
         onChangeText={updateFiber}
       />
       <Spacer />
-    </View>
+    </ScreenWrapper>
   );
 };
 

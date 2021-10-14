@@ -1,14 +1,14 @@
 import React from 'react';
 
 import {useNavigation} from '@react-navigation/native';
-import {Button, Text, View} from 'react-native';
+import {Button, Text} from 'react-native';
 
 import CurrentMacros from 'components/CurrentMacros';
+import ScreenWrapper from 'components/ScreenWrapper';
 import {USER_INFO} from 'navigation/Constants';
 import {useAuthContext} from 'providers/AuthProvider';
 import {useFoodCrudNavigationContext} from 'providers/FoodCrudNavigationProvider';
 import {useUserContext} from 'providers/UserProvider';
-import styles from 'styles';
 import {
   useParentNavigation,
   useSetFoodCrudNavigationOptions,
@@ -43,7 +43,7 @@ const ProfileScreen = () => {
   const weight = user.getWeightString();
 
   return (
-    <View style={styles.screen}>
+    <ScreenWrapper>
       <Text>{`Name: ${user.name}`}</Text>
       <CurrentMacros macros={macros} />
       {!!birthday && <Text>{`Birthday: ${birthday}`}</Text>}
@@ -54,7 +54,7 @@ const ProfileScreen = () => {
         onPress={() => parentNavigation?.navigate(USER_INFO)}
       />
       <Button title="Sign Out" onPress={signOut} />
-    </View>
+    </ScreenWrapper>
   );
 };
 

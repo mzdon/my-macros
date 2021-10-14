@@ -1,11 +1,12 @@
 import React from 'react';
 
 import {useNavigation} from '@react-navigation/native';
-import {Button, FlatList, Text, View} from 'react-native';
+import {Button, FlatList, Text} from 'react-native';
 
 import BaseTextInput from 'components/BaseTextInput';
 import ConsumedFoodItem from 'components/ConsumedFoodItem';
 import LookupFoodItem from 'components/LookupFoodItem';
+import ScreenWrapper from 'components/ScreenWrapper';
 import Spacer from 'components/Spacer';
 import SwipeableRow, {getEditAndDeleteActions} from 'components/SwipeableRow';
 import {FOOD_ITEM_DESCRIPTION, ITEM_CONSUMED} from 'navigation/Constants';
@@ -122,7 +123,7 @@ const FoodItemGroupScreen = () => {
   );
 
   return (
-    <View style={styles.screen}>
+    <ScreenWrapper>
       <Text>{`${foodGroupData?._id ? 'Edit' : 'New'} Item Group`}</Text>
       <Spacer />
       <BaseTextInput
@@ -145,7 +146,7 @@ const FoodItemGroupScreen = () => {
       />
       <Spacer />
       {!!internalError && <Text style={styles.error}>{internalError}</Text>}
-    </View>
+    </ScreenWrapper>
   );
 };
 

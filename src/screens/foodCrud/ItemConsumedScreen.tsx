@@ -1,9 +1,10 @@
 import React from 'react';
 
 import {useNavigation} from '@react-navigation/native';
-import {Button, Text, View} from 'react-native';
+import {Button, Text} from 'react-native';
 
 import BaseNumberInput from 'components/BaseNumberInput';
+import ScreenWrapper from 'components/ScreenWrapper';
 import Spacer from 'components/Spacer';
 import RadioButtons from 'components/RadioButtons';
 import {FOOD_ITEM_GROUP} from 'navigation/Constants';
@@ -15,7 +16,6 @@ import {
 import {Servings, UnitOfMeasurement} from 'types/UnitOfMeasurement';
 import {useSimpleStateUpdater} from 'utils/State';
 import {FoodItemType, isFoodOrDrink} from 'utils/FoodItem';
-import styles from 'styles';
 import {useFoodGroupContext} from 'providers/FoodGroupProvider';
 import {useFoodCrudNavigationContext} from 'providers/FoodCrudNavigationProvider';
 import {
@@ -122,7 +122,7 @@ const ItemConsumed = (): React.ReactElement => {
   })`;
 
   return (
-    <View style={styles.screen}>
+    <ScreenWrapper>
       <Text>{`How much ${description} did you eat?`}</Text>
       <Spacer />
       <BaseNumberInput
@@ -139,7 +139,7 @@ const ItemConsumed = (): React.ReactElement => {
         onChange={updateUnitOfMeasurement}
       />
       <Spacer />
-    </View>
+    </ScreenWrapper>
   );
 };
 

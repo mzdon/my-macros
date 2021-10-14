@@ -1,15 +1,15 @@
 import React from 'react';
 
 import {useNavigation, useRoute} from '@react-navigation/native';
-import {Button, Text, View} from 'react-native';
+import {Button, Text} from 'react-native';
 
 import BaseTextInput from 'components/BaseTextInput';
+import ScreenWrapper from 'components/ScreenWrapper';
 import {
   AddMealScreenNavigationProp,
   AddMealScreenRouteProp,
 } from 'navigation/RouteTypes';
 import {useJournalContext} from 'providers/JournalProvider';
-import styles from 'styles';
 import moment from 'moment';
 
 const AddMealScreen = () => {
@@ -56,14 +56,14 @@ const AddMealScreen = () => {
   }, [navigation, onAddCustom]);
 
   return (
-    <View style={styles.screen}>
+    <ScreenWrapper>
       <Text>{`Add Meal on ${moment(date).format('ddd MM DD YYYY')}`}</Text>
       <Button title="Breakfast" onPress={onAddBreakfast} />
       <Button title="Lunch" onPress={onAddLunch} />
       <Button title="Dinner" onPress={onAddDinner} />
       <Button title="Snack" onPress={onAddSnack} />
       <BaseTextInput value={description} onChangeText={setDescription} />
-    </View>
+    </ScreenWrapper>
   );
 };
 

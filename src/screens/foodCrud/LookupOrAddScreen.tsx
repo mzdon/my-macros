@@ -1,10 +1,10 @@
 import React from 'react';
 
 import {useNavigation} from '@react-navigation/native';
-import {View} from 'react-native';
 
 import LookupFoodItem from 'components/LookupFoodItem';
 import LookupFoodItemGroup from 'components/LookupFoodItemGroup';
+import ScreenWrapper from 'components/ScreenWrapper';
 import Spacer from 'components/Spacer';
 import {
   FOOD_ITEM_DESCRIPTION,
@@ -15,7 +15,6 @@ import {LookupOrAddNavigationProp} from 'navigation/RouteTypes';
 import {useFoodGroupContext} from 'providers/FoodGroupProvider';
 import FoodItem from 'schemas/FoodItem';
 import FoodItemGroup from 'schemas/FoodItemGroup';
-import styles from 'styles';
 import {useFoodCrudNavigationContext} from 'providers/FoodCrudNavigationProvider';
 
 const LookupOrAddScreen = (): React.ReactElement => {
@@ -49,7 +48,7 @@ const LookupOrAddScreen = (): React.ReactElement => {
   );
 
   return (
-    <View style={styles.screen}>
+    <ScreenWrapper>
       <LookupFoodItem
         addNewFoodItem={addNewFoodItem}
         selectFoodItem={selectFoodItem}
@@ -60,7 +59,7 @@ const LookupOrAddScreen = (): React.ReactElement => {
         selectFoodItemGroup={selectFoodItemGroup}
       />
       <Spacer />
-    </View>
+    </ScreenWrapper>
   );
 };
 

@@ -2,10 +2,11 @@ import React from 'react';
 
 import {useNavigation, useRoute} from '@react-navigation/native';
 import moment from 'moment';
-import {Button, LayoutAnimation, StyleSheet, View} from 'react-native';
+import {Button, LayoutAnimation, StyleSheet} from 'react-native';
 import CalendarStrip from 'react-native-calendar-strip';
 
 import JouranlEntryList from 'components/JournalEntryList';
+import ScreenWrapper from 'components/ScreenWrapper';
 import Spacer from 'components/Spacer';
 import Stats from 'components/Stats';
 import {ADD_MEAL, ITEM_CONSUMED, LOOKUP_OR_ADD} from 'navigation/Constants';
@@ -17,7 +18,6 @@ import {
 import {useFoodCrudNavigationContext} from 'providers/FoodCrudNavigationProvider';
 import {useJournalContext} from 'providers/JournalProvider';
 import {useUserContext} from 'providers/UserProvider';
-import styles from 'styles';
 import JournalEntry from 'schemas/JournalEntry';
 import {isSameDay} from 'utils/Date';
 import {
@@ -142,7 +142,7 @@ const FoodJournalScreen = () => {
   }
 
   return (
-    <View style={styles.screen}>
+    <ScreenWrapper>
       {showCalendarStrip && (
         <CalendarStrip
           style={_styles.calendar}
@@ -164,7 +164,7 @@ const FoodJournalScreen = () => {
         onDeleteConsumedFoodItem={deleteConsumedFoodItem}
         EmptyComponent={AddMealButtonFunction}
       />
-    </View>
+    </ScreenWrapper>
   );
 };
 
