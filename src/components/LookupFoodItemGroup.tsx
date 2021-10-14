@@ -4,9 +4,9 @@ import {Button} from 'react-native';
 import {withRealm} from 'react-realm-context';
 import {Results} from 'realm';
 
-import PageTextInput from 'components/input/PageTextInput';
 import SearchResults from 'components/SearchResults';
 import Spacer from 'components/Spacer';
+import TextInput from 'components/TextInput';
 import {useUserContext} from 'providers/UserProvider';
 import FoodItemGroup from 'schemas/FoodItemGroup';
 
@@ -40,7 +40,7 @@ const LookupFoodItemGroup = ({
 
   return (
     <>
-      <PageTextInput
+      <TextInput
         placeholder="Lookup Food Item Group..."
         value={search}
         onChangeText={setSearch}

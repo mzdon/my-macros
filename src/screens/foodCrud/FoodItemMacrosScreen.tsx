@@ -3,7 +3,7 @@ import React from 'react';
 import {useNavigation} from '@react-navigation/native';
 import {Alert, Button, Text} from 'react-native';
 
-import BaseNumberInput from 'components/BaseNumberInput';
+import NumberInput from 'components/NumberInput';
 import ScreenWrapper from 'components/ScreenWrapper';
 import Spacer from 'components/Spacer';
 import {ITEM_CONSUMED} from 'navigation/Constants';
@@ -132,7 +132,7 @@ const FoodItemMacrosScreen = (): React.ReactElement => {
     <ScreenWrapper>
       <Text>{`New ${foodItemData?.description}`}</Text>
       <Spacer />
-      <BaseNumberInput
+      <NumberInput
         label="Carbs"
         placeholder="Carbs"
         value={carbs}
@@ -140,7 +140,7 @@ const FoodItemMacrosScreen = (): React.ReactElement => {
         error={errors.carbs}
       />
       <Spacer />
-      <BaseNumberInput
+      <NumberInput
         label="Protein"
         placeholder="Protein"
         value={protein}
@@ -148,7 +148,7 @@ const FoodItemMacrosScreen = (): React.ReactElement => {
         error={errors.protien}
       />
       <Spacer />
-      <BaseNumberInput
+      <NumberInput
         label="Fat"
         placeholder="Fat"
         value={fat}
@@ -156,14 +156,14 @@ const FoodItemMacrosScreen = (): React.ReactElement => {
         error={errors.fat}
       />
       <Spacer />
-      <BaseNumberInput
+      <NumberInput
         label="Sugar"
         placeholder="Sugar"
         value={sugar}
         onChangeText={updateSugar}
       />
       <Spacer />
-      <BaseNumberInput
+      <NumberInput
         label="Fiber"
         placeholder="Fiber"
         value={fiber}

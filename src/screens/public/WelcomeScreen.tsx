@@ -4,10 +4,10 @@ import {Button, StyleSheet, View} from 'react-native';
 
 import CoverBackground from 'components/CoverBackground';
 import CoverContent from 'components/CoverContent';
-import CoverTextInput from 'components/input/CoverTextInput';
 import ScreenWrapper from 'components/ScreenWrapper';
 import Spacer from 'components/Spacer';
 import Text from 'components/Text';
+import TextInput from 'components/TextInput';
 import {useAuthContext} from 'providers/AuthProvider';
 import {RecoverableError, useSafeAsyncCall} from 'utils/Errors';
 import {
@@ -78,7 +78,7 @@ const WelcomeScreen = () => {
           <CoverContent>
             <Text.CoverHeader>MY MACROS</Text.CoverHeader>
             <Spacer />
-            <CoverTextInput
+            <TextInput.CoverTextInput
               placeholder="Email..."
               value={email}
               onChangeText={onChange.email}
@@ -86,7 +86,7 @@ const WelcomeScreen = () => {
               error={errors.email}
             />
             <Spacer />
-            <CoverTextInput
+            <TextInput.CoverTextInput
               placeholder="Password..."
               value={password}
               onChangeText={onChange.password}

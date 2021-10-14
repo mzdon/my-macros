@@ -2,12 +2,10 @@ import React from 'react';
 
 import {StyleSheet, Text, TextInput, View} from 'react-native';
 
-import {BaseNumberInputProps} from 'components/BaseNumberInput';
 import DisabledOverlay from 'components/DisabledOverlay';
-import PageNumberInput from 'components/input/PageNumberInput';
+import NumberInput, {NumberInputProps} from 'components/NumberInput';
 import Spacer from 'components/Spacer';
 import {MeasurementSystem} from 'types/MeasurementSystem';
-import styles from 'styles';
 
 const _styles = StyleSheet.create({
   innerContainer: {
@@ -19,7 +17,7 @@ const _styles = StyleSheet.create({
   stretchLabel: {width: 40, paddingLeft: 8},
 });
 
-interface Props extends BaseNumberInputProps {
+interface Props extends NumberInputProps {
   measurementSystem: MeasurementSystem | null;
 }
 
@@ -39,10 +37,10 @@ const WeightInput = (props: Props): React.ReactElement<Props> | null => {
   }[measurementSystem || MeasurementSystem.Imperial];
   return (
     <View>
-      <Text style={styles.inputLabel}>{'Weight (optional)'}</Text>
       <View style={_styles.innerContainer}>
-        <PageNumberInput
+        <NumberInput
           ref={inputRef}
+          label="Weight (optional)"
           {...rest}
           style={_styles.stretchInput}
         />

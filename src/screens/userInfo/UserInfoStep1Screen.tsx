@@ -5,10 +5,10 @@ import {Button} from 'react-native';
 
 import BirthdayInput from 'components/BirthdayInput';
 import HeightInput from 'components/HeightInput';
-import PageTextInput from 'components/input/PageTextInput';
 import RadioButtons from 'components/RadioButtons';
 import ScreenWrapper from 'components/ScreenWrapper';
 import Spacer from 'components/Spacer';
+import TextInput from 'components/TextInput';
 import WeightInput from 'components/WeightInput';
 import {USER_INFO_STEP_2} from 'navigation/Constants';
 import {UserInfoStep1NavigationProp} from 'navigation/RouteTypes';
@@ -88,7 +88,7 @@ const UserInfoStep1Screen = (): React.ReactElement => {
 
   return (
     <ScreenWrapper>
-      <PageTextInput
+      <TextInput
         label="Name"
         value={name}
         placeholder="Name"

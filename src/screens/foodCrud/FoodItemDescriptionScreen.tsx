@@ -3,11 +3,11 @@ import React from 'react';
 import {useNavigation} from '@react-navigation/native';
 import {Button, Text} from 'react-native';
 
-import BaseNumberInput from 'components/BaseNumberInput';
-import BaseTextInput from 'components/BaseTextInput';
+import NumberInput from 'components/NumberInput';
 import RadioButtons from 'components/RadioButtons';
 import ScreenWrapper from 'components/ScreenWrapper';
 import Spacer from 'components/Spacer';
+import TextInput from 'components/TextInput';
 import {FOOD_ITEM_MACROS} from 'navigation/Constants';
 import {FoodItemDescriptionNavigationProp} from 'navigation/RouteTypes';
 import {UnitOfMeasurement} from 'types/UnitOfMeasurement';
@@ -149,7 +149,7 @@ const FoodItemDescriptionScreen = () => {
     <ScreenWrapper>
       <Text>{`${foodItemData?.newFoodItem ? 'New' : 'Edit'} Item`}</Text>
       <Spacer />
-      <BaseTextInput
+      <TextInput
         label="Description"
         placeholder="New item description..."
         value={description}
@@ -157,7 +157,7 @@ const FoodItemDescriptionScreen = () => {
         error={internalFieldErrors.description || errors.description}
       />
       <Spacer />
-      <BaseNumberInput
+      <NumberInput
         label="Serving Size"
         placeholder="What's the serving size?"
         value={servingSize}
@@ -171,14 +171,14 @@ const FoodItemDescriptionScreen = () => {
         onChange={updateUnitOfMeasurement}
       />
       <Spacer />
-      <BaseTextInput
+      <TextInput
         label="Serving Size Note"
         placeholder="Aribitrary info like '3 cakes'"
         value={servingSizeNote}
         onChangeText={updateServingNote}
       />
       <Spacer />
-      <BaseNumberInput
+      <NumberInput
         label="Calories"
         placeholder="Calories"
         value={calories}

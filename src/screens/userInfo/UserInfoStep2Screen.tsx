@@ -3,7 +3,7 @@ import React from 'react';
 import {useNavigation} from '@react-navigation/native';
 import {Button} from 'react-native';
 
-import PageNumberInput from 'components/input/PageNumberInput';
+import NumberInput from 'components/NumberInput';
 import ScreenWrapper from 'components/ScreenWrapper';
 import Spacer from 'components/Spacer';
 import {
@@ -114,7 +114,7 @@ const UserInfoStep2Screen = (): React.ReactElement => {
 
   return (
     <ScreenWrapper>
-      <PageNumberInput
+      <NumberInput
         label="Calories (grams)"
         placeholder="Calories"
         value={calories}
@@ -122,7 +122,7 @@ const UserInfoStep2Screen = (): React.ReactElement => {
         error={errors.calories}
       />
       <Spacer />
-      <PageNumberInput
+      <NumberInput
         label="Carbohydrates (grams)"
         placeholder="Carbohydrates"
         value={carbs}
@@ -130,7 +130,7 @@ const UserInfoStep2Screen = (): React.ReactElement => {
         error={errors.carbs}
       />
       <Spacer />
-      <PageNumberInput
+      <NumberInput
         label="Protein (grams)"
         placeholder="Protein"
         value={protein}
@@ -138,7 +138,7 @@ const UserInfoStep2Screen = (): React.ReactElement => {
         error={errors.protein}
       />
       <Spacer />
-      <PageNumberInput
+      <NumberInput
         label="Fats (grams)"
         placeholder="Fats"
         value={fat}
@@ -146,14 +146,14 @@ const UserInfoStep2Screen = (): React.ReactElement => {
         error={errors.fat}
       />
       <Spacer />
-      <PageNumberInput
+      <NumberInput
         label="Sugar (grams/optional)"
         placeholder="Sugar"
         value={sugar || 0}
         onChangeText={updateSugar}
       />
       <Spacer />
-      <PageNumberInput
+      <NumberInput
         label="Fiber (grams/optional)"
         placeholder="Fiber"
         value={fiber || 0}

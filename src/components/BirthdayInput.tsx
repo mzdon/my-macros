@@ -1,11 +1,9 @@
 import React from 'react';
 
-import {BaseTextInputProps} from 'components/BaseTextInput';
-import PageTextInput from 'components/input/PageTextInput';
-import styles from 'styles';
+import TextInput, {TextInputProps} from 'components/TextInput';
 import {isStringValidNumber} from 'utils/Validators';
 
-interface Props extends BaseTextInputProps {
+interface Props extends TextInputProps {
   value: string;
   error: string | undefined;
   onChangeText: (v: string) => void;
@@ -13,7 +11,7 @@ interface Props extends BaseTextInputProps {
 
 const BirthdayInput = (props: Props): React.ReactElement<Props> => {
   const {onChangeText, ...rest} = props;
-  const {value, error} = rest;
+  const {value} = rest;
   const onChangeBirthday = (v: string) => {
     if (v.length < value.length) {
       onChangeText(v);
@@ -32,11 +30,10 @@ const BirthdayInput = (props: Props): React.ReactElement<Props> => {
     }
   };
   return (
-    <PageTextInput
+    <TextInput
       {...rest}
       onChangeText={onChangeBirthday}
       label="Birthday (optional)"
-      style={!!error && styles.inputError}
       placeholder="MM/DD/YYYY"
     />
   );

@@ -3,7 +3,7 @@ import React from 'react';
 import {useNavigation} from '@react-navigation/native';
 import {Button, Text} from 'react-native';
 
-import BaseNumberInput from 'components/BaseNumberInput';
+import NumberInput from 'components/NumberInput';
 import ScreenWrapper from 'components/ScreenWrapper';
 import Spacer from 'components/Spacer';
 import RadioButtons from 'components/RadioButtons';
@@ -125,7 +125,7 @@ const ItemConsumed = (): React.ReactElement => {
     <ScreenWrapper>
       <Text>{`How much ${description} did you eat?`}</Text>
       <Spacer />
-      <BaseNumberInput
+      <NumberInput
         label={quantityLabel}
         placeholder="Quantity"
         value={state.quantity}

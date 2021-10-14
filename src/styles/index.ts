@@ -9,10 +9,6 @@ export const backgroundColor = '#FFFFFF';
 export const pageLineColor = '#8CCFD8';
 
 export default StyleSheet.create({
-  input: {borderColor: 'black', borderWidth: 1},
-  inputLabel: {color: 'grey'},
-  inputError: {borderColor: 'red'},
-  inputErrorMessage: {color: 'red'},
   button: {color: 'blue'},
   error: {
     borderWidth: 1,

@@ -4,9 +4,9 @@ import {useNavigation, useRoute} from '@react-navigation/native';
 import moment from 'moment';
 import {Button, StyleSheet, View} from 'react-native';
 
-import PageTextInput from 'components/input/PageTextInput';
 import ScreenWrapper from 'components/ScreenWrapper';
 import Text from 'components/Text';
+import TextInput from 'components/TextInput';
 import {
   AddMealScreenNavigationProp,
   AddMealScreenRouteProp,
@@ -108,7 +108,7 @@ const AddMealScreen = () => {
         <Button title="Lunch" onPress={onAddLunch} />
         <Button title="Dinner" onPress={onAddDinner} />
         <Button title="Snack" onPress={onAddSnack} />
-        <PageTextInput
+        <TextInput
           placeholder="Custom meal description..."
           value={description}
           onChangeText={onChange.description}
