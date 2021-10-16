@@ -17,7 +17,7 @@ import {CatastrophicError} from 'utils/Errors';
 import {ProfileScreenNavigationProp} from 'navigation/RouteTypes';
 
 const headerOptions = {
-  headerTitle: 'Profile',
+  title: 'Profile',
 };
 
 const ProfileScreen = () => {

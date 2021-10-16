@@ -98,7 +98,7 @@ const renderSectionFooter = ({section}: {section: Section}) => {
 };
 
 const headerOptions = {
-  headerTitle: 'Food Editor',
+  title: 'Food Editor',
 };
 
 const FoodSelectorScreen = ({realm}: Props): React.ReactElement<Props> => {
