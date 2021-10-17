@@ -5,32 +5,33 @@ import {
   Platform,
   SafeAreaView,
   StyleSheet,
-  View,
+  ViewStyle,
 } from 'react-native';
 
 import {backgroundColor, defaultPadding} from 'styles';
-import {JustChildrenProps} from 'types/Common';
 
 const _styles = StyleSheet.create({
-  flex: {
+  container: {
     flex: 1,
     backgroundColor,
   },
-  screen: {
+  innerContainer: {
     flex: 1,
     padding: defaultPadding,
   },
 });
 
-const ScreenWrapper = ({
-  children,
-}: JustChildrenProps): React.ReactElement<JustChildrenProps> => {
+type Props = React.PropsWithChildren<{
+  style: ViewStyle;
+}>;
+
+const ScreenWrapper = ({style, children}: Props): React.ReactElement<Props> => {
   return (
-    <SafeAreaView style={_styles.flex}>
+    <SafeAreaView style={[_styles.container, style]}>
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        style={_styles.flex}>
-        <View style={_styles.screen}>{children}</View>
+        style={_styles.innerContainer}>
+        {children}
       </KeyboardAvoidingView>
     </SafeAreaView>
   );

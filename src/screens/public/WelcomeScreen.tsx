@@ -20,6 +20,9 @@ import {
 import {defaultPadding} from 'styles';
 
 const _styles = StyleSheet.create({
+  screenWrapper: {
+    backgroundColor: 'transparent',
+  },
   contentSpacing: {
     marginHorizontal: defaultPadding * 3,
     marginTop: defaultPadding * 5,
@@ -73,7 +76,7 @@ const WelcomeScreen = () => {
 
   return (
     <CoverBackground>
-      <ScreenWrapper>
+      <ScreenWrapper style={_styles.screenWrapper}>
         <View style={_styles.contentSpacing}>
           <CoverContent>
             <Text.CoverHeader>MY MACROS</Text.CoverHeader>

@@ -145,7 +145,6 @@
 				4E5B4FAC4484C42F7E831388 /* Pods-MyMacros-MyMacrosTests.debug.xcconfig */,
 				626A4013E0F732EBDB4DCF9B /* Pods-MyMacros-MyMacrosTests.release.xcconfig */,
 			);
-			name = Pods;
 			path = Pods;
 			sourceTree = "<group>";
 		};
@@ -485,6 +484,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
 				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 49SLGSZ779;
 				ENABLE_BITCODE = NO;
 				INFOPLIST_FILE = MyMacros/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -511,6 +511,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
 				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 49SLGSZ779;
 				INFOPLIST_FILE = MyMacros/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
