@@ -79,7 +79,7 @@ const FoodJournalScreen = () => {
     const icon = showCalendarStrip ? '\u25B2' : '\u25BC';
     return (
       <Button
-        title={`${moment(date).format('ddd MM DD YYYY')} ${icon}`}
+        title={`${moment(date).format('ddd MMM DD YYYY')} ${icon}`}
         onPress={toggleCalendarStrip}
       />
     );
