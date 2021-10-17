@@ -14,7 +14,6 @@ import {
   useFoodItemContext,
 } from 'providers/FoodItemProvider';
 import {
-  AllUnitsOfMeasurement,
   DrinkUnitsOfMeasurement,
   FoodUnitsOfMeasurement,
   ServingUnitOfMeasurement,
@@ -111,7 +110,6 @@ const ItemConsumed = (): React.ReactElement => {
   const uomValues = {
     [FoodItemType.Food]: FoodUnitsOfMeasurement,
     [FoodItemType.Drink]: DrinkUnitsOfMeasurement,
-    [FoodItemType.Either]: AllUnitsOfMeasurement,
   }[fOrD];
   const uomPlusServings = [ServingUnitOfMeasurement.Servings, ...uomValues];
 

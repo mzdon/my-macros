@@ -5,6 +5,7 @@ import {StyleSheet, Text, TextProps} from 'react-native';
 export const textStyles = StyleSheet.create({
   base: {
     fontSize: 16,
+    color: '#000',
   },
   coverHeader: {
     fontSize: 20,

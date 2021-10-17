@@ -3,7 +3,6 @@ import {UnitOfMeasurement} from 'types/UnitOfMeasurement';
 export enum FoodItemType {
   Food = 'food',
   Drink = 'drink',
-  Either = 'either',
 }
 
 export const UOM_TO_TYPE_MAP: Record<UnitOfMeasurement, FoodItemType> = {
@@ -14,9 +13,9 @@ export const UOM_TO_TYPE_MAP: Record<UnitOfMeasurement, FoodItemType> = {
   [UnitOfMeasurement.Feet]: FoodItemType.Food,
   [UnitOfMeasurement.Inches]: FoodItemType.Food,
   [UnitOfMeasurement.Centimeters]: FoodItemType.Food,
-  [UnitOfMeasurement.Cups]: FoodItemType.Either,
-  [UnitOfMeasurement.Tbsp]: FoodItemType.Either,
-  [UnitOfMeasurement.Tsp]: FoodItemType.Either,
+  [UnitOfMeasurement.Cups]: FoodItemType.Drink,
+  [UnitOfMeasurement.Tbsp]: FoodItemType.Drink,
+  [UnitOfMeasurement.Tsp]: FoodItemType.Drink,
   [UnitOfMeasurement.FluidOunces]: FoodItemType.Drink,
   [UnitOfMeasurement.Liters]: FoodItemType.Drink,
 };

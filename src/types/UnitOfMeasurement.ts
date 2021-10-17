@@ -47,9 +47,6 @@ export const FoodUnitsOfMeasurement = [
   UnitOfMeasurement.Ounces,
   UnitOfMeasurement.Pounds,
   UnitOfMeasurement.Kilograms,
-  UnitOfMeasurement.Cups,
-  UnitOfMeasurement.Tbsp,
-  UnitOfMeasurement.Tsp,
 ];
 
 export const DrinkUnitsOfMeasurement = [

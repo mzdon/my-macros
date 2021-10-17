@@ -1,94 +1,66 @@
 import React from 'react';
 
-import {Picker as RNPicker} from '@react-native-picker/picker';
 import {StyleSheet} from 'react-native';
+import ModalSelector from 'react-native-modal-selector';
 
 import Text, {textStyles} from 'components/Text';
+import {pageLineColor} from 'styles';
 
 const _styles = StyleSheet.create({
   label: {
     color: 'grey',
   },
+  container: {
+    borderColor: pageLineColor,
+    borderWidth: 2,
+  },
 });
 
-type Value =
-  | string
-  | {
-      label: string;
-      value: string;
-    };
+interface Value {
+  key?: number;
+  label: string;
+  value: string;
+}
 
 interface Props {
   label?: string;
-  value: string | null | undefined;
-  values: Value[];
-  nullable?: boolean;
-  onChange: (value: string | null) => void;
+  value: string;
+  values: (string | Value)[];
+  onChange: (value: string) => void;
 }
 
-const getInitialValue = ({value, values, nullable = false}: Props) => {
-  let selectedValue: Value;
-  if (!value) {
-    if (nullable) {
-      return null;
+const getData = (values: Props['values']) => {
+  return values.map((v, i) => {
+    if (typeof v === 'string') {
+      return {key: i, label: v, value: v};
     }
-    selectedValue = values[0];
-  } else {
-    selectedValue = value;
-  }
-  if (typeof selectedValue === 'string') {
-    return selectedValue;
-  }
-  return selectedValue.value;
-};
-
-const renderItem = (value: Value) => {
-  if (typeof value === 'string') {
-    const title = `${value
-      .split(' ')
-      .map(v => `${v.slice(0, 1).toUpperCase()}${value.slice(1)}`)
-      .join(' ')}`;
-    return (
-      <RNPicker.Item
-        key={value}
-        label={title}
-        value={value}
-        style={textStyles.base}
-      />
-    );
-  }
-  return (
-    <RNPicker.Item
-      key={value.value}
-      label={value.label}
-      value={value.value}
-      style={textStyles.base}
-    />
-  );
+    return {key: i, label: v.label, value: v.value};
+  });
 };
 
 const Picker = (props: Props): React.ReactElement<Props> => {
-  const {label, values, nullable, onChange} = props;
-  const [value, setValue] = React.useState(getInitialValue(props));
-  React.useEffect(() => {
-    if (props.value !== value) {
-      onChange(value ? value : null);
-    }
-  });
+  const {label, value, values, onChange} = props;
+
   const onValueChange = React.useCallback(
-    (nextValue: string | null) => {
-      setValue(nextValue);
-      onChange(nextValue);
+    (nextValue: Value) => {
+      onChange(nextValue.value);
     },
     [onChange],
   );
+
+  const data = React.useMemo(() => getData(values), [values]);
+
   return (
     <>
       {label && <Text style={_styles.label}>{label}</Text>}
-      <RNPicker selectedValue={value} onValueChange={onValueChange}>
-        {nullable === true && <RNPicker.Item label="-" value={null} />}
-        {values.map(renderItem)}
-      </RNPicker>
+      <ModalSelector
+        data={data}
+        initValue={value}
+        onChange={onValueChange}
+        selectStyle={_styles.container}
+        initValueTextStyle={textStyles.base}
+        selectTextStyle={textStyles.base}
+      />
     </>
   );
 };
