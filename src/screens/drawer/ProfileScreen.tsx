@@ -11,7 +11,7 @@ import {useFoodCrudNavigationContext} from 'providers/FoodCrudNavigationProvider
 import {useUserContext} from 'providers/UserProvider';
 import {
   useParentNavigation,
-  useSetFoodCrudNavigationOptions,
+  useSetFoodCrudNavigationOptionsOnFocus,
 } from 'utils/Navigation';
 import {CatastrophicError} from 'utils/Errors';
 import {ProfileScreenNavigationProp} from 'navigation/RouteTypes';
@@ -27,7 +27,7 @@ const ProfileScreen = () => {
   const {user} = useUserContext();
   const {signOut} = useAuthContext();
 
-  useSetFoodCrudNavigationOptions(
+  useSetFoodCrudNavigationOptionsOnFocus(
     navigation,
     foodCrudNavigation,
     headerOptions,

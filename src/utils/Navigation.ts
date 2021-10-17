@@ -17,17 +17,18 @@ export const useParentNavigation = () => {
   return stackNavigation;
 };
 
-export const useSetFoodCrudNavigationOptions = (
+export const useSetFoodCrudNavigationOptionsOnFocus = (
   navigation: StackNavigationProp<DrawerParamList>,
   foodCrudNavigation: {setOptions: FoodCrudScreenNavigationProp['setOptions']},
   options: StackNavigationOptions,
 ) => {
   React.useLayoutEffect(() => {
-    return navigation.addListener('focus', () => {
+    const setOptions = () =>
       foodCrudNavigation.setOptions({
         headerRight: undefined,
         ...options,
       });
-    });
+    setOptions();
+    return navigation.addListener('focus', () => setOptions);
   }, [foodCrudNavigation, navigation, options]);
 };

@@ -22,13 +22,13 @@ import JournalEntry from 'schemas/JournalEntry';
 import {isSameDay} from 'utils/Date';
 import {
   useParentNavigation,
-  useSetFoodCrudNavigationOptions,
+  useSetFoodCrudNavigationOptionsOnFocus,
 } from 'utils/Navigation';
 import {CatastrophicError} from 'utils/Errors';
 
 const _styles = StyleSheet.create({
   calendar: {
-    height: 100,
+    height: 80,
   },
   selectedDateContainer: {
     backgroundColor: 'pink',
@@ -92,7 +92,7 @@ const FoodJournalScreen = () => {
     }),
     [AddMealButtonFunction, DateHeaderTitle],
   );
-  useSetFoodCrudNavigationOptions(
+  useSetFoodCrudNavigationOptionsOnFocus(
     navigation,
     foodCrudNavigation,
     headerOptions,
@@ -147,6 +147,7 @@ const FoodJournalScreen = () => {
       {showCalendarStrip && (
         <CalendarStrip
           style={_styles.calendar}
+          maxDayComponentSize={48}
           highlightDateContainerStyle={_styles.selectedDateContainer}
           scrollable
           selectedDate={date}

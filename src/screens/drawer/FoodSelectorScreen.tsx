@@ -23,7 +23,7 @@ import {
   useGetFoodItems,
   useGetJournalEntriesWithFoodItemId,
 } from 'utils/Queries';
-import {useSetFoodCrudNavigationOptions} from 'utils/Navigation';
+import {useSetFoodCrudNavigationOptionsOnFocus} from 'utils/Navigation';
 
 const _styles = StyleSheet.create({
   header: {
@@ -111,7 +111,7 @@ const FoodSelectorScreen = ({realm}: Props): React.ReactElement<Props> => {
   const getJournalEntriesWithFoodItemId =
     useGetJournalEntriesWithFoodItemId(realm);
 
-  useSetFoodCrudNavigationOptions(
+  useSetFoodCrudNavigationOptionsOnFocus(
     navigation,
     foodCrudNavigation,
     headerOptions,

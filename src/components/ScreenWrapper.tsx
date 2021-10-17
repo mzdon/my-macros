@@ -22,7 +22,7 @@ const _styles = StyleSheet.create({
 });
 
 type Props = React.PropsWithChildren<{
-  style: ViewStyle;
+  style?: ViewStyle;
 }>;
 
 const ScreenWrapper = ({style, children}: Props): React.ReactElement<Props> => {
