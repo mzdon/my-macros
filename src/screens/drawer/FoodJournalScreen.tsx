@@ -86,7 +86,6 @@ const FoodJournalScreen = () => {
   }, [date, showCalendarStrip, toggleCalendarStrip]);
   const headerOptions = React.useMemo(
     () => ({
-      title: 'Journal',
       headerTitle: DateHeaderTitle,
       headerRight: AddMealButtonFunction,
     }),

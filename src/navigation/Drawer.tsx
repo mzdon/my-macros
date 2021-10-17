@@ -37,16 +37,37 @@ const Drawer = () => {
           name={NavConstants.JOURNAL}
           initialParams={{date: today().getTime()}}
           component={withScreenEnhancers(FoodJournalScreen)}
+          options={{title: 'Journal'}}
         />
         <DrawerNav.Screen
           key="food-editor"
           name={NavConstants.FOOD_EDITOR}
           component={withScreenEnhancers(FoodSelectorScreen)}
+          options={{title: 'Food Editor'}}
+          listeners={{
+            focus: e => {
+              console.log(e);
+              navigation.setOptions({
+                headerTitle: 'Food Editor',
+                headerRight: undefined,
+              });
+            },
+          }}
         />
         <DrawerNav.Screen
           key="profile"
           name={NavConstants.PROFILE}
           component={withScreenEnhancers(ProfileScreen)}
+          options={{title: 'Profile'}}
+          listeners={{
+            focus: e => {
+              console.log(e);
+              navigation.setOptions({
+                headerTitle: 'Profile',
+                headerRight: undefined,
+              });
+            },
+          }}
         />
       </DrawerNav.Navigator>
     </FoodCrudNavigationProvider>

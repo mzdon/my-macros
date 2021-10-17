@@ -1,37 +1,19 @@
 import React from 'react';
 
-import {useNavigation} from '@react-navigation/native';
 import {Button, Text} from 'react-native';
 
 import CurrentMacros from 'components/CurrentMacros';
 import ScreenWrapper from 'components/ScreenWrapper';
 import {USER_INFO} from 'navigation/Constants';
 import {useAuthContext} from 'providers/AuthProvider';
-import {useFoodCrudNavigationContext} from 'providers/FoodCrudNavigationProvider';
 import {useUserContext} from 'providers/UserProvider';
-import {
-  useParentNavigation,
-  useSetFoodCrudNavigationOptionsOnFocus,
-} from 'utils/Navigation';
+import {useParentNavigation} from 'utils/Navigation';
 import {CatastrophicError} from 'utils/Errors';
-import {ProfileScreenNavigationProp} from 'navigation/RouteTypes';
-
-const headerOptions = {
-  title: 'Profile',
-};
 
 const ProfileScreen = () => {
-  const navigation = useNavigation<ProfileScreenNavigationProp>();
   const parentNavigation = useParentNavigation();
-  const foodCrudNavigation = useFoodCrudNavigationContext();
   const {user} = useUserContext();
   const {signOut} = useAuthContext();
-
-  useSetFoodCrudNavigationOptionsOnFocus(
-    navigation,
-    foodCrudNavigation,
-    headerOptions,
-  );
 
   const macros = user.getCurrentMacros();
   if (!macros) {

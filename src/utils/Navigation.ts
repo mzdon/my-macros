@@ -23,13 +23,10 @@ export const useSetFoodCrudNavigationOptionsOnFocus = (
   options: StackNavigationOptions,
 ) => {
   React.useLayoutEffect(() => {
-    navigation.setOptions({...options});
-    const setFoodCrudOptions = () =>
+    return navigation.addListener('focus', () => {
       foodCrudNavigation.setOptions({
-        headerRight: undefined,
         ...options,
       });
-    setFoodCrudOptions();
-    return navigation.addListener('focus', () => setFoodCrudOptions);
+    });
   }, [foodCrudNavigation, navigation, options]);
 };
