@@ -45,8 +45,7 @@ const Drawer = () => {
           component={withScreenEnhancers(FoodSelectorScreen)}
           options={{title: 'Food Editor'}}
           listeners={{
-            focus: e => {
-              console.log(e);
+            focus: () => {
               navigation.setOptions({
                 headerTitle: 'Food Editor',
                 headerRight: undefined,
@@ -60,8 +59,7 @@ const Drawer = () => {
           component={withScreenEnhancers(ProfileScreen)}
           options={{title: 'Profile'}}
           listeners={{
-            focus: e => {
-              console.log(e);
+            focus: () => {
               navigation.setOptions({
                 headerTitle: 'Profile',
                 headerRight: undefined,
