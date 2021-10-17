@@ -11,6 +11,7 @@
     "reset": "rm -rf node_modules/ && rm -rf ios/Pods/ && yarn && cd ios && pod install && cd .."
   },
   "dependencies": {
+    "@react-native-picker/picker": "2.1.0",
     "@react-navigation/drawer": "6.1.4",
     "@react-navigation/native": "6.0.2",
     "@react-navigation/stack": "6.0.7",
@@ -21,6 +22,7 @@
     "react-native-config": "1.4.4",
     "react-native-gesture-handler": "1.10.3",
     "react-native-get-random-values": "1.7.0",
+    "react-native-modal-selector": "2.1.0",
     "react-native-reanimated": "2.2.2",
     "react-native-safe-area-context": "3.3.0",
     "react-native-screens": "3.5.0",

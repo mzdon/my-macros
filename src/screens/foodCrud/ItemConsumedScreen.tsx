@@ -4,16 +4,22 @@ import {useNavigation} from '@react-navigation/native';
 import {Button, Text} from 'react-native';
 
 import NumberInput from 'components/NumberInput';
+import Picker from 'components/Picker';
 import ScreenWrapper from 'components/ScreenWrapper';
 import Spacer from 'components/Spacer';
-import RadioButtons from 'components/RadioButtons';
 import {FOOD_ITEM_GROUP} from 'navigation/Constants';
 import {ItemConsumedNavigationProp} from 'navigation/RouteTypes';
 import {
   FoodItemContextValue,
   useFoodItemContext,
 } from 'providers/FoodItemProvider';
-import {Servings, UnitOfMeasurement} from 'types/UnitOfMeasurement';
+import {
+  AllUnitsOfMeasurement,
+  DrinkUnitsOfMeasurement,
+  FoodUnitsOfMeasurement,
+  ServingUnitOfMeasurement,
+  UnitOfMeasurement,
+} from 'types/UnitOfMeasurement';
 import {useSimpleStateUpdater} from 'utils/State';
 import {FoodItemType, isFoodOrDrink} from 'utils/FoodItem';
 import {useFoodGroupContext} from 'providers/FoodGroupProvider';
@@ -24,25 +30,16 @@ import {
   useValidateFields,
 } from 'utils/Validators';
 
-const UOM_VALUES = {
-  [FoodItemType.Food]: [
-    UnitOfMeasurement.Grams,
-    UnitOfMeasurement.Ounces,
-    Servings,
-  ],
-  [FoodItemType.Drink]: [
-    UnitOfMeasurement.FluidOunces,
-    UnitOfMeasurement.Liters,
-    Servings,
-  ],
-};
+interface ConsumedItemState {
+  quantity: number;
+  unitOfMeasurement: ServingUnitOfMeasurement;
+}
 
 const getInitialState = (
   foodItemData: FoodItemContextValue['foodItemData'],
 ) => ({
   quantity: foodItemData?.servingSize || 0,
-  unitOfMeasurement:
-    foodItemData?.servingUnitOfMeasurement || UnitOfMeasurement.Grams,
+  unitOfMeasurement: ServingUnitOfMeasurement.Servings,
 });
 
 const ItemConsumed = (): React.ReactElement => {
@@ -52,7 +49,7 @@ const ItemConsumed = (): React.ReactElement => {
   const {foodGroupData} = useFoodGroupContext();
   const {foodItemData, saveConsumedFoodItem} = useFoodItemContext();
 
-  const [state, updater, setState] = useSimpleStateUpdater(
+  const [state, updater, setState] = useSimpleStateUpdater<ConsumedItemState>(
     getInitialState(foodItemData),
   );
 
@@ -62,9 +59,9 @@ const ItemConsumed = (): React.ReactElement => {
 
   const updateQuantity = updater<number>('quantity');
   const onUpdateUnitOfMeasurement =
-    updater<UnitOfMeasurement>('unitOfMeasurement');
+    updater<ServingUnitOfMeasurement>('unitOfMeasurement');
   const updateUnitOfMeasurement = (value: string | null) => {
-    onUpdateUnitOfMeasurement(value as UnitOfMeasurement);
+    onUpdateUnitOfMeasurement(value as ServingUnitOfMeasurement);
   };
 
   const fieldValidators = React.useMemo(
@@ -108,12 +105,15 @@ const ItemConsumed = (): React.ReactElement => {
     });
   }, [navigation, validateBefore.onSave]);
 
-  const uomValues =
-    UOM_VALUES[
-      isFoodOrDrink(
-        foodItemData?.servingUnitOfMeasurement || UnitOfMeasurement.Grams,
-      )
-    ];
+  const fOrD = isFoodOrDrink(
+    foodItemData?.servingUnitOfMeasurement || UnitOfMeasurement.Grams,
+  );
+  const uomValues = {
+    [FoodItemType.Food]: FoodUnitsOfMeasurement,
+    [FoodItemType.Drink]: DrinkUnitsOfMeasurement,
+    [FoodItemType.Either]: AllUnitsOfMeasurement,
+  }[fOrD];
+  const uomPlusServings = [ServingUnitOfMeasurement.Servings, ...uomValues];
 
   const {description, servingSize, servingUnitOfMeasurement, servingSizeNote} =
     foodItemData || {};
@@ -133,9 +133,9 @@ const ItemConsumed = (): React.ReactElement => {
         error={errors.quantity}
       />
       <Spacer />
-      <RadioButtons
+      <Picker
         value={state.unitOfMeasurement}
-        values={uomValues}
+        values={uomPlusServings}
         onChange={updateUnitOfMeasurement}
       />
       <Spacer />

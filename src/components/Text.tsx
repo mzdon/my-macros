@@ -2,7 +2,7 @@ import React from 'react';
 
 import {StyleSheet, Text, TextProps} from 'react-native';
 
-const _styles = StyleSheet.create({
+export const textStyles = StyleSheet.create({
   base: {
     fontSize: 16,
   },
@@ -36,7 +36,7 @@ const createComponent = (typeStyle?: Props['style']): TextComponent => {
     ...rest
   }: Props): React.ReactElement<Props> => {
     return (
-      <Text style={[_styles.base, typeStyle, style]} {...rest}>
+      <Text style={[textStyles.base, typeStyle, style]} {...rest}>
         {children}
       </Text>
     );
@@ -45,8 +45,8 @@ const createComponent = (typeStyle?: Props['style']): TextComponent => {
 };
 
 const Base = createComponent() as TextComponents;
-Base.CoverHeader = createComponent(_styles.coverHeader);
-Base.PageHeader = createComponent(_styles.pageHeader);
-Base.SubHeader = createComponent(_styles.subHeader);
+Base.CoverHeader = createComponent(textStyles.coverHeader);
+Base.PageHeader = createComponent(textStyles.pageHeader);
+Base.SubHeader = createComponent(textStyles.subHeader);
 
 export default Base;

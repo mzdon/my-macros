@@ -4,12 +4,12 @@ import {
   Falsy,
   StyleProp,
   StyleSheet,
-  Text,
   TextInput,
   TextInputProps as RNTextInputProps,
   ViewStyle,
 } from 'react-native';
 
+import Text from 'components/Text';
 import {pageLineColor} from 'styles';
 
 const _styles = StyleSheet.create({

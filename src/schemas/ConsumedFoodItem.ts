@@ -2,17 +2,18 @@ import {UUID} from 'bson';
 import Realm from 'realm';
 
 import {InitFoodItemData, FoodItemData} from 'schemas/FoodItem';
-import {Servings, UnitOfMeasurement} from 'types/UnitOfMeasurement';
+import {
+  ServingUnitOfMeasurement,
+  UnitOfMeasurement,
+} from 'types/UnitOfMeasurement';
 import {round} from 'utils/Math';
 import {convert} from 'utils/UnitOfMeasurement';
-
-type UomOrServings = UnitOfMeasurement | typeof Servings;
 
 export interface InitConsumedFoodItemData {
   itemData: InitFoodItemData;
   itemId?: UUID | null;
   quantity: number;
-  unitOfMeasurement: UomOrServings;
+  unitOfMeasurement: ServingUnitOfMeasurement;
 }
 
 export interface ConsumedFoodItemData
@@ -25,9 +26,9 @@ export interface ConsumedFoodItemData
 function determineServingsConsumedAndUom(
   item: InitFoodItemData,
   quantity: number,
-  unitOfMeasurement: UomOrServings,
+  unitOfMeasurement: ServingUnitOfMeasurement,
 ): {servings: number; realQuantity: number; uom: UnitOfMeasurement} {
-  if (unitOfMeasurement === Servings) {
+  if (unitOfMeasurement === ServingUnitOfMeasurement.Servings) {
     // we consumed n servings
     return {
       servings: quantity,
@@ -35,24 +36,26 @@ function determineServingsConsumedAndUom(
       uom: item.servingUnitOfMeasurement,
     };
   }
-  if (unitOfMeasurement !== item.servingUnitOfMeasurement) {
+  // TODO: fix this hack when I figure out how to let ServingUnitOfMeasurement extend UnitOfMeasurement
+  const uom = unitOfMeasurement as unknown as UnitOfMeasurement;
+  if (uom !== item.servingUnitOfMeasurement) {
     // we consumed n uom where uom != item.uom
     const quantityAsServingUom = convert(
       quantity,
-      unitOfMeasurement,
+      uom,
       item.servingUnitOfMeasurement,
     );
     return {
       servings: round(quantityAsServingUom / item.servingSize),
       realQuantity: quantity,
-      uom: unitOfMeasurement,
+      uom,
     };
   }
   // we consumed n uom where uom == item.uom
   return {
     servings: quantity / item.servingSize,
     realQuantity: quantity,
-    uom: unitOfMeasurement,
+    uom,
   };
 }
 

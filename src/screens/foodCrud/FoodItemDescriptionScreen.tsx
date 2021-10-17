@@ -4,13 +4,16 @@ import {useNavigation} from '@react-navigation/native';
 import {Button, Text} from 'react-native';
 
 import NumberInput from 'components/NumberInput';
-import RadioButtons from 'components/RadioButtons';
+import Picker from 'components/Picker';
 import ScreenWrapper from 'components/ScreenWrapper';
 import Spacer from 'components/Spacer';
 import TextInput from 'components/TextInput';
 import {FOOD_ITEM_MACROS} from 'navigation/Constants';
 import {FoodItemDescriptionNavigationProp} from 'navigation/RouteTypes';
-import {UnitOfMeasurement} from 'types/UnitOfMeasurement';
+import {
+  AllUnitsOfMeasurement,
+  UnitOfMeasurement,
+} from 'types/UnitOfMeasurement';
 import {useFoodItemContext} from 'providers/FoodItemProvider';
 import {InitFoodItemData} from 'schemas/FoodItem';
 import {Errors, NameExistsError} from 'utils/Errors';
@@ -20,13 +23,6 @@ import {
   requiredErrorMessage,
   useValidateFields,
 } from 'utils/Validators';
-
-const SERVING_UMO_VALUES = [
-  UnitOfMeasurement.Grams,
-  UnitOfMeasurement.Ounces,
-  UnitOfMeasurement.FluidOunces,
-  UnitOfMeasurement.Liters,
-];
 
 const FoodItemDescriptionScreen = () => {
   const navigation = useNavigation<FoodItemDescriptionNavigationProp>();
@@ -165,9 +161,10 @@ const FoodItemDescriptionScreen = () => {
         error={errors.servingSize}
       />
       <Spacer />
-      <RadioButtons
+      <Picker
+        label="Unit of Measurement"
         value={servingUnitOfMeasurement}
-        values={SERVING_UMO_VALUES}
+        values={AllUnitsOfMeasurement}
         onChange={updateUnitOfMeasurement}
       />
       <Spacer />
