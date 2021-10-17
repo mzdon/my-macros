@@ -10,7 +10,7 @@ import Spacer from 'components/Spacer';
 import {FOOD_ITEM_GROUP} from 'navigation/Constants';
 import {ItemConsumedNavigationProp} from 'navigation/RouteTypes';
 import {
-  FoodItemContextValue,
+  // FoodItemContextValue,
   useFoodItemContext,
 } from 'providers/FoodItemProvider';
 import {
@@ -34,12 +34,14 @@ interface ConsumedItemState {
   unitOfMeasurement: ServingUnitOfMeasurement;
 }
 
-const getInitialState = (
-  foodItemData: FoodItemContextValue['foodItemData'],
-) => ({
-  quantity: foodItemData?.servingSize || 0,
-  unitOfMeasurement: ServingUnitOfMeasurement.Servings,
-});
+// TODO: if editing, use existing
+// otherwise 1 serving
+const getInitialState = () =>
+  // foodItemData: FoodItemContextValue['foodItemData'],
+  ({
+    quantity: 1,
+    unitOfMeasurement: ServingUnitOfMeasurement.Servings,
+  });
 
 const ItemConsumed = (): React.ReactElement => {
   const navigation = useNavigation<ItemConsumedNavigationProp>();
@@ -49,11 +51,11 @@ const ItemConsumed = (): React.ReactElement => {
   const {foodItemData, saveConsumedFoodItem} = useFoodItemContext();
 
   const [state, updater, setState] = useSimpleStateUpdater<ConsumedItemState>(
-    getInitialState(foodItemData),
+    getInitialState(),
   );
 
   React.useEffect(() => {
-    setState(getInitialState(foodItemData));
+    setState(getInitialState());
   }, [foodItemData, setState]);
 
   const updateQuantity = updater<number>('quantity');
