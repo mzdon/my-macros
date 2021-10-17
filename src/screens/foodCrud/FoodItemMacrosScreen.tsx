@@ -11,11 +11,6 @@ import {FoodItemMacrosNavigationProp} from 'navigation/RouteTypes';
 import {useFoodCrudNavigationContext} from 'providers/FoodCrudNavigationProvider';
 import {useFoodItemContext} from 'providers/FoodItemProvider';
 import {InitFoodItemData} from 'schemas/FoodItem';
-import {
-  isValidRequiredNumber,
-  requiredErrorMessage,
-  useValidateFields,
-} from 'utils/Validators';
 
 const FoodItemMacrosScreen = (): React.ReactElement => {
   const navigation = useNavigation<FoodItemMacrosNavigationProp>();
@@ -69,30 +64,6 @@ const FoodItemMacrosScreen = (): React.ReactElement => {
   const updateSugar = updater<number>('sugar');
   const updateFiber = updater<number>('fiber');
 
-  const fieldValidators = React.useMemo(
-    () => ({
-      carbs: {
-        isValid: isValidRequiredNumber,
-        message: requiredErrorMessage('Carbs'),
-        value: carbs,
-        onChange: updateCarbs,
-      },
-      protien: {
-        isValid: isValidRequiredNumber,
-        message: requiredErrorMessage('Protein'),
-        value: protein,
-        onChange: updateProtein,
-      },
-      fat: {
-        isValid: isValidRequiredNumber,
-        message: requiredErrorMessage('Fat'),
-        value: fat,
-        onChange: updateFat,
-      },
-    }),
-    [carbs, fat, protein, updateCarbs, updateFat, updateProtein],
-  );
-
   const onNext = React.useCallback(() => {
     if (newFoodItem) {
       saveFoodItem();
@@ -107,26 +78,12 @@ const FoodItemMacrosScreen = (): React.ReactElement => {
     saveFoodItem,
   ]);
 
-  const before = React.useMemo(
-    () => ({
-      onNext,
-    }),
-    [onNext],
-  );
-
-  const {errors, onChange, validateBefore} = useValidateFields(
-    fieldValidators,
-    before,
-  );
-
   React.useLayoutEffect(() => {
     const title = newFoodItem ? 'Next' : 'Save';
     navigation.setOptions({
-      headerRight: () => (
-        <Button title={title} onPress={validateBefore.onNext} />
-      ),
+      headerRight: () => <Button title={title} onPress={onNext} />,
     });
-  }, [newFoodItem, navigation, validateBefore.onNext]);
+  }, [newFoodItem, navigation, onNext]);
 
   return (
     <ScreenWrapper>
@@ -136,24 +93,21 @@ const FoodItemMacrosScreen = (): React.ReactElement => {
         label="Carbs"
         placeholder="Carbs"
         value={carbs}
-        onChangeText={onChange.carbs}
-        error={errors.carbs}
+        onChangeText={updateCarbs}
       />
       <Spacer />
       <NumberInput
         label="Protein"
         placeholder="Protein"
         value={protein}
-        onChangeText={onChange.protien}
-        error={errors.protien}
+        onChangeText={updateProtein}
       />
       <Spacer />
       <NumberInput
         label="Fat"
         placeholder="Fat"
         value={fat}
-        onChangeText={onChange.fat}
-        error={errors.fat}
+        onChangeText={updateFat}
       />
       <Spacer />
       <NumberInput

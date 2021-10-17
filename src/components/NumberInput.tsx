@@ -37,7 +37,7 @@ const createComponent = (
       const validOnChangeText = useCheckValidNumberFirst((v: string) => {
         let cleanVal = v;
         // remove leading 0 if the next character is not a decimal point
-        if (cleanVal[0] === '0' && cleanVal[1] !== '.') {
+        if (cleanVal.length > 1 && cleanVal[0] === '0' && cleanVal[1] !== '.') {
           cleanVal = cleanVal.substr(1);
         } else if (cleanVal.length === 0) {
           cleanVal = '0';

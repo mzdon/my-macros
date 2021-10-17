@@ -5,6 +5,7 @@ import {StyleSheet, View} from 'react-native';
 import Text from 'components/Text';
 import Meal from 'schemas/Meal';
 import MacroDefinition from 'schemas/MacroDefinition';
+import {round} from 'utils/Math';
 
 const _styles = StyleSheet.create({
   container: {flexDirection: 'row'},
@@ -79,7 +80,7 @@ const optionalMacrosRemaining = (
   if (!target) {
     result += 'n/a';
   } else {
-    result += `${value}g`;
+    result += `${round(value)}g`;
   }
   return result;
 };
@@ -90,19 +91,19 @@ const Stats = ({macros, meals}: Props): React.ReactElement<Props> => {
     <View style={_styles.container}>
       <View style={_styles.inner}>
         <Text.SubHeader>Consumed</Text.SubHeader>
-        <Text>{`Calories: ${consumed.calories}`}</Text>
-        <Text>{`Carbs: ${consumed.carbs}g`}</Text>
-        <Text>{`Protein: ${consumed.protein}g`}</Text>
-        <Text>{`Fat: ${consumed.fat}g`}</Text>
-        <Text>{`Sugar ${consumed.sugar}g`}</Text>
-        <Text>{`Fiber ${consumed.fiber}g`}</Text>
+        <Text>{`Calories: ${round(consumed.calories)}`}</Text>
+        <Text>{`Carbs: ${round(consumed.carbs)}g`}</Text>
+        <Text>{`Protein: ${round(consumed.protein)}g`}</Text>
+        <Text>{`Fat: ${round(consumed.fat)}g`}</Text>
+        <Text>{`Sugar ${round(consumed.sugar)}g`}</Text>
+        <Text>{`Fiber ${round(consumed.fiber)}g`}</Text>
       </View>
       <View style={_styles.inner}>
         <Text.SubHeader>Remaining</Text.SubHeader>
-        <Text>{`Calories: ${remaining.calories}`}</Text>
-        <Text>{`Carbs: ${remaining.carbs}g`}</Text>
-        <Text>{`Protein: ${remaining.protein}g`}</Text>
-        <Text>{`Fat: ${remaining.fat}g`}</Text>
+        <Text>{`Calories: ${round(remaining.calories)}`}</Text>
+        <Text>{`Carbs: ${round(remaining.carbs)}g`}</Text>
+        <Text>{`Protein: ${round(remaining.protein)}g`}</Text>
+        <Text>{`Fat: ${round(remaining.fat)}g`}</Text>
         <Text>
           {optionalMacrosRemaining('Sugar', consumed.sugar, macros.sugar)}
         </Text>

@@ -5,6 +5,7 @@ import {StyleSheet, View} from 'react-native';
 import Text from 'components/Text';
 import Meal from 'schemas/Meal';
 import {defaultPadding} from 'styles';
+import {round} from 'utils/Math';
 
 const _styles = StyleSheet.create({
   container: {
@@ -28,7 +29,9 @@ const MealHeader = ({meal}: Props): React.ReactElement<Props> => {
       <Text.SubHeader style={_styles.wrappingText} numberOfLines={1}>
         {description}
       </Text.SubHeader>
-      <Text.SubHeader>{`${calories}cal ${carbs}c ${protein}p ${fat}f`}</Text.SubHeader>
+      <Text.SubHeader>{`${calories}cal ${round(carbs)}c ${round(
+        protein,
+      )}p ${round(fat)}f`}</Text.SubHeader>
     </View>
   );
 };

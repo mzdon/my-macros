@@ -53,7 +53,7 @@ function determineServingsConsumedAndUom(
   }
   // we consumed n uom where uom == item.uom
   return {
-    servings: quantity / item.servingSize,
+    servings: round(quantity / item.servingSize),
     realQuantity: quantity,
     uom,
   };

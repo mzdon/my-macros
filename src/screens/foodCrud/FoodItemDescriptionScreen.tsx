@@ -85,21 +85,8 @@ const FoodItemDescriptionScreen = () => {
         value: servingSize,
         onChange: updateServingSize,
       },
-      calories: {
-        isValid: isValidRequiredNumber,
-        message: requiredErrorMessage('Calories'),
-        value: calories,
-        onChange: updateCalories,
-      },
     }),
-    [
-      calories,
-      description,
-      servingSize,
-      updateCalories,
-      updateDescription,
-      updateServingSize,
-    ],
+    [description, servingSize, updateDescription, updateServingSize],
   );
 
   const onNext = React.useCallback(() => {
@@ -179,8 +166,7 @@ const FoodItemDescriptionScreen = () => {
         label="Calories"
         placeholder="Calories"
         value={calories}
-        onChangeText={onChange.calories}
-        error={errors.calories}
+        onChangeText={updateCalories}
       />
       <Spacer />
     </ScreenWrapper>
