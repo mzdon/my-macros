@@ -20,10 +20,7 @@ import {useJournalContext} from 'providers/JournalProvider';
 import {useUserContext} from 'providers/UserProvider';
 import JournalEntry from 'schemas/JournalEntry';
 import {isSameDay} from 'utils/Date';
-import {
-  useParentNavigation,
-  useSetFoodCrudNavigationOptionsOnFocus,
-} from 'utils/Navigation';
+import {useParentNavigation} from 'utils/Navigation';
 import {CatastrophicError} from 'utils/Errors';
 
 const _styles = StyleSheet.create({
@@ -70,7 +67,7 @@ const FoodJournalScreen = () => {
     setShowCalendarStrip(!showCalendarStrip);
   }, [showCalendarStrip]);
 
-  // header options
+  // header buttons
   const AddMealButtonFunction = React.useCallback(
     () => <AddMealButton date={date} />,
     [date],
@@ -91,11 +88,9 @@ const FoodJournalScreen = () => {
     }),
     [AddMealButtonFunction, DateHeaderTitle],
   );
-  useSetFoodCrudNavigationOptionsOnFocus(
-    navigation,
-    foodCrudNavigation,
-    headerOptions,
-  );
+  React.useLayoutEffect(() => {
+    navigation.setOptions(headerOptions);
+  });
 
   const addItem = React.useCallback(
     (journalEntryId: JournalEntry['_id'], mealIndex: number) =>

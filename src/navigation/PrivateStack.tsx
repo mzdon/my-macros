@@ -27,7 +27,7 @@ const PrivateStack = () => {
   return (
     <Stack.Navigator
       initialRouteName={getInitialRouteName(user)}
-      screenOptions={{headerStyle: pageHeaderStyle}}>
+      screenOptions={{headerShown: false, headerStyle: pageHeaderStyle}}>
       <Stack.Group>
         <Stack.Screen
           key="drawer"
@@ -38,7 +38,6 @@ const PrivateStack = () => {
           key="user-info"
           name={NavConstants.USER_INFO}
           component={UserInfoStack}
-          options={{headerShown: false}}
         />
       </Stack.Group>
       <Stack.Group screenOptions={{presentation: 'modal'}}>
@@ -46,12 +45,12 @@ const PrivateStack = () => {
           key="add-meal"
           name={NavConstants.ADD_MEAL}
           component={withScreenEnhancers(AddMealScreen)}
+          options={{headerShown: true}}
         />
         <Stack.Screen
           key="food-crud"
           name={NavConstants.FOOD_CRUD}
           component={FoodCrudStack}
-          options={{headerShown: false}}
         />
       </Stack.Group>
     </Stack.Navigator>
