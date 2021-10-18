@@ -1,11 +1,12 @@
 import React from 'react';
 
-import {SectionList, StyleSheet, Text} from 'react-native';
+import {SectionList, StyleSheet, View} from 'react-native';
 import {withRealm} from 'react-realm-context';
 import Realm, {Results} from 'realm';
 
 import ScreenWrapper from 'components/ScreenWrapper';
 import SwipeableRow, {getEditAndDeleteActions} from 'components/SwipeableRow';
+import Text from 'components/Text';
 import {
   FOOD_CRUD,
   FOOD_ITEM_DESCRIPTION,
@@ -24,9 +25,10 @@ import {
 } from 'utils/Queries';
 
 const _styles = StyleSheet.create({
-  header: {
-    fontWeight: 'bold',
-    fontSize: 16,
+  textContainer: {
+    flex: 1,
+    flexDirection: 'column',
+    justifyContent: 'center',
   },
 });
 
@@ -84,7 +86,7 @@ const getSections = (
 };
 
 const renderSectionHeader = ({section: {title}}: {section: Section}) => (
-  <Text style={_styles.header}>{title}</Text>
+  <Text.SubHeader>{title}</Text.SubHeader>
 );
 
 const renderSectionFooter = ({section}: {section: Section}) => {
@@ -166,7 +168,9 @@ const FoodSelectorScreen = ({realm}: Props): React.ReactElement<Props> => {
             onEditPress: onEdit,
             onDeletePress: onDelete,
           })}>
-          <Text>{data.description}</Text>
+          <View style={_styles.textContainer}>
+            <Text>{data.description}</Text>
+          </View>
         </SwipeableRow>
       );
     },

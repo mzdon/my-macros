@@ -1,19 +1,36 @@
 import React from 'react';
 
-import {Button, Text} from 'react-native';
+import {useNavigation} from '@react-navigation/native';
+import {Button} from 'react-native';
 
 import CurrentMacros from 'components/CurrentMacros';
 import ScreenWrapper from 'components/ScreenWrapper';
+import Text from 'components/Text';
 import {USER_INFO} from 'navigation/Constants';
 import {useAuthContext} from 'providers/AuthProvider';
 import {useUserContext} from 'providers/UserProvider';
 import {useParentNavigation} from 'utils/Navigation';
 import {CatastrophicError} from 'utils/Errors';
+import Spacer from 'components/Spacer';
 
 const ProfileScreen = () => {
+  const navigation = useNavigation();
   const parentNavigation = useParentNavigation();
   const {user} = useUserContext();
   const {signOut} = useAuthContext();
+
+  React.useLayoutEffect(() => {
+    navigation.setOptions({
+      headerRight: () => {
+        return <Button title="Sign Out" onPress={signOut} />;
+      },
+    });
+  });
+
+  const onPressUpdate = React.useCallback(
+    () => parentNavigation.navigate(USER_INFO),
+    [parentNavigation],
+  );
 
   const macros = user.getCurrentMacros();
   if (!macros) {
@@ -26,16 +43,14 @@ const ProfileScreen = () => {
 
   return (
     <ScreenWrapper>
-      <Text>{`Name: ${user.name}`}</Text>
-      <CurrentMacros macros={macros} />
+      <Text.SubHeader>{`Name: ${user.name}`}</Text.SubHeader>
       {!!birthday && <Text>{`Birthday: ${birthday}`}</Text>}
-      {!!height && <Text>{height}</Text>}
-      {!!weight && <Text>{weight}</Text>}
-      <Button
-        title="Update"
-        onPress={() => parentNavigation?.navigate(USER_INFO)}
-      />
-      <Button title="Sign Out" onPress={signOut} />
+      {!!height && <Text>{`Height: ${height}`}</Text>}
+      {!!weight && <Text>{`Weight: ${weight}`}</Text>}
+      <Spacer />
+      <CurrentMacros macros={macros} />
+      <Spacer />
+      <Button title="Update" onPress={onPressUpdate} />
     </ScreenWrapper>
   );
 };

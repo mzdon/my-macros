@@ -84,15 +84,11 @@ const FoodJournalScreen = () => {
       />
     );
   }, [date, showCalendarStrip, toggleCalendarStrip]);
-  const headerOptions = React.useMemo(
-    () => ({
+  React.useLayoutEffect(() => {
+    navigation.setOptions({
       headerTitle: DateHeaderTitle,
       headerRight: AddMealButtonFunction,
-    }),
-    [AddMealButtonFunction, DateHeaderTitle],
-  );
-  React.useLayoutEffect(() => {
-    navigation.setOptions(headerOptions);
+    });
   });
 
   const addItem = React.useCallback(

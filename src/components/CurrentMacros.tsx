@@ -1,7 +1,6 @@
 import React from 'react';
 
-import {Text} from 'react-native';
-
+import Text from 'components/Text';
 import MacroDefinition from 'schemas/MacroDefinition';
 
 interface Props {
@@ -12,7 +11,7 @@ const CurrentMacros = ({macros}: Props): React.ReactElement<Props> => {
   const {calories, carbs, protein, fat, sugar, fiber} = macros;
   return (
     <>
-      <Text>Macros</Text>
+      <Text.SubHeader>Macros</Text.SubHeader>
       <Text>{`Calories: ${calories} cal`}</Text>
       <Text>{`Carbs: ${carbs} g`}</Text>
       <Text>{`Protein: ${protein} g`}</Text>
