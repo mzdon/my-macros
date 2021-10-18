@@ -13,16 +13,16 @@ import {
   // FoodItemContextValue,
   useFoodItemContext,
 } from 'providers/FoodItemProvider';
+import {useFoodGroupContext} from 'providers/FoodGroupProvider';
 import {
   DrinkUnitsOfMeasurement,
   FoodUnitsOfMeasurement,
   ServingUnitOfMeasurement,
   UnitOfMeasurement,
 } from 'types/UnitOfMeasurement';
-import {useSimpleStateUpdater} from 'utils/State';
 import {FoodItemType, isFoodOrDrink} from 'utils/FoodItem';
-import {useFoodGroupContext} from 'providers/FoodGroupProvider';
-import {useFoodCrudNavigationContext} from 'providers/FoodCrudNavigationProvider';
+import {useParentNavigation} from 'utils/Navigation';
+import {useSimpleStateUpdater} from 'utils/State';
 import {
   isValidRequiredNumber,
   requiredErrorMessage,
@@ -45,7 +45,7 @@ const getInitialState = () =>
 
 const ItemConsumed = (): React.ReactElement => {
   const navigation = useNavigation<ItemConsumedNavigationProp>();
-  const foodCrudNavigation = useFoodCrudNavigationContext();
+  const parentNavigation = useParentNavigation();
 
   const {foodGroupData} = useFoodGroupContext();
   const {foodItemData, saveConsumedFoodItem} = useFoodItemContext();
@@ -80,11 +80,17 @@ const ItemConsumed = (): React.ReactElement => {
   const onSave = React.useCallback(() => {
     saveConsumedFoodItem(state);
     if (!foodGroupData) {
-      foodCrudNavigation.goBack();
+      parentNavigation.goBack();
     } else {
-      foodCrudNavigation.navigate(FOOD_ITEM_GROUP);
+      navigation.navigate(FOOD_ITEM_GROUP);
     }
-  }, [foodCrudNavigation, foodGroupData, saveConsumedFoodItem, state]);
+  }, [
+    foodGroupData,
+    navigation,
+    parentNavigation,
+    saveConsumedFoodItem,
+    state,
+  ]);
 
   const before = React.useMemo(
     () => ({

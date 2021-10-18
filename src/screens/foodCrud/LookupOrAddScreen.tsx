@@ -7,6 +7,7 @@ import LookupFoodItemGroup from 'components/LookupFoodItemGroup';
 import ScreenWrapper from 'components/ScreenWrapper';
 import Spacer from 'components/Spacer';
 import {
+  FOOD_CRUD,
   FOOD_ITEM_DESCRIPTION,
   FOOD_ITEM_GROUP,
   ITEM_CONSUMED,
@@ -15,11 +16,12 @@ import {LookupOrAddNavigationProp} from 'navigation/RouteTypes';
 import {useFoodGroupContext} from 'providers/FoodGroupProvider';
 import FoodItem from 'schemas/FoodItem';
 import FoodItemGroup from 'schemas/FoodItemGroup';
-import {useFoodCrudNavigationContext} from 'providers/FoodCrudNavigationProvider';
+import {useNestedScreenNavigate, useParentNavigation} from 'utils/Navigation';
 
 const LookupOrAddScreen = (): React.ReactElement => {
   const navigation = useNavigation<LookupOrAddNavigationProp>();
-  const foodCrudNavigation = useFoodCrudNavigationContext();
+  const parentNavigation = useParentNavigation();
+  const foodCrudNavigate = useNestedScreenNavigate(parentNavigation, FOOD_CRUD);
   const {applyFoodItemGroup} = useFoodGroupContext();
 
   const addNewFoodItem = React.useCallback(
@@ -28,17 +30,17 @@ const LookupOrAddScreen = (): React.ReactElement => {
   );
   const selectFoodItem = React.useCallback(
     (foodItem: FoodItem) => {
-      foodCrudNavigation.navigate(ITEM_CONSUMED, {
+      foodCrudNavigate(ITEM_CONSUMED, {
         foodItemId: foodItem._id.toHexString(),
       });
     },
-    [foodCrudNavigation],
+    [foodCrudNavigate],
   );
   const addNewFoodItemGroup = React.useCallback(() => {
-    foodCrudNavigation.navigate(FOOD_ITEM_GROUP, {
+    foodCrudNavigate(FOOD_ITEM_GROUP, {
       newFoodGroup: true,
     });
-  }, [foodCrudNavigation]);
+  }, [foodCrudNavigate]);
   const selectFoodItemGroup = React.useCallback(
     (foodItemGroup: FoodItemGroup) => {
       applyFoodItemGroup(foodItemGroup);

@@ -9,9 +9,12 @@ import ScreenWrapper from 'components/ScreenWrapper';
 import Spacer from 'components/Spacer';
 import SwipeableRow, {getEditAndDeleteActions} from 'components/SwipeableRow';
 import TextInput from 'components/TextInput';
-import {FOOD_ITEM_DESCRIPTION, ITEM_CONSUMED} from 'navigation/Constants';
+import {
+  FOOD_CRUD,
+  FOOD_ITEM_DESCRIPTION,
+  ITEM_CONSUMED,
+} from 'navigation/Constants';
 import {FoodItemGroupNavigationProp} from 'navigation/RouteTypes';
-import {useFoodCrudNavigationContext} from 'providers/FoodCrudNavigationProvider';
 import {useFoodGroupContext} from 'providers/FoodGroupProvider';
 import {ConsumedFoodItemData} from 'schemas/ConsumedFoodItem';
 import FoodItem from 'schemas/FoodItem';
@@ -21,10 +24,12 @@ import {
   requiredErrorMessage,
   useValidateFields,
 } from 'utils/Validators';
+import {useNestedScreenNavigate, useParentNavigation} from 'utils/Navigation';
 
 const FoodItemGroupScreen = () => {
   const navigation = useNavigation<FoodItemGroupNavigationProp>();
-  const foodCrudNavigation = useFoodCrudNavigationContext();
+  const parentNavigation = useParentNavigation();
+  const foodCrudNavigate = useNestedScreenNavigate(parentNavigation, FOOD_CRUD);
 
   const {
     foodGroupData,
@@ -45,25 +50,25 @@ const FoodItemGroupScreen = () => {
     if (internalError) {
       setInternalError('');
     }
-    foodCrudNavigation.navigate(FOOD_ITEM_DESCRIPTION, {
+    foodCrudNavigate(FOOD_ITEM_DESCRIPTION, {
       foodItemId: undefined,
     });
-  }, [foodCrudNavigation, internalError]);
+  }, [foodCrudNavigate, internalError]);
   const selectFoodItem = React.useCallback(
     (foodItem: FoodItem) => {
-      foodCrudNavigation.navigate(ITEM_CONSUMED, {
+      foodCrudNavigate(ITEM_CONSUMED, {
         foodItemId: foodItem._id.toHexString(),
       });
     },
-    [foodCrudNavigation],
+    [foodCrudNavigate],
   );
   const editFoodItem = React.useCallback(
     (index: number) => {
-      foodCrudNavigation.navigate(ITEM_CONSUMED, {
+      foodCrudNavigate(ITEM_CONSUMED, {
         consumedItemIndex: index,
       });
     },
-    [foodCrudNavigation],
+    [foodCrudNavigate],
   );
 
   const onSave = React.useCallback(() => {
@@ -72,8 +77,8 @@ const FoodItemGroupScreen = () => {
       return;
     }
     saveFoodGroup();
-    foodCrudNavigation.goBack();
-  }, [foodCrudNavigation, foodGroupData?.foodItems.length, saveFoodGroup]);
+    parentNavigation.goBack();
+  }, [parentNavigation, foodGroupData?.foodItems.length, saveFoodGroup]);
 
   const fieldValidators = React.useMemo(
     () => ({

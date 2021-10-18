@@ -8,13 +8,13 @@ import ScreenWrapper from 'components/ScreenWrapper';
 import Spacer from 'components/Spacer';
 import {ITEM_CONSUMED} from 'navigation/Constants';
 import {FoodItemMacrosNavigationProp} from 'navigation/RouteTypes';
-import {useFoodCrudNavigationContext} from 'providers/FoodCrudNavigationProvider';
 import {useFoodItemContext} from 'providers/FoodItemProvider';
 import {InitFoodItemData} from 'schemas/FoodItem';
+import {useParentNavigation} from 'utils/Navigation';
 
 const FoodItemMacrosScreen = (): React.ReactElement => {
   const navigation = useNavigation<FoodItemMacrosNavigationProp>();
-  const foodCrudNavigation = useFoodCrudNavigationContext();
+  const parentNavigation = useParentNavigation();
 
   const {newFoodItem, foodItemData, updateFoodItemData, saveFoodItem} =
     useFoodItemContext();
@@ -41,7 +41,7 @@ const FoodItemMacrosScreen = (): React.ReactElement => {
           text: 'No',
           onPress: () => {
             saveFoodItem();
-            foodCrudNavigation.goBack();
+            parentNavigation.goBack();
           },
           style: 'cancel',
         },
@@ -49,14 +49,14 @@ const FoodItemMacrosScreen = (): React.ReactElement => {
           text: 'Yes',
           onPress: () => {
             saveFoodItem(true);
-            foodCrudNavigation.goBack();
+            parentNavigation.goBack();
           },
           style: 'default',
         },
       ],
       {cancelable: false},
     );
-  }, [foodCrudNavigation, saveFoodItem]);
+  }, [parentNavigation, saveFoodItem]);
 
   const updateCarbs = updater<number>('carbs');
   const updateProtein = updater<number>('protein');

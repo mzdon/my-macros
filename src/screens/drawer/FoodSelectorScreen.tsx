@@ -14,6 +14,7 @@ import {
 import {useUserContext} from 'providers/UserProvider';
 import FoodItem from 'schemas/FoodItem';
 import FoodItemGroup from 'schemas/FoodItemGroup';
+import {useNestedScreenNavigate, useParentNavigation} from 'utils/Navigation';
 import {
   useDeleteItem,
   useGetFoodItemGroups,
@@ -21,7 +22,6 @@ import {
   useGetFoodItems,
   useGetJournalEntriesWithFoodItemId,
 } from 'utils/Queries';
-import {useNestedScreenNavigate, useParentNavigation} from 'utils/Navigation';
 
 const _styles = StyleSheet.create({
   header: {

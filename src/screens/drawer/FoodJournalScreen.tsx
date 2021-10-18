@@ -23,8 +23,8 @@ import {useJournalContext} from 'providers/JournalProvider';
 import {useUserContext} from 'providers/UserProvider';
 import JournalEntry from 'schemas/JournalEntry';
 import {isSameDay} from 'utils/Date';
-import {useParentNavigation, useNestedScreenNavigate} from 'utils/Navigation';
 import {CatastrophicError} from 'utils/Errors';
+import {useParentNavigation, useNestedScreenNavigate} from 'utils/Navigation';
 
 const _styles = StyleSheet.create({
   calendar: {
