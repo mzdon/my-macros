@@ -6,11 +6,11 @@ import Realm, {Results} from 'realm';
 
 import ScreenWrapper from 'components/ScreenWrapper';
 import SwipeableRow, {getEditAndDeleteActions} from 'components/SwipeableRow';
-import {FOOD_ITEM_DESCRIPTION, FOOD_ITEM_GROUP} from 'navigation/Constants';
 import {
-  Screen,
-  useFoodCrudNavigationContext,
-} from 'providers/FoodCrudNavigationProvider';
+  FOOD_CRUD,
+  FOOD_ITEM_DESCRIPTION,
+  FOOD_ITEM_GROUP,
+} from 'navigation/Constants';
 import {useUserContext} from 'providers/UserProvider';
 import FoodItem from 'schemas/FoodItem';
 import FoodItemGroup from 'schemas/FoodItemGroup';
@@ -21,6 +21,7 @@ import {
   useGetFoodItems,
   useGetJournalEntriesWithFoodItemId,
 } from 'utils/Queries';
+import {useNestedScreenNavigate, useParentNavigation} from 'utils/Navigation';
 
 const _styles = StyleSheet.create({
   header: {
@@ -36,7 +37,7 @@ interface Props {
 interface FoodItemData {
   data: FoodItem;
   payload: {
-    screen: Screen;
+    screen: string;
     foodItemId: string;
   };
 }
@@ -44,7 +45,7 @@ interface FoodItemData {
 interface FoodItemGroupData {
   data: FoodItemGroup;
   payload: {
-    screen: Screen;
+    screen: string;
     foodGroupId: string;
   };
 }
@@ -95,7 +96,8 @@ const renderSectionFooter = ({section}: {section: Section}) => {
 };
 
 const FoodSelectorScreen = ({realm}: Props): React.ReactElement<Props> => {
-  const foodCrudNavigation = useFoodCrudNavigationContext();
+  const parentNavigation = useParentNavigation();
+  const foodCrudNavigate = useNestedScreenNavigate(parentNavigation, FOOD_CRUD);
   const getFoodItems = useGetFoodItems(realm);
   const getFoodItemGroups = useGetFoodItemGroups(realm);
   const getFoodItemGroupsWithFoodItemId =
@@ -149,7 +151,7 @@ const FoodSelectorScreen = ({realm}: Props): React.ReactElement<Props> => {
       const {data, payload} = item;
       const onEdit = () => {
         const {screen, ...rest} = payload;
-        foodCrudNavigation.navigate(screen, rest);
+        foodCrudNavigate(screen, rest);
       };
       const onDelete = () => {
         if (data instanceof FoodItem) {
@@ -168,7 +170,7 @@ const FoodSelectorScreen = ({realm}: Props): React.ReactElement<Props> => {
         </SwipeableRow>
       );
     },
-    [deleteFoodItem, deleteFoodItemGroup, foodCrudNavigation],
+    [deleteFoodItem, deleteFoodItemGroup, foodCrudNavigate],
   );
 
   const foodItems = getFoodItems().sorted('description');

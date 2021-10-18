@@ -9,18 +9,21 @@ import JouranlEntryList from 'components/JournalEntryList';
 import ScreenWrapper from 'components/ScreenWrapper';
 import Spacer from 'components/Spacer';
 import Stats from 'components/Stats';
-import {ADD_MEAL, ITEM_CONSUMED, LOOKUP_OR_ADD} from 'navigation/Constants';
+import {
+  ADD_MEAL,
+  FOOD_CRUD,
+  ITEM_CONSUMED,
+  LOOKUP_OR_ADD,
+} from 'navigation/Constants';
 import {
   FoodCrudScreenNavigationProp,
-  JournalScreenNavigationProp,
   JournalScreenRouteProp,
 } from 'navigation/RouteTypes';
-import {useFoodCrudNavigationContext} from 'providers/FoodCrudNavigationProvider';
 import {useJournalContext} from 'providers/JournalProvider';
 import {useUserContext} from 'providers/UserProvider';
 import JournalEntry from 'schemas/JournalEntry';
 import {isSameDay} from 'utils/Date';
-import {useParentNavigation} from 'utils/Navigation';
+import {useParentNavigation, useNestedScreenNavigate} from 'utils/Navigation';
 import {CatastrophicError} from 'utils/Errors';
 
 const _styles = StyleSheet.create({
@@ -52,9 +55,9 @@ const FoodJournalScreen = () => {
   } = useRoute<JournalScreenRouteProp>();
   const {user} = useUserContext();
   const {entries, deleteMeal, deleteConsumedFoodItem} = useJournalContext();
-  const navigation = useNavigation<JournalScreenNavigationProp>();
+  const navigation = useNavigation();
   const parentNavigation = useParentNavigation();
-  const foodCrudNavigation = useFoodCrudNavigationContext();
+  const foodCrudNavigate = useNestedScreenNavigate(parentNavigation, FOOD_CRUD);
 
   const [date, setDate] = React.useState(new Date(initialDate));
   const onSetDate = React.useCallback((selectedDate: moment.Moment) => {
@@ -94,11 +97,11 @@ const FoodJournalScreen = () => {
 
   const addItem = React.useCallback(
     (journalEntryId: JournalEntry['_id'], mealIndex: number) =>
-      foodCrudNavigation.navigate(LOOKUP_OR_ADD, {
+      foodCrudNavigate(LOOKUP_OR_ADD, {
         journalEntryId: journalEntryId.toHexString(),
         mealIndex,
       }),
-    [foodCrudNavigation],
+    [foodCrudNavigate],
   );
 
   const editMeal = React.useCallback(
@@ -116,12 +119,12 @@ const FoodJournalScreen = () => {
       mealIndex: number,
       consumedItemIndex: number,
     ) =>
-      foodCrudNavigation.navigate(ITEM_CONSUMED, {
+      foodCrudNavigate(ITEM_CONSUMED, {
         journalEntryId: journalEntryId.toHexString(),
         mealIndex,
         consumedItemIndex,
       }),
-    [foodCrudNavigation],
+    [foodCrudNavigate],
   );
 
   const viewedEntry = React.useMemo(() => {
