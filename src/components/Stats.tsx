@@ -8,7 +8,9 @@ import MacroDefinition from 'schemas/MacroDefinition';
 import {round} from 'utils/Math';
 
 const _styles = StyleSheet.create({
-  container: {flexDirection: 'row'},
+  container: {
+    flexDirection: 'row',
+  },
   inner: {flex: 1},
 });
 

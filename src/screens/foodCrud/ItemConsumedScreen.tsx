@@ -1,12 +1,13 @@
 import React from 'react';
 
 import {useNavigation} from '@react-navigation/native';
-import {Button, Text} from 'react-native';
+import {Button} from 'react-native';
 
 import NumberInput from 'components/NumberInput';
 import Picker from 'components/Picker';
 import ScreenWrapper from 'components/ScreenWrapper';
 import Spacer from 'components/Spacer';
+import Text from 'components/Text';
 import {FOOD_ITEM_GROUP} from 'navigation/Constants';
 import {ItemConsumedNavigationProp} from 'navigation/RouteTypes';
 import {
@@ -28,6 +29,7 @@ import {
   requiredErrorMessage,
   useValidateFields,
 } from 'utils/Validators';
+import Container from 'components/Container';
 
 interface ConsumedItemState {
   quantity: number;
@@ -129,22 +131,25 @@ const ItemConsumed = (): React.ReactElement => {
 
   return (
     <ScreenWrapper>
-      <Text>{`How much ${description} did you eat?`}</Text>
-      <Spacer />
-      <NumberInput
-        label={quantityLabel}
-        placeholder="Quantity"
-        value={state.quantity}
-        onChangeText={onChange.quantity}
-        error={errors.quantity}
-      />
-      <Spacer />
-      <Picker
-        value={state.unitOfMeasurement}
-        values={uomPlusServings}
-        onChange={updateUnitOfMeasurement}
-      />
-      <Spacer />
+      <Container>
+        <Spacer />
+        <Text.SubHeader>{`How much ${description} did you eat?`}</Text.SubHeader>
+        <Spacer />
+        <NumberInput
+          label={quantityLabel}
+          placeholder="Quantity"
+          value={state.quantity}
+          onChangeText={onChange.quantity}
+          error={errors.quantity}
+        />
+        <Spacer />
+        <Picker
+          value={state.unitOfMeasurement}
+          values={uomPlusServings}
+          onChange={updateUnitOfMeasurement}
+        />
+        <Spacer />
+      </Container>
     </ScreenWrapper>
   );
 };

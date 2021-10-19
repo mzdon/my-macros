@@ -3,15 +3,16 @@ import React from 'react';
 import {useNavigation} from '@react-navigation/native';
 import {Button} from 'react-native';
 
+import Container from 'components/Container';
 import NumberInput from 'components/NumberInput';
 import ScreenWrapper from 'components/ScreenWrapper';
 import Spacer from 'components/Spacer';
+import {DRAWER} from 'navigation/Constants';
 import {
   UserInfoNavigationProp,
   UserInfoStep2NavigationProp,
 } from 'navigation/RouteTypes';
 import {useUserInfoContext} from 'providers/UserInfoProvider';
-import {DRAWER} from 'navigation/Constants';
 import {
   isValidRequiredNumber,
   requiredErrorMessage,
@@ -114,52 +115,55 @@ const UserInfoStep2Screen = (): React.ReactElement => {
 
   return (
     <ScreenWrapper>
-      <NumberInput
-        label="Calories (grams)"
-        placeholder="Calories"
-        value={calories}
-        onChangeText={onChange.calories}
-        error={errors.calories}
-      />
-      <Spacer />
-      <NumberInput
-        label="Carbohydrates (grams)"
-        placeholder="Carbohydrates"
-        value={carbs}
-        onChangeText={onChange.carbs}
-        error={errors.carbs}
-      />
-      <Spacer />
-      <NumberInput
-        label="Protein (grams)"
-        placeholder="Protein"
-        value={protein}
-        onChangeText={onChange.protein}
-        error={errors.protein}
-      />
-      <Spacer />
-      <NumberInput
-        label="Fats (grams)"
-        placeholder="Fats"
-        value={fat}
-        onChangeText={onChange.fat}
-        error={errors.fat}
-      />
-      <Spacer />
-      <NumberInput
-        label="Sugar (grams/optional)"
-        placeholder="Sugar"
-        value={sugar || 0}
-        onChangeText={updateSugar}
-      />
-      <Spacer />
-      <NumberInput
-        label="Fiber (grams/optional)"
-        placeholder="Fiber"
-        value={fiber || 0}
-        onChangeText={updateFiber}
-      />
-      <Spacer />
+      <Container>
+        <Spacer />
+        <NumberInput
+          label="Calories (grams)"
+          placeholder="Calories"
+          value={calories}
+          onChangeText={onChange.calories}
+          error={errors.calories}
+        />
+        <Spacer />
+        <NumberInput
+          label="Carbohydrates (grams)"
+          placeholder="Carbohydrates"
+          value={carbs}
+          onChangeText={onChange.carbs}
+          error={errors.carbs}
+        />
+        <Spacer />
+        <NumberInput
+          label="Protein (grams)"
+          placeholder="Protein"
+          value={protein}
+          onChangeText={onChange.protein}
+          error={errors.protein}
+        />
+        <Spacer />
+        <NumberInput
+          label="Fats (grams)"
+          placeholder="Fats"
+          value={fat}
+          onChangeText={onChange.fat}
+          error={errors.fat}
+        />
+        <Spacer />
+        <NumberInput
+          label="Sugar (grams/optional)"
+          placeholder="Sugar"
+          value={sugar || 0}
+          onChangeText={updateSugar}
+        />
+        <Spacer />
+        <NumberInput
+          label="Fiber (grams/optional)"
+          placeholder="Fiber"
+          value={fiber || 0}
+          onChangeText={updateFiber}
+        />
+        <Spacer />
+      </Container>
     </ScreenWrapper>
   );
 };

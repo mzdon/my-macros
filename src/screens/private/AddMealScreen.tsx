@@ -2,8 +2,9 @@ import React from 'react';
 
 import {useNavigation, useRoute} from '@react-navigation/native';
 import moment from 'moment';
-import {Button, StyleSheet, View} from 'react-native';
+import {Button, StyleSheet} from 'react-native';
 
+import Container from 'components/Container';
 import ScreenWrapper from 'components/ScreenWrapper';
 import Text from 'components/Text';
 import TextInput from 'components/TextInput';
@@ -17,6 +18,7 @@ import {
   requiredErrorMessage,
   useValidateFields,
 } from 'utils/Validators';
+import Spacer from 'components/Spacer';
 
 const _styles = StyleSheet.create({
   container: {
@@ -100,7 +102,8 @@ const AddMealScreen = () => {
 
   return (
     <ScreenWrapper>
-      <View style={_styles.container}>
+      <Container style={_styles.container}>
+        <Spacer />
         <Text.PageHeader>{`Add Meal on ${moment(date).format(
           'ddd MM DD YYYY',
         )}`}</Text.PageHeader>
@@ -115,7 +118,7 @@ const AddMealScreen = () => {
           error={errors.description}
           style={_styles.stretchInput}
         />
-      </View>
+      </Container>
     </ScreenWrapper>
   );
 };

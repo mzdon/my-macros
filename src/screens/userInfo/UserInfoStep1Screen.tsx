@@ -4,6 +4,7 @@ import {useNavigation} from '@react-navigation/native';
 import {Button} from 'react-native';
 
 import BirthdayInput from 'components/BirthdayInput';
+import Container from 'components/Container';
 import HeightInput from 'components/HeightInput';
 import RadioButtons from 'components/RadioButtons';
 import ScreenWrapper from 'components/ScreenWrapper';
@@ -88,38 +89,43 @@ const UserInfoStep1Screen = (): React.ReactElement => {
 
   return (
     <ScreenWrapper>
-      <TextInput
-        label="Name"
-        value={name}
-        placeholder="Name"
-        onChangeText={onChange.name}
-        error={errors.name}
-      />
-      <Spacer />
-      <BirthdayInput
-        value={birthday}
-        onChangeText={onChange.birthday}
-        error={errors.birthday}
-      />
-      <Spacer />
-      <RadioButtons
-        label="Measurement System (optional)"
-        optional
-        values={[MeasurementSystem.Imperial, MeasurementSystem.Metric]}
-        value={measurementSystem}
-        onChange={updateMeasurementSystem}
-      />
-      <Spacer />
-      <HeightInput
-        value={height}
-        measurementSystem={measurementSystem}
-        onChangeText={updateHeight}
-      />
-      <WeightInput
-        value={weight}
-        measurementSystem={measurementSystem}
-        onChangeText={updateWeight}
-      />
+      <Container>
+        <Spacer />
+        <TextInput
+          label="Name"
+          value={name}
+          placeholder="Name"
+          onChangeText={onChange.name}
+          error={errors.name}
+        />
+        <Spacer />
+        <BirthdayInput
+          value={birthday}
+          onChangeText={onChange.birthday}
+          error={errors.birthday}
+        />
+        <Spacer />
+        <RadioButtons
+          label="Measurement System (optional)"
+          optional
+          values={[MeasurementSystem.Imperial, MeasurementSystem.Metric]}
+          value={measurementSystem}
+          onChange={updateMeasurementSystem}
+        />
+        <Spacer />
+        <HeightInput
+          value={height}
+          measurementSystem={measurementSystem}
+          onChangeText={updateHeight}
+        />
+        <Spacer />
+        <WeightInput
+          value={weight}
+          measurementSystem={measurementSystem}
+          onChangeText={updateWeight}
+        />
+        <Spacer />
+      </Container>
     </ScreenWrapper>
   );
 };

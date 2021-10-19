@@ -3,15 +3,17 @@ import React from 'react';
 import {useNavigation} from '@react-navigation/native';
 import {Button} from 'react-native';
 
+import Container from 'components/Container';
 import CurrentMacros from 'components/CurrentMacros';
+import ItemSeparator from 'components/ItemSeparator';
 import ScreenWrapper from 'components/ScreenWrapper';
+import Spacer from 'components/Spacer';
 import Text from 'components/Text';
 import {USER_INFO} from 'navigation/Constants';
 import {useAuthContext} from 'providers/AuthProvider';
 import {useUserContext} from 'providers/UserProvider';
 import {useParentNavigation} from 'utils/Navigation';
 import {CatastrophicError} from 'utils/Errors';
-import Spacer from 'components/Spacer';
 
 const ProfileScreen = () => {
   const navigation = useNavigation();
@@ -43,14 +45,23 @@ const ProfileScreen = () => {
 
   return (
     <ScreenWrapper>
-      <Text.SubHeader>{`Name: ${user.name}`}</Text.SubHeader>
-      {!!birthday && <Text>{`Birthday: ${birthday}`}</Text>}
-      {!!height && <Text>{`Height: ${height}`}</Text>}
-      {!!weight && <Text>{`Weight: ${weight}`}</Text>}
-      <Spacer />
-      <CurrentMacros macros={macros} />
-      <Spacer />
+      <Container>
+        <Spacer />
+        <Text.SubHeader>{`Name: ${user.name}`}</Text.SubHeader>
+        {!!birthday && <Text>{`Birthday: ${birthday}`}</Text>}
+        {!!height && <Text>{`Height: ${height}`}</Text>}
+        {!!weight && <Text>{`Weight: ${weight}`}</Text>}
+        <Spacer />
+      </Container>
+      <ItemSeparator />
+      <Container>
+        <Spacer />
+        <CurrentMacros macros={macros} />
+        <Spacer />
+      </Container>
+      <ItemSeparator />
       <Button title="Update" onPress={onPressUpdate} />
+      <ItemSeparator />
     </ScreenWrapper>
   );
 };

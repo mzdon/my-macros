@@ -1,20 +1,26 @@
 import React from 'react';
 
 import {Animated, StyleSheet, Text, View} from 'react-native';
+import {RectButton, Swipeable} from 'react-native-gesture-handler';
 
-import {RectButton} from 'react-native-gesture-handler';
-import Swipeable from 'react-native-gesture-handler/Swipeable';
+import SwipeableIndicator from 'components/SwipeableIndicator';
 
 const ACTION_WIDTH = 82;
 const ACTION_FONT_SIZE = 16;
 const ACTION_PADDING = 10;
-const MIN_HEIGHT = ACTION_FONT_SIZE + ACTION_PADDING * 2;
+export const MIN_HEIGHT = ACTION_FONT_SIZE + ACTION_PADDING * 2;
+const RED = '#EF5272';
+const PURPLE = '#B797FF';
 
 const styles = StyleSheet.create({
   childrenContainer: {
     minHeight: MIN_HEIGHT,
+    flexDirection: 'row',
   },
   actionsContainer: {
+    flexDirection: 'row-reverse',
+  },
+  leftActionsContainer: {
     flexDirection: 'row',
   },
   actionContainer: {
@@ -65,13 +71,8 @@ const SwipeableRow = ({
       text: string,
       color: string,
       callback: () => void,
-      x: number,
-      progress: Animated.AnimatedInterpolation,
+      trans: Animated.AnimatedInterpolation,
     ) => {
-      const trans = progress.interpolate({
-        inputRange: [0, 1],
-        outputRange: [x, 0],
-      });
       const pressHandler = () => {
         close();
         callback();
@@ -97,23 +98,33 @@ const SwipeableRow = ({
       if (!leftActions) {
         return null;
       }
+      const getTranslateX = (
+        prog: Animated.AnimatedInterpolation,
+        idx: number,
+      ) =>
+        prog.interpolate({
+          inputRange: [0, 1],
+          outputRange: [ACTION_WIDTH * (idx + 1) * -1, 0],
+        });
       return (
         <View
           style={[
-            styles.actionsContainer,
+            styles.leftActionsContainer,
             {
               width: leftActions.length * ACTION_WIDTH,
             },
           ]}>
-          {leftActions.map((action, index) =>
-            renderAction(
-              action.label,
-              action.color,
-              action.onPress,
-              0 + index * ACTION_WIDTH,
-              progress,
-            ),
-          )}
+          {leftActions
+            .slice(0)
+            .reverse()
+            .map((action, index) =>
+              renderAction(
+                action.label,
+                action.color,
+                action.onPress,
+                getTranslateX(progress, index),
+              ),
+            )}
         </View>
       );
     },
@@ -126,6 +137,11 @@ const SwipeableRow = ({
         return null;
       }
       const width = rightActions.length * ACTION_WIDTH;
+      const getTranslateX = (prog: Animated.AnimatedInterpolation, x: number) =>
+        prog.interpolate({
+          inputRange: [0, 1],
+          outputRange: [x, 0],
+        });
       return (
         <View
           style={[
@@ -134,15 +150,18 @@ const SwipeableRow = ({
               width,
             },
           ]}>
-          {rightActions.map((action, index) =>
-            renderAction(
-              action.label,
-              action.color,
-              action.onPress,
-              width - index * ACTION_WIDTH,
-              progress,
-            ),
-          )}
+          {rightActions.reduceRight((result, action, index) => {
+            const nextResult = [...result];
+            nextResult.push(
+              renderAction(
+                action.label,
+                action.color,
+                action.onPress,
+                getTranslateX(progress, width - index * ACTION_WIDTH),
+              ),
+            );
+            return nextResult;
+          }, [] as React.ReactElement[])}
         </View>
       );
     },
@@ -158,7 +177,11 @@ const SwipeableRow = ({
       rightThreshold={40}
       renderLeftActions={renderLeftActions}
       renderRightActions={renderRightActions}>
-      <View style={styles.childrenContainer}>{children}</View>
+      <View style={styles.childrenContainer}>
+        {!!leftActions && <SwipeableIndicator color={PURPLE} left />}
+        {children}
+        {!!rightActions && <SwipeableIndicator color={PURPLE} />}
+      </View>
     </Swipeable>
   );
 };
@@ -172,11 +195,11 @@ interface UseEditAndDeleteActionCallbacks {
 
 export const getEditAction = (
   onEditPress: UseEditAndDeleteActionCallbacks['onEditPress'],
-) => ({color: 'purple', label: 'Edit', onPress: onEditPress});
+) => ({color: PURPLE, label: 'Edit', onPress: onEditPress});
 
 export const getDeleteAction = (
   onDeletePress: UseEditAndDeleteActionCallbacks['onDeletePress'],
-) => ({color: 'red', label: 'Delete', onPress: onDeletePress});
+) => ({color: RED, label: 'Delete', onPress: onDeletePress});
 
 export const getEditAndDeleteActions = ({
   onEditPress,

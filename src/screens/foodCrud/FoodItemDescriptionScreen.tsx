@@ -1,12 +1,14 @@
 import React from 'react';
 
 import {useNavigation} from '@react-navigation/native';
-import {Button, Text} from 'react-native';
+import {Button} from 'react-native';
 
+import Container from 'components/Container';
 import NumberInput from 'components/NumberInput';
 import Picker from 'components/Picker';
 import ScreenWrapper from 'components/ScreenWrapper';
 import Spacer from 'components/Spacer';
+import Text from 'components/Text';
 import TextInput from 'components/TextInput';
 import {FOOD_ITEM_MACROS} from 'navigation/Constants';
 import {FoodItemDescriptionNavigationProp} from 'navigation/RouteTypes';
@@ -130,45 +132,50 @@ const FoodItemDescriptionScreen = () => {
 
   return (
     <ScreenWrapper>
-      <Text>{`${foodItemData?.newFoodItem ? 'New' : 'Edit'} Item`}</Text>
-      <Spacer />
-      <TextInput
-        label="Description"
-        placeholder="New item description..."
-        value={description}
-        onChangeText={onChange.description}
-        error={internalFieldErrors.description || errors.description}
-      />
-      <Spacer />
-      <NumberInput
-        label="Serving Size"
-        placeholder="What's the serving size?"
-        value={servingSize}
-        onChangeText={onChange.servingSize}
-        error={errors.servingSize}
-      />
-      <Spacer />
-      <Picker
-        label="Unit of Measurement"
-        value={servingUnitOfMeasurement}
-        values={AllUnitsOfMeasurement}
-        onChange={updateUnitOfMeasurement}
-      />
-      <Spacer />
-      <TextInput
-        label="Serving Size Note"
-        placeholder="Aribitrary info like '3 cakes'"
-        value={servingSizeNote}
-        onChangeText={updateServingNote}
-      />
-      <Spacer />
-      <NumberInput
-        label="Calories"
-        placeholder="Calories"
-        value={calories}
-        onChangeText={updateCalories}
-      />
-      <Spacer />
+      <Container>
+        <Spacer />
+        <Text.SubHeader>{`${
+          foodItemData?.newFoodItem ? 'New' : 'Edit'
+        } Item`}</Text.SubHeader>
+        <Spacer />
+        <TextInput
+          label="Description"
+          placeholder="New item description..."
+          value={description}
+          onChangeText={onChange.description}
+          error={internalFieldErrors.description || errors.description}
+        />
+        <Spacer />
+        <NumberInput
+          label="Serving Size"
+          placeholder="What's the serving size?"
+          value={servingSize}
+          onChangeText={onChange.servingSize}
+          error={errors.servingSize}
+        />
+        <Spacer />
+        <Picker
+          label="Unit of Measurement"
+          value={servingUnitOfMeasurement}
+          values={AllUnitsOfMeasurement}
+          onChange={updateUnitOfMeasurement}
+        />
+        <Spacer />
+        <TextInput
+          label="Serving Size Note"
+          placeholder="Aribitrary info like '3 cakes'"
+          value={servingSizeNote}
+          onChangeText={updateServingNote}
+        />
+        <Spacer />
+        <NumberInput
+          label="Calories"
+          placeholder="Calories"
+          value={calories}
+          onChangeText={updateCalories}
+        />
+        <Spacer />
+      </Container>
     </ScreenWrapper>
   );
 };

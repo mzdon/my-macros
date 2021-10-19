@@ -1,24 +1,22 @@
 import React from 'react';
 
-import {Button, SectionList, StyleSheet, View} from 'react-native';
+import {Button, SectionList, StyleSheet} from 'react-native';
 
 import ConsumedFoodItem from 'components/ConsumedFoodItem';
+import Container from 'components/Container';
+import ItemSeparator from 'components/ItemSeparator';
 import MealHeader from 'components/MealHeader';
-import Spacer from 'components/Spacer';
 import SwipeableRow, {getEditAndDeleteActions} from 'components/SwipeableRow';
 import ConsumedFoodItemSchema from 'schemas/ConsumedFoodItem';
 import JournalEntry from 'schemas/JournalEntry';
 import Meal from 'schemas/Meal';
+import Spacer from './Spacer';
 
 const _styles = StyleSheet.create({
-  titleContainer: {
+  rowContainer: {
     flex: 1,
     flexDirection: 'column',
     justifyContent: 'center',
-  },
-  title: {
-    fontSize: 16,
-    fontWeight: 'bold',
   },
 });
 
@@ -90,9 +88,11 @@ const JouranlEntryList = (props: Props): React.ReactElement<Props> => {
               onEditConsumedFoodItem(journalEntry._id, mealIndex, index),
             onDeletePress: () => onDeleteConsumedFoodItem(item),
           })}>
-          <View style={_styles.titleContainer}>
+          <Container style={_styles.rowContainer}>
+            <Spacer />
             <ConsumedFoodItem item={item} />
-          </View>
+            <Spacer />
+          </Container>
         </SwipeableRow>
       );
     },
@@ -101,27 +101,34 @@ const JouranlEntryList = (props: Props): React.ReactElement<Props> => {
 
   const renderSectionHeader = React.useCallback(
     ({section: {meal, journalEntry, mealIndex}}: {section: Section}) => (
-      <SwipeableRow
-        rightActions={getEditAndDeleteActions({
-          onEditPress: () => onEditMeal(journalEntry.date, mealIndex),
-          onDeletePress: () => onDeleteMeal(meal),
-        })}>
-        <View style={_styles.titleContainer}>
-          <MealHeader meal={meal} />
-        </View>
-      </SwipeableRow>
+      <>
+        <SwipeableRow
+          rightActions={getEditAndDeleteActions({
+            onEditPress: () => onEditMeal(journalEntry.date, mealIndex),
+            onDeletePress: () => onDeleteMeal(meal),
+          })}>
+          <Container style={_styles.rowContainer}>
+            <MealHeader meal={meal} />
+          </Container>
+        </SwipeableRow>
+        <ItemSeparator />
+      </>
     ),
     [onDeleteMeal, onEditMeal],
   );
 
   const renderSectionFooter = React.useCallback(
     ({section}: {section: Section}) => {
-      const {journalEntry, mealIndex} = section;
+      const {journalEntry, mealIndex, data} = section;
       return (
-        <Button
-          title="Add Item"
-          onPress={() => onAddItem(journalEntry._id, mealIndex)}
-        />
+        <>
+          {!!data.length && <ItemSeparator />}
+          <Button
+            title="Add Item"
+            onPress={() => onAddItem(journalEntry._id, mealIndex)}
+          />
+          <ItemSeparator />
+        </>
       );
     },
     [onAddItem],
@@ -135,7 +142,7 @@ const JouranlEntryList = (props: Props): React.ReactElement<Props> => {
       renderSectionFooter={renderSectionFooter}
       keyExtractor={item => item._objectId()}
       ListEmptyComponent={EmptyComponent}
-      ItemSeparatorComponent={Spacer}
+      ItemSeparatorComponent={ItemSeparator}
       stickySectionHeadersEnabled={false}
       initialNumToRender={40}
     />

@@ -5,7 +5,9 @@ import moment from 'moment';
 import {Button, LayoutAnimation, StyleSheet} from 'react-native';
 import CalendarStrip from 'react-native-calendar-strip';
 
+import Container from 'components/Container';
 import JouranlEntryList from 'components/JournalEntryList';
+import ItemSeparator from 'components/ItemSeparator';
 import ScreenWrapper from 'components/ScreenWrapper';
 import Spacer from 'components/Spacer';
 import Stats from 'components/Stats';
@@ -22,11 +24,15 @@ import {
 import {useJournalContext} from 'providers/JournalProvider';
 import {useUserContext} from 'providers/UserProvider';
 import JournalEntry from 'schemas/JournalEntry';
+import {defaultPadding} from 'styles';
 import {isSameDay} from 'utils/Date';
 import {CatastrophicError} from 'utils/Errors';
 import {useParentNavigation, useNestedScreenNavigate} from 'utils/Navigation';
 
 const _styles = StyleSheet.create({
+  calendarContainer: {
+    paddingHorizontal: defaultPadding,
+  },
   calendar: {
     height: 80,
   },
@@ -137,19 +143,29 @@ const FoodJournalScreen = () => {
 
   return (
     <ScreenWrapper>
-      {showCalendarStrip && (
-        <CalendarStrip
-          style={_styles.calendar}
-          maxDayComponentSize={48}
-          highlightDateContainerStyle={_styles.selectedDateContainer}
-          scrollable
-          selectedDate={date}
-          onDateSelected={onSetDate}
-          markedDates={markedDates}
-        />
-      )}
-      <Stats macros={macros} meals={viewedEntry?.meals} />
       <Spacer />
+      {showCalendarStrip && (
+        <>
+          <Container>
+            <CalendarStrip
+              style={_styles.calendar}
+              maxDayComponentSize={48}
+              highlightDateContainerStyle={_styles.selectedDateContainer}
+              scrollable
+              selectedDate={date}
+              onDateSelected={onSetDate}
+              markedDates={markedDates}
+            />
+          </Container>
+          <ItemSeparator />
+          <Spacer />
+        </>
+      )}
+      <Container>
+        <Stats macros={macros} meals={viewedEntry?.meals} />
+      </Container>
+      <Spacer />
+      <ItemSeparator />
       <JouranlEntryList
         journalEntry={viewedEntry}
         onAddItem={addItem}

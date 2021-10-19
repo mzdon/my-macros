@@ -2,6 +2,7 @@ import React from 'react';
 
 import {useNavigation} from '@react-navigation/native';
 
+import Container from 'components/Container';
 import LookupFoodItem from 'components/LookupFoodItem';
 import LookupFoodItemGroup from 'components/LookupFoodItemGroup';
 import ScreenWrapper from 'components/ScreenWrapper';
@@ -58,17 +59,19 @@ const LookupOrAddScreen = (): React.ReactElement => {
 
   return (
     <ScreenWrapper>
-      <Spacer />
-      <LookupFoodItem
-        addNewFoodItem={addNewFoodItem}
-        selectFoodItem={selectFoodItem}
-      />
-      <Spacer />
-      <LookupFoodItemGroup
-        addNewFoodItemGroup={addNewFoodItemGroup}
-        selectFoodItemGroup={selectFoodItemGroup}
-      />
-      <Spacer />
+      <Container>
+        <Spacer />
+        <LookupFoodItem
+          addNewFoodItem={addNewFoodItem}
+          selectFoodItem={selectFoodItem}
+        />
+        <Spacer />
+        <LookupFoodItemGroup
+          addNewFoodItemGroup={addNewFoodItemGroup}
+          selectFoodItemGroup={selectFoodItemGroup}
+        />
+        <Spacer />
+      </Container>
     </ScreenWrapper>
   );
 };

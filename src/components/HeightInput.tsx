@@ -1,14 +1,17 @@
 import React from 'react';
 
-import {StyleSheet, Text, TextInput, View} from 'react-native';
+import {StyleSheet, TextInput, View} from 'react-native';
 
 import DisabledOverlay from 'components/DisabledOverlay';
 import NumberInput, {NumberInputProps} from 'components/NumberInput';
 import Spacer from 'components/Spacer';
+import Text from 'components/Text';
 import {MeasurementSystem} from 'types/MeasurementSystem';
-import styles from 'styles';
 
 const _styles = StyleSheet.create({
+  inputLabel: {
+    color: 'grey',
+  },
   innerContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -111,7 +114,7 @@ const HeightInput = (props: Props): React.ReactElement<Props> | null => {
 
   return (
     <View>
-      <Text style={styles.inputLabel}>{'Height (optional)'}</Text>
+      <Text style={_styles.inputLabel}>{'Height (optional)'}</Text>
       <View style={_styles.innerContainer}>
         {(!measurementSystem ||
           measurementSystem === MeasurementSystem.Imperial) && (

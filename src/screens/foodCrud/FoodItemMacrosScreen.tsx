@@ -1,11 +1,13 @@
 import React from 'react';
 
 import {useNavigation} from '@react-navigation/native';
-import {Alert, Button, Text} from 'react-native';
+import {Alert, Button} from 'react-native';
 
+import Container from 'components/Container';
 import NumberInput from 'components/NumberInput';
 import ScreenWrapper from 'components/ScreenWrapper';
 import Spacer from 'components/Spacer';
+import Text from 'components/Text';
 import {ITEM_CONSUMED} from 'navigation/Constants';
 import {FoodItemMacrosNavigationProp} from 'navigation/RouteTypes';
 import {useFoodItemContext} from 'providers/FoodItemProvider';
@@ -87,43 +89,46 @@ const FoodItemMacrosScreen = (): React.ReactElement => {
 
   return (
     <ScreenWrapper>
-      <Text>{`New ${foodItemData?.description}`}</Text>
-      <Spacer />
-      <NumberInput
-        label="Carbs"
-        placeholder="Carbs"
-        value={carbs}
-        onChangeText={updateCarbs}
-      />
-      <Spacer />
-      <NumberInput
-        label="Protein"
-        placeholder="Protein"
-        value={protein}
-        onChangeText={updateProtein}
-      />
-      <Spacer />
-      <NumberInput
-        label="Fat"
-        placeholder="Fat"
-        value={fat}
-        onChangeText={updateFat}
-      />
-      <Spacer />
-      <NumberInput
-        label="Sugar"
-        placeholder="Sugar"
-        value={sugar}
-        onChangeText={updateSugar}
-      />
-      <Spacer />
-      <NumberInput
-        label="Fiber"
-        placeholder="Fiber"
-        value={fiber}
-        onChangeText={updateFiber}
-      />
-      <Spacer />
+      <Container>
+        <Spacer />
+        <Text.SubHeader>{`New ${foodItemData?.description}`}</Text.SubHeader>
+        <Spacer />
+        <NumberInput
+          label="Carbs"
+          placeholder="Carbs"
+          value={carbs}
+          onChangeText={updateCarbs}
+        />
+        <Spacer />
+        <NumberInput
+          label="Protein"
+          placeholder="Protein"
+          value={protein}
+          onChangeText={updateProtein}
+        />
+        <Spacer />
+        <NumberInput
+          label="Fat"
+          placeholder="Fat"
+          value={fat}
+          onChangeText={updateFat}
+        />
+        <Spacer />
+        <NumberInput
+          label="Sugar"
+          placeholder="Sugar"
+          value={sugar}
+          onChangeText={updateSugar}
+        />
+        <Spacer />
+        <NumberInput
+          label="Fiber"
+          placeholder="Fiber"
+          value={fiber}
+          onChangeText={updateFiber}
+        />
+        <Spacer />
+      </Container>
     </ScreenWrapper>
   );
 };

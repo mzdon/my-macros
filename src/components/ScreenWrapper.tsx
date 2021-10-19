@@ -8,7 +8,7 @@ import {
   ViewStyle,
 } from 'react-native';
 
-import {backgroundColor, defaultPadding} from 'styles';
+import {backgroundColor} from 'styles';
 
 const _styles = StyleSheet.create({
   container: {
@@ -17,7 +17,6 @@ const _styles = StyleSheet.create({
   },
   innerContainer: {
     flex: 1,
-    padding: defaultPadding,
   },
 });
 

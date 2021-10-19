@@ -1,11 +1,17 @@
 import React from 'react';
 
-import {SectionList, StyleSheet, View} from 'react-native';
+import {SectionList, StyleSheet, TextStyle} from 'react-native';
 import {withRealm} from 'react-realm-context';
 import Realm, {Results} from 'realm';
 
+import Container from 'components/Container';
+import ItemSeparator from 'components/ItemSeparator';
 import ScreenWrapper from 'components/ScreenWrapper';
-import SwipeableRow, {getEditAndDeleteActions} from 'components/SwipeableRow';
+import Spacer from 'components/Spacer';
+import SwipeableRow, {
+  MIN_HEIGHT,
+  getEditAndDeleteActions,
+} from 'components/SwipeableRow';
 import Text from 'components/Text';
 import {
   FOOD_CRUD,
@@ -24,11 +30,19 @@ import {
   useGetJournalEntriesWithFoodItemId,
 } from 'utils/Queries';
 
+const commonStyle: TextStyle = {
+  justifyContent: 'center',
+};
+
 const _styles = StyleSheet.create({
+  headerContainer: {
+    minHeight: MIN_HEIGHT,
+    ...commonStyle,
+  },
   textContainer: {
     flex: 1,
     flexDirection: 'column',
-    justifyContent: 'center',
+    ...commonStyle,
   },
 });
 
@@ -86,15 +100,32 @@ const getSections = (
 };
 
 const renderSectionHeader = ({section: {title}}: {section: Section}) => (
-  <Text.SubHeader>{title}</Text.SubHeader>
+  <>
+    <Container style={_styles.headerContainer}>
+      <Text.SubHeader>{title}</Text.SubHeader>
+    </Container>
+    <ItemSeparator />
+  </>
 );
 
 const renderSectionFooter = ({section}: {section: Section}) => {
+  let text = null;
   if (section.data.length === 0) {
     const isGroups = section.title.toLowerCase().includes('group');
-    return <Text>{`No ${isGroups ? 'Groups' : 'Items'}`}</Text>;
+    text = (
+      <Container>
+        <Spacer />
+        <Text>{`No ${isGroups ? 'Groups' : 'Items'}`}</Text>
+        <Spacer />
+      </Container>
+    );
   }
-  return null;
+  return (
+    <>
+      {text}
+      <ItemSeparator />
+    </>
+  );
 };
 
 const FoodSelectorScreen = ({realm}: Props): React.ReactElement<Props> => {
@@ -168,9 +199,9 @@ const FoodSelectorScreen = ({realm}: Props): React.ReactElement<Props> => {
             onEditPress: onEdit,
             onDeletePress: onDelete,
           })}>
-          <View style={_styles.textContainer}>
+          <Container style={_styles.textContainer}>
             <Text>{data.description}</Text>
-          </View>
+          </Container>
         </SwipeableRow>
       );
     },
@@ -189,6 +220,7 @@ const FoodSelectorScreen = ({realm}: Props): React.ReactElement<Props> => {
         renderSectionFooter={renderSectionFooter}
         renderItem={renderItem}
         keyExtractor={item => item.data._objectId()}
+        ItemSeparatorComponent={ItemSeparator}
         initialNumToRender={40}
       />
     </ScreenWrapper>

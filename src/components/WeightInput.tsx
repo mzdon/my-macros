@@ -1,10 +1,11 @@
 import React from 'react';
 
-import {StyleSheet, Text, TextInput, View} from 'react-native';
+import {StyleSheet, TextInput, View} from 'react-native';
 
 import DisabledOverlay from 'components/DisabledOverlay';
 import NumberInput, {NumberInputProps} from 'components/NumberInput';
 import Spacer from 'components/Spacer';
+import Text from 'components/Text';
 import {MeasurementSystem} from 'types/MeasurementSystem';
 
 const _styles = StyleSheet.create({
@@ -13,8 +14,16 @@ const _styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'flex-end',
   },
-  stretchInput: {flexGrow: 1},
-  stretchLabel: {width: 40, paddingLeft: 8},
+  label: {
+    color: 'grey',
+  },
+  stretchInput: {
+    flexGrow: 1,
+  },
+  stretchLabel: {
+    width: 40,
+    paddingLeft: 8,
+  },
 });
 
 interface Props extends NumberInputProps {
@@ -37,13 +46,9 @@ const WeightInput = (props: Props): React.ReactElement<Props> | null => {
   }[measurementSystem || MeasurementSystem.Imperial];
   return (
     <View>
+      <Text style={_styles.label}>Weight (optional)</Text>
       <View style={_styles.innerContainer}>
-        <NumberInput
-          ref={inputRef}
-          label="Weight (optional)"
-          {...rest}
-          style={_styles.stretchInput}
-        />
+        <NumberInput ref={inputRef} {...rest} style={_styles.stretchInput} />
         <Text style={_styles.stretchLabel}>{uomText}</Text>
       </View>
       <Spacer />

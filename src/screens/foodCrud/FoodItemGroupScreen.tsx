@@ -1,13 +1,15 @@
 import React from 'react';
 
 import {useNavigation} from '@react-navigation/native';
-import {Button, FlatList, Text} from 'react-native';
+import {Button, FlatList, StyleSheet} from 'react-native';
 
 import ConsumedFoodItem from 'components/ConsumedFoodItem';
+import Container from 'components/Container';
 import LookupFoodItem from 'components/LookupFoodItem';
 import ScreenWrapper from 'components/ScreenWrapper';
 import Spacer from 'components/Spacer';
 import SwipeableRow, {getEditAndDeleteActions} from 'components/SwipeableRow';
+import Text from 'components/Text';
 import TextInput from 'components/TextInput';
 import {
   FOOD_CRUD,
@@ -25,6 +27,40 @@ import {
   useValidateFields,
 } from 'utils/Validators';
 import {useNestedScreenNavigate, useParentNavigation} from 'utils/Navigation';
+import ItemSeparator from 'components/ItemSeparator';
+
+const _styles = StyleSheet.create({
+  stretch: {
+    flex: 1,
+  },
+});
+
+const renderHeader = () => {
+  return (
+    <>
+      <Container>
+        <Text.SubHeader>Food Items</Text.SubHeader>
+        <Spacer />
+      </Container>
+      <ItemSeparator />
+    </>
+  );
+};
+
+const renderFooter = (data: any[]) => {
+  return (
+    <>
+      {!!data.length && (
+        <Container>
+          <Spacer />
+          <Text>No items added yet...</Text>
+          <Spacer />
+        </Container>
+      )}
+      <ItemSeparator />
+    </>
+  );
+};
 
 const FoodItemGroupScreen = () => {
   const navigation = useNavigation<FoodItemGroupNavigationProp>();
@@ -120,7 +156,11 @@ const FoodItemGroupScreen = () => {
             onEditPress: () => editFoodItem(index),
             onDeletePress: () => removeFoodItemFromGroup(index),
           })}>
-          <ConsumedFoodItem item={item} />
+          <Container style={_styles.stretch}>
+            <Spacer />
+            <ConsumedFoodItem item={item} />
+            <Spacer />
+          </Container>
         </SwipeableRow>
       );
     },
@@ -129,28 +169,44 @@ const FoodItemGroupScreen = () => {
 
   return (
     <ScreenWrapper>
-      <Text>{`${foodGroupData?._id ? 'Edit' : 'New'} Item Group`}</Text>
+      <Container>
+        <Spacer />
+        <Text.SubHeader>{`${
+          foodGroupData?._id ? 'Edit' : 'New'
+        } Item Group`}</Text.SubHeader>
+        <Spacer />
+        <TextInput
+          label="Description"
+          placeholder="Group description..."
+          value={description}
+          onChangeText={onChange.description}
+          error={errors.description}
+        />
+        <Spacer />
+        <LookupFoodItem
+          addNewFoodItem={addNewFoodItem}
+          selectFoodItem={selectFoodItem}
+        />
+      </Container>
+      <ItemSeparator />
       <Spacer />
-      <TextInput
-        label="Description"
-        placeholder="Group description..."
-        value={description}
-        onChangeText={onChange.description}
-        error={errors.description}
-      />
-      <Spacer />
-      <LookupFoodItem
-        addNewFoodItem={addNewFoodItem}
-        selectFoodItem={selectFoodItem}
-      />
       <FlatList
         data={foodItems}
-        ListHeaderComponent={<Text>Food Items</Text>}
+        ListHeaderComponent={renderHeader}
+        ListFooterComponent={renderFooter}
         renderItem={renderItem}
         keyExtractor={(_item, idx) => `consumedItem-${idx}`}
+        ItemSeparatorComponent={ItemSeparator}
       />
       <Spacer />
-      {!!internalError && <Text style={styles.error}>{internalError}</Text>}
+      <Container>
+        {!!internalError && (
+          <>
+            <Text style={styles.error}>{internalError}</Text>
+            <Spacer />
+          </>
+        )}
+      </Container>
     </ScreenWrapper>
   );
 };

@@ -1,7 +1,8 @@
 import React from 'react';
 
-import {Button, StyleSheet, Text, View} from 'react-native';
-import styles from 'styles';
+import {Button, StyleSheet, View} from 'react-native';
+
+import Text from 'components/Text';
 
 interface RBProps {
   value: string;
@@ -22,8 +23,17 @@ const RadioButton = ({value, selected, onPress}: RBProps) => {
 };
 
 const _styles = StyleSheet.create({
-  innerContainer: {flexDirection: 'row', justifyContent: 'space-between'},
-  selected: {borderWidth: 1, borderColor: 'blue'},
+  innerContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  label: {
+    color: 'grey',
+  },
+  selected: {
+    borderWidth: 1,
+    borderColor: 'blue',
+  },
 });
 
 interface Props {
@@ -54,7 +64,7 @@ const RadioButtons = ({
 
   return (
     <>
-      {label && <Text style={styles.inputLabel}>{label}</Text>}
+      {label && <Text style={_styles.label}>{label}</Text>}
       <View style={_styles.innerContainer}>
         {values.map((v, i) => (
           <RadioButton
