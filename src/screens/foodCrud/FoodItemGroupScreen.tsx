@@ -30,6 +30,9 @@ import {useNestedScreenNavigate, useParentNavigation} from 'utils/Navigation';
 import ItemSeparator from 'components/ItemSeparator';
 
 const _styles = StyleSheet.create({
+  searchContainer: {
+    zIndex: 1,
+  },
   stretch: {
     flex: 1,
   },
@@ -169,7 +172,7 @@ const FoodItemGroupScreen = () => {
 
   return (
     <ScreenWrapper>
-      <Container>
+      <Container style={_styles.searchContainer}>
         <Spacer />
         <Text.SubHeader>{`${
           foodGroupData?._id ? 'Edit' : 'New'
