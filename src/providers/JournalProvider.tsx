@@ -12,14 +12,16 @@ import ConsumedFoodItem, {
 import JournalEntry from 'schemas/JournalEntry';
 import FoodItemGroup from 'schemas/FoodItemGroup';
 import {FoodItemData} from 'schemas/FoodItem';
-import Meal from 'schemas/Meal';
+import Meal, {InitMealData} from 'schemas/Meal';
 import {isSameDay} from 'utils/Date';
 import {CatastrophicError, RecoverableError} from 'utils/Errors';
 import {
   useDeleteItem,
   useGetJournalEntriesWithFoodItemId,
   useGetJournalEntryById,
+  useQueryResultStateWithListener,
 } from 'utils/Queries';
+import {ServingUnitOfMeasurement} from 'types/UnitOfMeasurement';
 
 interface JournalContext {
   entries: JournalEntry[];
@@ -63,7 +65,11 @@ const JournalProvider = ({
     throw new CatastrophicError('No user available in JournalProvider');
   }
 
-  const userId = user._id;
+  const getResult = React.useCallback(
+    () => realm.objects<JournalEntry>('JournalEntry').sorted('date'),
+    [realm],
+  );
+  const entries = useQueryResultStateWithListener(realm, getResult);
 
   const getEntryById = useGetJournalEntryById(realm);
   const getJournalEntriesWithFoodItemId =
@@ -74,30 +80,20 @@ const JournalProvider = ({
       return (
         realm
           .objects<JournalEntry>('JournalEntry')
-          .filtered('userId == $0', userId)
           .find(entry => isSameDay(entry.date, date)) || null
       );
     },
-    [realm, userId],
+    [realm],
   );
-
-  const getEntries = React.useCallback(() => {
-    return realm
-      .objects<JournalEntry>('JournalEntry')
-      .filtered('userId == $0', userId)
-      .sorted('date');
-  }, [realm, userId]);
 
   const saveMeal = React.useCallback(
     (date: Date, description: string, mealIndex?: number) => {
       const entry = getEntryForDate(date);
-      let meals = entry ? [...entry.meals] : [];
+      let meals: InitMealData[] = entry ? [...entry.meals] : [];
       if (mealIndex === undefined) {
         const newMeal = {description};
-        // @ts-ignore
         meals.push(newMeal);
       } else {
-        // @ts-ignore
         meals = meals.map((meal, idx) => {
           if (idx === mealIndex) {
             return {items: meal.items, description};
@@ -106,17 +102,16 @@ const JournalProvider = ({
         });
       }
 
-      const entryData = {userId, date, meals, id: entry?._id};
+      const entryData = {date, meals, id: entry?._id};
       realm.write(() => {
         realm.create<JournalEntry>(
           JournalEntry,
-          // @ts-ignore
-          JournalEntry.generate(entryData),
+          JournalEntry.generate(entryData, user.realmUserId),
           UpdateMode.Modified,
         );
       });
     },
-    [getEntryForDate, realm, userId],
+    [getEntryForDate, realm, user.realmUserId],
   );
 
   const deleteMeal = useDeleteItem<Meal>(realm);
@@ -175,7 +170,9 @@ const JournalProvider = ({
                   itemData: foodItemData,
                   itemId: foodItemData._id,
                   quantity: oldItem.quantity,
-                  unitOfMeasurement: oldItem.unitOfMeasurement,
+                  // TODO: if I can figure out a decent solution for inhereting from enums fix this
+                  unitOfMeasurement:
+                    oldItem.unitOfMeasurement as unknown as ServingUnitOfMeasurement,
                 };
                 entry.meals[mealIdx].items[itemIdx] = ConsumedFoodItem.generate(
                   newItemData,
@@ -191,7 +188,7 @@ const JournalProvider = ({
 
   const contextValue = React.useMemo(() => {
     return {
-      entries: [...getEntries()],
+      entries: [...entries],
       saveMeal,
       deleteMeal,
       saveConsumedFoodItem,
@@ -203,7 +200,7 @@ const JournalProvider = ({
     applyFoodItemGroup,
     deleteConsumedFoodItem,
     deleteMeal,
-    getEntries,
+    entries,
     saveConsumedFoodItem,
     saveMeal,
     updateEntriesWithFoodItem,

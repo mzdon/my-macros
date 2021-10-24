@@ -1,25 +1,34 @@
 import React from 'react';
 
-import {Pressable, StyleSheet} from 'react-native';
+import {Pressable, StyleSheet, View, ViewStyle} from 'react-native';
 
 import Text from 'components/Text';
 import {RecoverableError} from 'utils/Errors';
-import {backgroundColor, pageLineColor} from 'styles';
+import {backgroundColor, defaultPadding, pageLineColor} from 'styles';
 
 const _styles = StyleSheet.create({
-  button: {
-    backgroundColor: pageLineColor,
-    color: backgroundColor,
+  container: {
+    backgroundColor: backgroundColor,
+    borderWidth: 2,
+    borderRadius: 3,
+    borderColor: pageLineColor,
+    padding: defaultPadding,
+  },
+  title: {
+    color: pageLineColor,
+    fontSize: 16,
   },
 });
 
 type Props = React.PropsWithChildren<{
   title: string;
+  containerStyle?: ViewStyle;
   onPress: () => void;
 }>;
 
 const Button = ({
   children,
+  containerStyle,
   title,
   onPress,
 }: Props): React.ReactElement<Props> => {
@@ -31,7 +40,9 @@ const Button = ({
 
   return (
     <Pressable onPress={onPress}>
-      {children || <Text style={_styles.button}>{title}</Text>}
+      <View style={[_styles.container, containerStyle]}>
+        {children || <Text style={_styles.title}>{title}</Text>}
+      </View>
     </Pressable>
   );
 };

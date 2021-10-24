@@ -18,6 +18,7 @@ import {
   useGetFoodItemGroupsWithFoodItemId,
 } from 'utils/Queries';
 import {FoodItemData} from 'schemas/FoodItem';
+import {ServingUnitOfMeasurement} from 'types/UnitOfMeasurement';
 
 type FoodGroupStateData = {
   _id?: UUID;
@@ -132,10 +133,10 @@ const FoodGroupProvider = ({
     }
     let result;
     realm.write(() => {
-      const data: unknown = FoodItemGroup.generate({
-        ...foodGroupData,
-        userId: user._id,
-      });
+      const data: unknown = FoodItemGroup.generate(
+        foodGroupData,
+        user.realmUserId,
+      );
       result = realm.create<FoodItemGroup>(
         FoodItemGroup,
         data as FoodItemGroup,
@@ -230,7 +231,9 @@ const FoodGroupProvider = ({
                   itemData: foodItemData,
                   itemId: foodItemData._id,
                   quantity: oldItem.quantity,
-                  unitOfMeasurement: oldItem.unitOfMeasurement,
+                  // TODO: if I can figure out a decent solution for inhereting from enums fix this
+                  unitOfMeasurement:
+                    oldItem.unitOfMeasurement as unknown as ServingUnitOfMeasurement,
                 };
                 group.foodItems[itemIdx] = ConsumedFoodItem.generate(
                   newConsumedFoodItemdData,

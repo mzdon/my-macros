@@ -127,7 +127,6 @@ const FoodItemProvider = ({
       data = {
         ...getFoodItemById(foodItemId).getData(),
         newFoodItem: false,
-        userId: user._id,
       };
     } else if (
       journalEntryId &&
@@ -142,14 +141,12 @@ const FoodItemProvider = ({
           consumedItemIndex,
         ),
         newFoodItem: false,
-        userId: user._id,
       };
     } else if (consumedItemIndex !== undefined && foodGroupData) {
       // case [5]
       data = {
         ...foodGroupData.foodItems[consumedItemIndex],
         newFoodItem: false,
-        userId: user._id,
       };
     } else {
       // case [3]
@@ -165,7 +162,6 @@ const FoodItemProvider = ({
         servingUnitOfMeasurement: UnitOfMeasurement.Grams,
         servingSizeNote: '',
         newFoodItem: true,
-        userId: user._id,
       };
     }
 
@@ -206,7 +202,7 @@ const FoodItemProvider = ({
       realm.write(() => {
         result = realm.create<FoodItem>(
           FoodItem,
-          FoodItem.generate(data),
+          FoodItem.generate(data, user.realmUserId),
           UpdateMode.Modified,
         );
         user.addFoodItem(result);

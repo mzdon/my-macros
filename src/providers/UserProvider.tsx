@@ -37,7 +37,7 @@ const UserProvider = ({realm, children}: Props): React.ReactElement<Props> => {
     let user = queryUser();
     if (!user) {
       realm.write(() => {
-        realm.create(User, User.generate({realmUserId}));
+        realm.create(User, User.generate({realmUserId}, realmUserId));
       });
       user = queryUser();
     }

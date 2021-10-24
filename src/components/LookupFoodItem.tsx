@@ -1,9 +1,10 @@
 import React from 'react';
 
-import {Button} from 'react-native';
+import {Button, View} from 'react-native';
 import {withRealm} from 'react-realm-context';
 import {Results} from 'realm';
 
+import ClearSearch from 'components/ClearSearch';
 import SearchResults from 'components/SearchResults';
 import Spacer from 'components/Spacer';
 import TextInput from 'components/TextInput';
@@ -31,22 +32,23 @@ const LookupFoodItem = ({
     }
     const qResult = realm
       .objects<FoodItem>('FoodItem')
-      .filtered('userId == $0 && description CONTAINS[c] $1', user._id, search)
+      .filtered('description CONTAINS[c] $0', search)
       .sorted('description');
     setResults(qResult);
   }, [realm, search, user]);
 
   return (
-    <>
+    <View>
       <TextInput
         placeholder="Lookup Food Item..."
         value={search}
         onChangeText={setSearch}
       />
+      {!!search && <ClearSearch onPress={setSearch} />}
       {!!search && <SearchResults items={results} onPress={selectFoodItem} />}
       <Spacer />
       <Button title="New Food Item" onPress={addNewFoodItem} />
-    </>
+    </View>
   );
 };
 

@@ -6,24 +6,32 @@ import {today} from 'utils/Date';
 
 interface InitJournalEntryData {
   id?: UUID;
-  userId: UUID;
   date?: Date;
   meals?: InitMealData[];
 }
 
+interface JournalEntryData {
+  _id: UUID;
+  date: Date;
+  meals: Meal[];
+}
+
 class JournalEntry extends Realm.Object {
   _id!: UUID;
-  userId!: UUID;
   date!: Date;
   meals!: Meal[];
 
-  static generate(obj: InitJournalEntryData) {
-    const {id = new UUID(), userId, date = today(), meals = []} = obj;
+  static generate(
+    obj: InitJournalEntryData,
+    partitionValue: string,
+  ): JournalEntryData {
+    const {id = new UUID(), date = today(), meals = []} = obj;
     return {
       _id: id,
-      userId,
+      // @ts-ignore - hide _partition
+      _partition: partitionValue,
       date,
-      meals: meals.map(data => Meal.generate(data)),
+      meals: meals.map(data => Meal.generate(data)) as Meal[],
     };
   }
 
@@ -32,7 +40,7 @@ class JournalEntry extends Realm.Object {
     primaryKey: '_id',
     properties: {
       _id: 'uuid',
-      userId: 'uuid',
+      _partition: 'string',
       date: 'date',
       meals: 'Meal[]',
     },

@@ -1,8 +1,5 @@
 import {Factory} from 'rosie';
 
-import {MacroDefinitionStrings} from 'types/MacroDefinition';
-import {isStringValidNumber} from 'utils/Validators';
-
 export interface MacroData {
   calories: number;
   carbs: number;
@@ -21,13 +18,6 @@ function determineOptionalNumber(value: string | number | null): number | null {
     return null;
   }
   return Number(value);
-}
-
-function determineOptionalString(value: string | number | null): string {
-  if (value === null) {
-    return '';
-  }
-  return String(value);
 }
 
 class MacroDefinition {
@@ -83,44 +73,6 @@ class MacroDefinition {
       sugar: this.sugar,
       fiber: this.fiber,
     };
-  }
-
-  static getMacroStrings(
-    macroDef?: MacroDefinition | undefined,
-  ): MacroDefinitionStrings {
-    const macroStrings = {
-      calories: '',
-      carbs: '',
-      protein: '',
-      fat: '',
-      sugar: '',
-      fiber: '',
-    };
-    if (macroDef) {
-      macroStrings.calories = String(macroDef.calories);
-      macroStrings.carbs = String(macroDef.carbs);
-      macroStrings.protein = String(macroDef.protein);
-      macroStrings.fat = String(macroDef.fat);
-      macroStrings.sugar = determineOptionalString(macroDef.sugar);
-      macroStrings.fiber = determineOptionalString(macroDef.fiber);
-    }
-    return macroStrings;
-  }
-
-  static isValidDefinitionStrings(defStrings: MacroDefinitionStrings): boolean {
-    const {calories, carbs, protein, fat, sugar, fiber} = defStrings;
-    return (
-      !!calories &&
-      isStringValidNumber(calories) &&
-      !!carbs &&
-      isStringValidNumber(carbs) &&
-      !!protein &&
-      isStringValidNumber(protein) &&
-      !!fat &&
-      isStringValidNumber(fat) &&
-      isStringValidNumber(sugar) &&
-      isStringValidNumber(fiber)
-    );
   }
 
   static schema = {

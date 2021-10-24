@@ -221,6 +221,7 @@ const FoodSelectorScreen = ({realm}: Props): React.ReactElement<Props> => {
         renderItem={renderItem}
         keyExtractor={item => item.data._objectId()}
         ItemSeparatorComponent={ItemSeparator}
+        stickySectionHeadersEnabled={false}
         initialNumToRender={40}
       />
     </ScreenWrapper>

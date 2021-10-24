@@ -5,7 +5,6 @@ import {UnitOfMeasurement} from 'types/UnitOfMeasurement';
 
 export interface InitFoodItemData {
   _id?: UUID;
-  userId: UUID;
   description: string;
   calories: number;
   carbs: number;
@@ -19,7 +18,6 @@ export interface InitFoodItemData {
 }
 
 const REQUIRED_INIT_KEYS: Array<keyof InitFoodItemData> = [
-  'userId',
   'description',
   'calories',
   'carbs',
@@ -37,7 +35,6 @@ export type FoodItemData = Omit<InitFoodItemData, '_id'> & {_id: UUID};
 
 class FoodItem extends Realm.Object {
   _id!: UUID;
-  userId!: UUID;
   description!: string;
   calories!: number;
   carbs!: number;
@@ -49,10 +46,9 @@ class FoodItem extends Realm.Object {
   servingUnitOfMeasurement!: UnitOfMeasurement;
   servingSizeNote!: string;
 
-  static generate(obj: InitFoodItemData): FoodItemData {
+  static generate(obj: InitFoodItemData, partitionValue: string): FoodItemData {
     const {
       _id = new UUID(),
-      userId,
       description,
       calories,
       carbs,
@@ -66,7 +62,8 @@ class FoodItem extends Realm.Object {
     } = obj;
     return {
       _id,
-      userId,
+      // @ts-ignore - hide _partition
+      _partition: partitionValue,
       description,
       calories,
       carbs,
@@ -98,7 +95,6 @@ class FoodItem extends Realm.Object {
   getData(): FoodItemData {
     return {
       _id: this._id,
-      userId: this.userId,
       description: this.description,
       calories: this.calories,
       carbs: this.carbs,
@@ -117,7 +113,7 @@ class FoodItem extends Realm.Object {
     primaryKey: '_id',
     properties: {
       _id: 'uuid',
-      userId: 'uuid',
+      _partition: 'string',
       description: 'string',
       calories: 'int',
       carbs: 'double',

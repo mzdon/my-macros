@@ -7,7 +7,43 @@ import JournalEntry from 'schemas/JournalEntry';
 import FoodItem from 'schemas/FoodItem';
 import FoodItemGroup from 'schemas/FoodItemGroup';
 import {RecoverableError} from 'utils/Errors';
-import {useUserContext} from 'providers/UserProvider';
+
+export const useQueryResultStateWithListener = <T>(
+  realm: Realm,
+  getResult: () => Realm.Results<T & Realm.Object>,
+) => {
+  const [currentResult, setCurrentResult] = React.useState<
+    Realm.Results<T & Realm.Object>
+  >(() => {
+    const initialResult = getResult();
+
+    const listener: Realm.CollectionChangeCallback<T & Realm.Object> = (
+      _collection,
+      changes,
+    ) => {
+      const isInTransaction = realm.isInTransaction;
+      const {deletions, insertions, newModifications, oldModifications} =
+        changes;
+      if (
+        !isInTransaction &&
+        (deletions.length ||
+          insertions.length ||
+          newModifications.length ||
+          oldModifications.length)
+      ) {
+        const newResult = getResult();
+        initialResult.removeAllListeners();
+        newResult.addListener(listener);
+        setCurrentResult(newResult);
+      }
+    };
+    initialResult.addListener(listener);
+
+    return initialResult;
+  });
+
+  return currentResult;
+};
 
 function getUUID(id: UUID | string): UUID {
   return id instanceof UUID ? id : new UUID(id);
@@ -37,20 +73,16 @@ export const useGetFoodItemById = (realm: Realm) =>
 export const useGetFoodItemGroupById = (realm: Realm) =>
   useGetTypeById<FoodItemGroup>(realm, 'FoodItemGroup');
 
-const useGetTypeForUser = <T extends Realm.Object>(
-  realm: Realm,
-  type: string,
-) => {
-  const {user} = useUserContext();
+const useGetType = <T extends Realm.Object>(realm: Realm, type: string) => {
   return React.useCallback(() => {
-    return realm.objects<T>(type).filtered('userId == $0', user._id);
-  }, [realm, type, user._id]);
+    return realm.objects<T>(type);
+  }, [realm, type]);
 };
 
 export const useGetFoodItems = (realm: Realm) =>
-  useGetTypeForUser<FoodItem>(realm, 'FoodItem');
+  useGetType<FoodItem>(realm, 'FoodItem');
 export const useGetFoodItemGroups = (realm: Realm) =>
-  useGetTypeForUser<FoodItemGroup>(realm, 'FoodItemGroup');
+  useGetType<FoodItemGroup>(realm, 'FoodItemGroup');
 
 export const useDeleteItem = <T extends Realm.Object = Realm.Object>(
   realm: Realm,

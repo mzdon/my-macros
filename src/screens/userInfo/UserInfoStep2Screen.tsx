@@ -113,12 +113,14 @@ const UserInfoStep2Screen = (): React.ReactElement => {
     });
   }, [navigation, validateBefore.onSave]);
 
+  const calculatedCalories = carbs * 4 + protein * 4 + fat * 9;
+
   return (
     <ScreenWrapper>
       <Container>
         <Spacer />
         <NumberInput
-          label="Calories (grams)"
+          label={`Calories (${calculatedCalories} based on CPF)`}
           placeholder="Calories"
           value={calories}
           onChangeText={onChange.calories}

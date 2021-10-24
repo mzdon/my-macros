@@ -46,6 +46,19 @@ interface ConstructorObject {
   foodItemGroups?: UUID[];
 }
 
+interface GeneratedObject {
+  _id: UUID;
+  realmUserId: string;
+  name: string;
+  height: Height | null;
+  birthday: Date | null;
+  measurementSystem: MeasurementSystem | null;
+  weighIns: WeighIn[];
+  macroDefinitions: MacroDefinition[];
+  foodItems: UUID[];
+  foodItemGroups: UUID[];
+}
+
 class User extends Realm.Object {
   _id!: UUID;
   realmUserId!: string;
@@ -58,7 +71,10 @@ class User extends Realm.Object {
   foodItems!: UUID[];
   foodItemGroups!: UUID[];
 
-  static generate(obj: ConstructorObject) {
+  static generate(
+    obj: ConstructorObject,
+    partitionValue: string,
+  ): GeneratedObject {
     const {
       realmUserId,
       _id = new UUID(),
@@ -73,6 +89,8 @@ class User extends Realm.Object {
     } = obj;
     return {
       _id,
+      // @ts-ignore - hide _partition
+      _partition: partitionValue,
       realmUserId,
       name,
       height,
@@ -282,6 +300,7 @@ class User extends Realm.Object {
     primaryKey: '_id',
     properties: {
       _id: 'uuid',
+      _partition: 'string',
       realmUserId: 'string',
       name: 'string',
       height: 'Height?',
